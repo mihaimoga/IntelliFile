@@ -1,0 +1,88 @@
+/* This file is part of IntelliFile application developed by Mihai MOGA.
+
+IntelliFile is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Open
+Source Initiative, either version 3 of the License, or any later version.
+
+IntelliFile is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
+
+// MainFrame.h : interface of the CMainFrame class
+//
+
+#pragma once
+
+#include "FileView.h"
+
+class CMainFrame : public CFrameWndEx
+{
+protected: 
+	DECLARE_DYNAMIC(CMainFrame)
+	
+public:
+	CMainFrame();
+
+// Attributes
+public:
+
+// Operations
+public:
+
+// Overrides
+public:
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+// Implementation
+public:
+	virtual ~CMainFrame();
+#ifdef _DEBUG
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
+
+protected:  // control bar embedded members
+	CMFCRibbonBar     m_wndRibbonBar;
+	CMFCRibbonApplicationButton m_MainButton;
+	CMFCToolBarImages m_PanelImages;
+	CMFCRibbonStatusBar  m_wndStatusBar;
+	CMFCCaptionBar    m_wndCaptionBar;
+	CSplitterWndEx m_wndSplitter;
+	CFileView*    m_wndLeftFileView;
+	CFileView*    m_wndRightFileView;
+	CImageList m_pImageList;
+	BOOL m_bShiftPressed;
+	BOOL m_bCtrlPressed;
+	BOOL m_bMenuPressed;
+
+// Generated message map functions
+protected:
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
+	afx_msg void OnSetFocus(CWnd *pOldWnd);
+	afx_msg void OnViewCaptionBar();
+	afx_msg void OnUpdateViewCaptionBar(CCmdUI* pCmdUI);
+	afx_msg void OnOptions();
+
+	afx_msg void OnRefresh();
+	afx_msg void OnViewFile();
+	afx_msg void OnEditFile();
+	afx_msg void OnCopyFile();
+	afx_msg void OnMoveFile();
+	afx_msg void OnNewFolder();
+	afx_msg void OnDeleteFile();
+
+public:
+	BOOL CreateCaptionBar();
+	BOOL HideMessageBar();
+	BOOL ShowMessageBar(CString strMessage);
+	BOOL SetStatusBar(BOOL bIsLeftPane, CString strMessage);
+
+	DECLARE_MESSAGE_MAP()
+};

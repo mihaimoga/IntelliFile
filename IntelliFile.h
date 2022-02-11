@@ -20,6 +20,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #endif
 
 #include "resource.h"       // main symbols
+#include "sinstance.h"
 
 // CIntelliFileApp:
 // See IntelliFile.cpp for the implementation of this class
@@ -29,6 +30,9 @@ class CIntelliFileApp : public CWinAppEx
 {
 public:
 	CIntelliFileApp();
+
+public:
+	CInstanceChecker m_pInstanceChecker;
 
 // Overrides
 public:

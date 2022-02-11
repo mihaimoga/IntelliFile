@@ -66,6 +66,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <atlsync.h>
 
 #define ID_MFCLISTCTRL (WM_USER+0x1234)
 

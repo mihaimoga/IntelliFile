@@ -35,7 +35,7 @@ END_MESSAGE_MAP()
 
 // CIntelliFileApp construction
 
-CIntelliFileApp::CIntelliFileApp()
+CIntelliFileApp::CIntelliFileApp() : m_pInstanceChecker(_T("IntelliFile"))
 {
 	EnableHtmlHelp();
 
@@ -95,6 +95,17 @@ BOOL CIntelliFileApp::InitInstance()
 
 	EnableTaskbarInteraction(FALSE);
 
+	//Check for the previous instance as soon as possible
+	if (m_pInstanceChecker.PreviousInstanceRunning())
+	{
+		CCommandLineInfo cmdInfo;
+		ParseCommandLine(cmdInfo);
+
+		AfxMessageBox(_T("Previous version detected, will now restore it..."), MB_OK | MB_ICONINFORMATION);
+		m_pInstanceChecker.ActivatePreviousInstance(cmdInfo.m_strFileName);
+		return FALSE;
+	}
+
 	// AfxInitRichEdit2() is required to use RichEdit control	
 	// AfxInitRichEdit2();
 
@@ -133,6 +144,10 @@ BOOL CIntelliFileApp::InitInstance()
 	pFrame->UpdateWindow();
 	// call DragAcceptFiles only if there's a suffix
 	//  In an SDI app, this should occur after ProcessShellCommand
+
+	// If this is the first instance of our App then track it so any other instances can find us
+	m_pInstanceChecker.TrackFirstInstanceRunning(m_pMainWnd->GetSafeHwnd());
+
 	return TRUE;
 }
 

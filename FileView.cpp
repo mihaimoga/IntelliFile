@@ -172,7 +172,7 @@ void CFileView::ResizeListCtrl()
 void CFileView::DoubleClickEntry(int nIndex)
 {
 	ASSERT(GetListCtrl().m_hWnd != NULL);
-	CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nIndex));
+	CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nIndex));
 	ASSERT(pFileData != NULL);
 	if (pFileData->IsFolder())
 	{
@@ -298,7 +298,7 @@ BOOL CFileView::EditFile()
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
 	if (nListItem != -1)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nListItem));
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
 		ASSERT(pFileData != NULL);
 		if (!pFileData->IsFolder())
 		{
@@ -327,7 +327,7 @@ BOOL CFileView::CopyFile(CFileView* pDestination)
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
 	while (nListItem != -1)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nListItem));
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
 		ASSERT(pFileData != NULL);
 		arrSelection.Add(pFileData);
 		nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);
@@ -356,7 +356,7 @@ BOOL CFileView::MoveFile(CFileView* pDestination)
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
 	while (nListItem != -1)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nListItem));
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
 		ASSERT(pFileData != NULL);
 		arrSelection.Add(pFileData);
 		nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);
@@ -385,7 +385,7 @@ BOOL CFileView::NewFolder(CFileView* pDestination)
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
 	while (nListItem != -1)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nListItem));
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
 		ASSERT(pFileData != NULL);
 		arrSelection.Add(pFileData);
 		nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);
@@ -414,7 +414,7 @@ BOOL CFileView::DeleteFile(CFileView* pDestination)
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
 	while (nListItem != -1)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt(GetListCtrl().GetItemData(nListItem));
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
 		ASSERT(pFileData != NULL);
 		arrSelection.Add(pFileData);
 		nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);

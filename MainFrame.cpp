@@ -52,6 +52,7 @@ END_MESSAGE_MAP()
 
 CMainFrame::CMainFrame()
 {
+	m_MainButton = NULL;
 	m_wndLeftFileView = NULL;
 	m_wndRightFileView = NULL;
 
@@ -82,8 +83,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndRibbonBar.Create(this);
 	m_wndRibbonBar.LoadFromResource(IDR_RIBBON);
 
-	m_MainButton.SetVisible(FALSE);
-	m_wndRibbonBar.SetApplicationButton(&m_MainButton, CSize());
+	m_MainButton = new CMFCRibbonApplicationButton;
+	m_MainButton->SetVisible(FALSE);
+	m_wndRibbonBar.SetApplicationButton(m_MainButton, CSize());
 
 	if (!m_wndStatusBar.Create(this))
 	{

@@ -220,7 +220,7 @@ CFileSystem::~CFileSystem()
 
 BOOL CFileSystem::RemoveAll()
 {
-	const int nSize = m_arrFiles.GetSize();
+	const int nSize = (int)m_arrFiles.GetSize();
 	for (int nIndex = 0; nIndex < nSize; nIndex++)
 	{
 		CFileData* pFileData = m_arrFiles.GetAt(nIndex);
@@ -475,9 +475,9 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 						}
 						else
 						{
-							const UINT nCount = arrSelection->GetCount();
+							const int nCount = (int)arrSelection->GetCount();
 							LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-							for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+							for (int nIndex = 0; nIndex < nCount; nIndex++)
 							{
 								CFileData* pFileData = arrSelection->GetAt(nIndex);
 								ASSERT_VALID(pFileData);
@@ -516,7 +516,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 								return FALSE;
 							}
 
-							for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+							for (int nIndex = 0; nIndex < nCount; nIndex++)
 							{
 								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 							}
@@ -626,9 +626,9 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 						}
 						else
 						{
-							const UINT nCount = arrSelection->GetCount();
+							const int nCount = (int)arrSelection->GetCount();
 							LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-							for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+							for (int nIndex = 0; nIndex < nCount; nIndex++)
 							{
 								CFileData* pFileData = arrSelection->GetAt(nIndex);
 								ASSERT_VALID(pFileData);
@@ -667,7 +667,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 								return FALSE;
 							}
 
-							for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+							for (int nIndex = 0; nIndex < nCount; nIndex++)
 							{
 								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 							}
@@ -780,9 +780,9 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 					}
 					else
 					{
-						const UINT nCount = arrSelection->GetCount();
+						const int nCount = (int)arrSelection->GetCount();
 						LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-						for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+						for (int nIndex = 0; nIndex < nCount; nIndex++)
 						{
 							CFileData* pFileData = arrSelection->GetAt(nIndex);
 							ASSERT_VALID(pFileData);
@@ -819,7 +819,7 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 							return FALSE;
 						}
 
-						for (UINT nIndex = 0; nIndex < nCount; nIndex++)
+						for (int nIndex = 0; nIndex < nCount; nIndex++)
 						{
 							ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 						}

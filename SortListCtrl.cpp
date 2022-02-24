@@ -41,8 +41,8 @@ int CSortListCtrl::OnCompareItems(LPARAM lParam1, LPARAM lParam2, int iColumn)
 	UNREFERENCED_PARAMETER(iColumn);
 	if (m_pFileSystem != NULL)
 	{
-		CFileData* pParam1 = m_pFileSystem->GetAt(lParam1);
-		CFileData* pParam2 = m_pFileSystem->GetAt(lParam2);
+		CFileData* pParam1 = m_pFileSystem->GetAt((int)lParam1);
+		CFileData* pParam2 = m_pFileSystem->GetAt((int)lParam2);
 		if ((pParam1 != NULL) && (pParam2 != NULL))
 		{
 			if (((pParam1->GetFileAttributes() & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) &&

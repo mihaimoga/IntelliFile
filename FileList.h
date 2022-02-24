@@ -94,7 +94,7 @@ public:
 
 public:
 	BOOL RemoveAll();
-	int GetSize() { return m_arrFiles.GetSize(); }
+	int GetSize() { return (int)m_arrFiles.GetSize(); }
 	CFileData* GetAt(int nIndex) { return m_arrFiles.GetAt(nIndex); }
 
 	int GetSystemType() { return m_nSystemType; }

@@ -94,10 +94,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndStatusBar.AddElement(new CMFCRibbonStatusBarPane(
-		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetFolder(), TRUE, NULL,
+		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetCurrentFolder(), TRUE, NULL,
 		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
 	m_wndStatusBar.AddExtendedElement(new CMFCRibbonStatusBarPane(
-		ID_STATUSBAR_PANE2, m_wndRightFileView->m_pFileSystem.GetFolder(), TRUE, NULL,
+		ID_STATUSBAR_PANE2, m_wndRightFileView->m_pFileSystem.GetCurrentFolder(), TRUE, NULL,
 		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
 
 	// enable Visual Studio 2005 style docking window behavior
@@ -136,6 +136,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
 		m_wndLeftFileView->m_bIsLeftPane = TRUE;
+		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
@@ -143,7 +144,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
 		m_wndRightFileView->m_bIsLeftPane = FALSE;
-		m_wndRightFileView->m_pFileSystem.SetFolder(_T("D:\\"));
+		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
 		VERIFY(m_wndRightFileView->Refresh());
 	}
 

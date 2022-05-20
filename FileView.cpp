@@ -18,6 +18,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "IntelliFile.h"
 #include "FileView.h"
 #include "MainFrame.h"
+#include "NewFolderDlg.h"
 
 // CFileView
 
@@ -178,7 +179,7 @@ void CFileView::DoubleClickEntry(int nIndex)
 	{
 		if (pFileData->GetFileName().CompareNoCase(_T(".")) != 0)
 		{
-			CString strFolder = m_pFileSystem.GetFolder();
+			CString strFolder = m_pFileSystem.GetCurrentFolder();
 			if (pFileData->GetFileName().CompareNoCase(_T("..")) != 0)
 			{
 				strFolder += pFileData->GetFileName();
@@ -190,7 +191,7 @@ void CFileView::DoubleClickEntry(int nIndex)
 				strFolder = strFolder.Left(strFolder.ReverseFind(_T('\\')));
 				strFolder += _T("\\");
 			}
-			if (m_pFileSystem.SetFolder(strFolder))
+			if (m_pFileSystem.SetCurrentFolder(strFolder))
 			{
 				if (Refresh())
 				{
@@ -212,7 +213,7 @@ void CFileView::DoubleClickEntry(int nIndex)
 	}
 	else
 	{
-		CString strFolder = m_pFileSystem.GetFolder();
+		CString strFolder = m_pFileSystem.GetCurrentFolder();
 		CString strFilePath = strFolder + pFileData->GetFileName();
 		if (IsApplication(strFilePath))
 		{
@@ -231,7 +232,7 @@ void CFileView::DoubleClickEntry(int nIndex)
 	}
 }
 
-BOOL CFileView::Refresh()
+BOOL CFileView::Refresh(CString* strNewFolderName)
 {
 	CString strListItem;
 	GetListCtrl().SetRedraw(FALSE);
@@ -240,6 +241,10 @@ BOOL CFileView::Refresh()
 	{
 		strListItem = GetListCtrl().GetItemText(nListItem, 0);
 	}
+	if (strNewFolderName != NULL)
+	{
+		strListItem = *strNewFolderName;
+	}
 	VERIFY(GetListCtrl().DeleteAllItems());
 	BOOL bRetVal = m_pFileSystem.Refresh();
 	const int nSize = m_pFileSystem.GetSize();
@@ -247,7 +252,7 @@ BOOL CFileView::Refresh()
 	{
 		CFileData* pFileData = m_pFileSystem.GetAt(nIndex);
 		ASSERT(pFileData != NULL);
-		const int nListItem = GetListCtrl().InsertItem(GetListCtrl().GetItemCount(), pFileData->GetFileName());
+		nListItem = GetListCtrl().InsertItem(GetListCtrl().GetItemCount(), pFileData->GetFileName());
 		GetListCtrl().SetItemText(nListItem, 1, pFileData->FormatSize());
 		GetListCtrl().SetItemText(nListItem, 2, pFileData->FormatDate());
 		GetListCtrl().SetItemText(nListItem, 3, pFileData->FormatAttr());
@@ -284,7 +289,7 @@ BOOL CFileView::Refresh()
 	GetListCtrl().UpdateWindow();
 	ResizeListCtrl();
 	ASSERT_VALID(m_pMainFrame);
-	m_pMainFrame->SetStatusBar(m_bIsLeftPane, m_pFileSystem.GetFolder());
+	m_pMainFrame->SetStatusBar(m_bIsLeftPane, m_pFileSystem.GetCurrentFolder());
 	return bRetVal;
 }
 
@@ -302,7 +307,7 @@ BOOL CFileView::EditFile()
 		ASSERT(pFileData != NULL);
 		if (!pFileData->IsFolder())
 		{
-			CString strFolder = m_pFileSystem.GetFolder();
+			CString strFolder = m_pFileSystem.GetCurrentFolder();
 			CString strFilePath = strFolder + pFileData->GetFileName();
 			if (m_pFileSystem.EditFile(strFilePath))
 			{
@@ -381,18 +386,10 @@ BOOL CFileView::MoveFile(CFileView* pDestination)
 
 BOOL CFileView::NewFolder(CFileView* pDestination)
 {
-	CFileList arrSelection;
-	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
-	while (nListItem != -1)
+	CNewFolderDlg dlgNewFolder(m_pMainFrame);
+	if (dlgNewFolder.DoModal() == IDOK)
 	{
-		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
-		ASSERT(pFileData != NULL);
-		arrSelection.Add(pFileData);
-		nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);
-	}
-	if (arrSelection.GetCount() > 0)
-	{
-		if (m_pFileSystem.NewFolder(&pDestination->m_pFileSystem, &arrSelection) && Refresh())
+		if (m_pFileSystem.NewFolder(&pDestination->m_pFileSystem, dlgNewFolder.m_strNewFolderName) && Refresh(&dlgNewFolder.m_strNewFolderName))
 		{
 			ASSERT_VALID(m_pMainFrame);
 			m_pMainFrame->HideMessageBar();

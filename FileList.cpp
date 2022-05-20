@@ -46,7 +46,7 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD 
 	_stprintf_s((LPTSTR)lpszDisplayBuf, 
 		LocalSize(lpszDisplayBuf) / sizeof(TCHAR),
 		TEXT("%s failed with error %d: %s\n"), 
-		lpszFunction, dwError, lpszMsgBuf); 
+		lpszFunction, dwError, (LPCTSTR) lpszMsgBuf);
 	OutputDebugString((LPCTSTR) lpszDisplayBuf);
 	if (wndCaptionBar != NULL)
 	{
@@ -210,7 +210,7 @@ CFileSystem::CFileSystem()
 	m_wndCaptionBar = NULL;
 	m_hWndParent = NULL;
 	m_nSystemType = FILE_TYPE_FAT;
-	m_strFolder = DEFAULT_FOLDER;
+	m_strCurrentFolder = DEFAULT_FOLDER;
 }
 
 CFileSystem::~CFileSystem()
@@ -232,7 +232,7 @@ BOOL CFileSystem::RemoveAll()
 	return TRUE;
 }
 
-BOOL CFileSystem::SetFolder(CString strFolder)
+BOOL CFileSystem::SetCurrentFolder(CString strFolder)
 {
 	switch (m_nSystemType)
 	{
@@ -240,9 +240,10 @@ BOOL CFileSystem::SetFolder(CString strFolder)
 		{
 			if (SetCurrentDirectory(strFolder))
 			{
-				m_strFolder = strFolder;
+				m_strCurrentFolder = strFolder;
 				return TRUE;
 			}
+			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("SetCurrentDirectory"), GetLastError());
 			}
@@ -262,7 +263,7 @@ BOOL CFileSystem::Refresh()
 	{
 		case FILE_TYPE_FAT:
 		{
-			if (!SetFolder(m_strFolder))
+			if (!SetCurrentFolder(m_strCurrentFolder))
 				return FALSE;
 
 			hFindFile = FindFirstFile(_T("*.*"), &pFindData);
@@ -435,7 +436,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 					FOF_NOERRORUI |
 					FOFX_SHOWELEVATIONPROMPT)))
 				{
-					CString strDestination = pDestination->GetFolder();
+					CString strDestination = pDestination->GetCurrentFolder();
 					IShellItem* pFolderItem = NULL;
 					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, NULL, IID_PPV_ARGS(&pFolderItem))))
 					{
@@ -444,7 +445,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 							CFileData* pFileData = arrSelection->GetAt(0);
 							ASSERT_VALID(pFileData);
 							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetFolder();
+							CString strFolder = GetCurrentFolder();
 							CString strFilePath = strFolder + strFileName;
 
 							IShellItem* pShellItem = NULL;
@@ -482,7 +483,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 								CFileData* pFileData = arrSelection->GetAt(nIndex);
 								ASSERT_VALID(pFileData);
 								CString strFileName = pFileData->GetFileName();
-								CString strFolder = GetFolder();
+								CString strFolder = GetCurrentFolder();
 								CString strFilePath = strFolder + strFileName;
 
 								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
@@ -586,7 +587,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 					FOF_NOERRORUI |
 					FOFX_SHOWELEVATIONPROMPT)))
 				{
-					CString strDestination = pDestination->GetFolder();
+					CString strDestination = pDestination->GetCurrentFolder();
 					IShellItem* pFolderItem = NULL;
 					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, NULL, IID_PPV_ARGS(&pFolderItem))))
 					{
@@ -595,7 +596,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 							CFileData* pFileData = arrSelection->GetAt(0);
 							ASSERT_VALID(pFileData);
 							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetFolder();
+							CString strFolder = GetCurrentFolder();
 							CString strFilePath = strFolder + strFileName;
 
 							IShellItem* pShellItem = NULL;
@@ -633,7 +634,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 								CFileData* pFileData = arrSelection->GetAt(nIndex);
 								ASSERT_VALID(pFileData);
 								CString strFileName = pFileData->GetFileName();
-								CString strFolder = GetFolder();
+								CString strFolder = GetCurrentFolder();
 								CString strFilePath = strFolder + strFileName;
 
 								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
@@ -722,10 +723,21 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 	return FALSE;
 }
 
-BOOL CFileSystem::NewFolder(CFileSystem* pDestination, CFileList* arrSelection)
+BOOL CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
 {
-	if ((pDestination != NULL) && (arrSelection != NULL))
+	if (pDestination != NULL)
 	{
+		switch (m_nSystemType)
+		{
+			case FILE_TYPE_FAT:
+			{
+				if (!SetCurrentFolder(m_strCurrentFolder))
+					return FALSE;
+
+				if (!::CreateDirectory(strNewFolderName, NULL))
+					return FALSE;
+			}
+		}
 		return TRUE;
 	}
 	return FALSE;
@@ -751,7 +763,7 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 						CFileData* pFileData = arrSelection->GetAt(0);
 						ASSERT_VALID(pFileData);
 						CString strFileName = pFileData->GetFileName();
-						CString strFolder = GetFolder();
+						CString strFolder = GetCurrentFolder();
 						CString strFilePath = strFolder + strFileName;
 
 						IShellItem* pShellItem = NULL;
@@ -787,7 +799,7 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 							CFileData* pFileData = arrSelection->GetAt(nIndex);
 							ASSERT_VALID(pFileData);
 							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetFolder();
+							CString strFolder = GetCurrentFolder();
 							CString strFilePath = strFolder + strFileName;
 
 							arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);

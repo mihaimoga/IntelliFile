@@ -17,7 +17,6 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "stdafx.h"
 #include "IntelliFile.h"
 #include "NewFolderDlg.h"
-#include "afxdialogex.h"
 
 // CNewFolderDlg dialog
 
@@ -44,9 +43,8 @@ END_MESSAGE_MAP()
 
 // CNewFolderDlg message handlers
 
-
 void CNewFolderDlg::OnBnClickedOk()
 {
-	CDialogEx::OnOK();
 	m_editNewFolderName.GetWindowText(m_strNewFolderName);
+	CDialogEx::OnOK();
 }

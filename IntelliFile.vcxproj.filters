@@ -311,6 +311,9 @@
     <ClInclude Include="NewFolderDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ChangeDriveDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -344,6 +347,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NewFolderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChangeDriveDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

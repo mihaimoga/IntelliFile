@@ -18,6 +18,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "IntelliFile.h"
 #include "FileView.h"
 #include "MainFrame.h"
+#include "ChangeDriveDlg.h"
 #include "NewFolderDlg.h"
 
 // CFileView
@@ -293,6 +294,27 @@ BOOL CFileView::Refresh(CString* strNewFolderName)
 	return bRetVal;
 }
 
+BOOL CFileView::ChangeDrive()
+{
+	CChangeDriveDlg dlgChangeDrive(this);
+	if (dlgChangeDrive.DoModal() == IDOK)
+	{
+		if (m_pFileSystem.SetCurrentFolder(dlgChangeDrive.m_strNewDriveName) && Refresh(NULL))
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return TRUE;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 BOOL CFileView::ViewFile()
 {
 	return TRUE;
@@ -339,7 +361,7 @@ BOOL CFileView::CopyFile(CFileView* pDestination)
 	}
 	if (arrSelection.GetCount() > 0)
 	{
-		if (m_pFileSystem.CopyFile(&pDestination->m_pFileSystem, &arrSelection) && pDestination->Refresh() && Refresh())
+		if (m_pFileSystem.CopyFile(&pDestination->m_pFileSystem, &arrSelection) && pDestination->Refresh() && Refresh(NULL))
 		{
 			ASSERT_VALID(m_pMainFrame);
 			m_pMainFrame->HideMessageBar();
@@ -368,7 +390,7 @@ BOOL CFileView::MoveFile(CFileView* pDestination)
 	}
 	if (arrSelection.GetCount() > 0)
 	{
-		if (m_pFileSystem.MoveFile(&pDestination->m_pFileSystem, &arrSelection) && pDestination->Refresh() && Refresh())
+		if (m_pFileSystem.MoveFile(&pDestination->m_pFileSystem, &arrSelection) && pDestination->Refresh() && Refresh(NULL))
 		{
 			ASSERT_VALID(m_pMainFrame);
 			m_pMainFrame->HideMessageBar();
@@ -418,7 +440,7 @@ BOOL CFileView::DeleteFile(CFileView* pDestination)
 	}
 	if (arrSelection.GetCount() > 0)
 	{
-		if (m_pFileSystem.DeleteFile(&pDestination->m_pFileSystem, &arrSelection) && Refresh())
+		if (m_pFileSystem.DeleteFile(&pDestination->m_pFileSystem, &arrSelection) && Refresh(NULL))
 		{
 			ASSERT_VALID(m_pMainFrame);
 			m_pMainFrame->HideMessageBar();

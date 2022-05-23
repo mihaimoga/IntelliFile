@@ -455,6 +455,7 @@ echo.
     <None Include="res\writesmall.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ChangeDriveDlg.h" />
     <ClInclude Include="FileList.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="HyperlinkStatic.h" />
@@ -547,6 +548,7 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ChangeDriveDlg.cpp" />
     <ClCompile Include="FileList.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="HyperlinkStatic.cpp" />

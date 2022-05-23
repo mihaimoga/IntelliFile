@@ -46,6 +46,7 @@ public:
 	void ResizeListCtrl();
 	void DoubleClickEntry(int nIndex);
 	BOOL Refresh(CString* strNewFolderName = NULL);
+	BOOL ChangeDrive();
 	BOOL ViewFile();
 	BOOL EditFile();
 	BOOL CopyFile(CFileView* pDestination);

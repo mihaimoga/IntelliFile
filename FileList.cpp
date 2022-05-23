@@ -271,7 +271,8 @@ BOOL CFileSystem::Refresh()
 			{
 				do
 				{
-					if (CString(pFindData.cFileName).CompareNoCase(_T(".")) != 0)
+					if ((CString(pFindData.cFileName).CompareNoCase(_T(".")) != 0) &&
+						((CString(pFindData.cFileName).CompareNoCase(_T("..")) != 0) || (m_strCurrentFolder.GetLength() > 3)))
 					{
 						const ULONGLONG nFileSize = (ULONGLONG)(pFindData.nFileSizeLow) +
 							((ULONGLONG)(pFindData.nFileSizeHigh) << 32);
@@ -302,7 +303,7 @@ BOOL CFileSystem::Refresh()
 			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), GetLastError());
-				CFileData* pFileData = new CFileData(
+				/*CFileData* pFileData = new CFileData(
 					FILE_ATTRIBUTE_DIRECTORY,
 					COleDateTime(), // ftCreationTime
 					COleDateTime(), // ftLastAccessTime,
@@ -310,7 +311,7 @@ BOOL CFileSystem::Refresh()
 					0,
 					_T(".."),
 					_T(".."));
-				m_arrFiles.Add(pFileData);
+				m_arrFiles.Add(pFileData);*/
 				return FALSE;
 			}
 			return TRUE;
@@ -734,8 +735,16 @@ BOOL CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
 				if (!SetCurrentFolder(m_strCurrentFolder))
 					return FALSE;
 
-				if (!::CreateDirectory(strNewFolderName, NULL))
+				if (::CreateDirectory(strNewFolderName, NULL))
+				{
+
+				}
+				else
+				{
+					const DWORD dwError = GetLastError();
+					DisplayErrorBox(m_wndCaptionBar, _T("CreateDirectory"), dwError);
 					return FALSE;
+				}
 			}
 		}
 		return TRUE;

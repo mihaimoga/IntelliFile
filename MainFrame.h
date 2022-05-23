@@ -71,6 +71,7 @@ protected:
 	afx_msg void OnOptions();
 
 	afx_msg void OnRefresh();
+	afx_msg void OnChangeDrive();
 	afx_msg void OnViewFile();
 	afx_msg void OnEditFile();
 	afx_msg void OnCopyFile();

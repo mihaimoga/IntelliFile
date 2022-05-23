@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_MOVE_FILE, &CMainFrame::OnMoveFile)
 	ON_COMMAND(ID_NEW_FOLDER, &CMainFrame::OnNewFolder)
 	ON_COMMAND(ID_DELETE_FILE, &CMainFrame::OnDeleteFile)
+	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -439,7 +440,14 @@ void CMainFrame::OnRefresh()
 {
 	CFileView* pActiveView = (CFileView*) GetActiveView();
 	ASSERT_VALID(pActiveView);
-	VERIFY(pActiveView->Refresh());
+	VERIFY(pActiveView->Refresh(NULL));
+}
+
+void CMainFrame::OnChangeDrive()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->ChangeDrive());
 }
 
 void CMainFrame::OnViewFile()

@@ -20,6 +20,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "MainFrame.h"
 #include "ChangeDriveDlg.h"
 #include "NewFolderDlg.h"
+#include "ViewTextFileDlg.h"
 
 // CFileView
 
@@ -317,7 +318,34 @@ BOOL CFileView::ChangeDrive()
 
 BOOL CFileView::ViewFile()
 {
-	return TRUE;
+	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	if (nListItem != -1)
+	{
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nListItem));
+		ASSERT(pFileData != NULL);
+		if (!pFileData->IsFolder())
+		{
+			CString strFolder = m_pFileSystem.GetCurrentFolder();
+			CString strFilePath = strFolder + pFileData->GetFileName();
+			/*if (m_pFileSystem.ViewFile(strFilePath))
+			{
+				ASSERT_VALID(m_pMainFrame);
+				m_pMainFrame->HideMessageBar();
+				return TRUE;
+			}
+			else
+			{
+				ASSERT_VALID(m_pMainFrame);
+				m_pMainFrame->RecalcLayout();
+				return FALSE;
+			}*/
+			CViewTextFileDlg dlgViewTextFile(this);
+			dlgViewTextFile.m_strFilePath = strFilePath;
+			dlgViewTextFile.DoModal();
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 BOOL CFileView::EditFile()

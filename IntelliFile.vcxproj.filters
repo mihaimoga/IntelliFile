@@ -314,6 +314,12 @@
     <ClInclude Include="ChangeDriveDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WndResizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewTextFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -350,6 +356,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ChangeDriveDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WndResizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewTextFileDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,0 +1,45 @@
+/* This file is part of IntelliFile application developed by Mihai MOGA.
+
+IntelliFile is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Open
+Source Initiative, either version 3 of the License, or any later version.
+
+IntelliFile is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
+
+#pragma once
+
+#include "WndResizer.h"
+
+// CViewTextFileDlg dialog
+
+class CViewTextFileDlg : public CDialogEx
+{
+	DECLARE_DYNAMIC(CViewTextFileDlg)
+
+public:
+	CViewTextFileDlg(CWnd* pParent = nullptr);   // standard constructor
+	virtual ~CViewTextFileDlg();
+
+// Dialog Data
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ViewTextFileDlg };
+#endif
+
+public:
+	CWndResizer m_pWindowResizer;
+	CFont m_fontTerminal;
+	CEdit m_ctrlTextFile;
+	CString m_strFilePath;
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual BOOL DestroyWindow();
+
+	DECLARE_MESSAGE_MAP()
+};

@@ -52,9 +52,9 @@ BOOL CChangeDriveDlg::OnInitDialog()
 
 	const DWORD nDriveList = ::GetLogicalDrives();
 	VERIFY(nDriveList != 0);
-	for (int nIndex = 0; nIndex < 26; nIndex++)
+	for (DWORD nIndex = 0; nIndex < 26; nIndex++)
 	{
-		if ((nDriveList & (1 << nIndex)) == ((1 << nIndex)))
+		if ((nDriveList & (1 << nIndex)) == (((DWORD)1 << nIndex)))
 		{
 			strDriveName.Format(_T("%c:\\"), (_T('A') + nIndex));
 			const UINT nDriveType = ::GetDriveType(strDriveName);

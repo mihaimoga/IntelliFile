@@ -458,6 +458,7 @@ echo.
     <ClInclude Include="ChangeDriveDlg.h" />
     <ClInclude Include="FileList.h" />
     <ClInclude Include="FileView.h" />
+    <ClInclude Include="HTMLCtrl.h" />
     <ClInclude Include="HyperlinkStatic.h" />
     <ClInclude Include="IntelliFile.h" />
     <ClInclude Include="MainFrame.h" />
@@ -466,6 +467,7 @@ echo.
     <ClInclude Include="sinstance.h" />
     <ClInclude Include="SortListCtrl.h" />
     <ClInclude Include="VersionInfo.h" />
+    <ClInclude Include="ViewMetaFileDlg.h" />
     <ClInclude Include="ViewRichFileDlg.h" />
     <ClInclude Include="ViewTextFileDlg.h" />
     <ClInclude Include="WndResizer.h" />
@@ -554,6 +556,7 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="ChangeDriveDlg.cpp" />
     <ClCompile Include="FileList.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="HTMLCtrl.cpp" />
     <ClCompile Include="HyperlinkStatic.cpp" />
     <ClCompile Include="IntelliFile.cpp" />
     <ClCompile Include="MainFrame.cpp" />
@@ -568,6 +571,7 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="VersionInfo.cpp" />
+    <ClCompile Include="ViewMetaFileDlg.cpp" />
     <ClCompile Include="ViewRichFileDlg.cpp" />
     <ClCompile Include="ViewTextFileDlg.cpp" />
     <ClCompile Include="WndResizer.cpp" />

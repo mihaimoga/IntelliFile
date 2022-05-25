@@ -35,6 +35,7 @@
 #define HIDD_ChangeDriveDlg                     0x2013A
 #define HIDD_ViewTextFileDlg                    0x2013B
 #define HIDD_ViewRichFileDlg                    0x2013C
+#define HIDD_ViewMetaFileDlg                    0x2013D
  
 // Frame Controls (IDW_*) 
 // This is a part of the Microsoft Foundation Classes C++ library.

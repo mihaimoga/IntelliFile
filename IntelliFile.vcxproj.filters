@@ -323,6 +323,12 @@
     <ClInclude Include="ViewRichFileDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HTMLCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewMetaFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -368,6 +374,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewRichFileDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HTMLCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewMetaFileDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

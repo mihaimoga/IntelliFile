@@ -20,6 +20,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "MainFrame.h"
 #include "ChangeDriveDlg.h"
 #include "NewFolderDlg.h"
+#include "ViewMetaFileDlg.h"
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
 
@@ -355,6 +356,16 @@ BOOL CFileView::ViewFile()
 					dlgViewRichFile.m_strFilePath = strFilePath;
 					dlgViewRichFile.DoModal();
 					return TRUE;
+				}
+				else
+				{
+					if (IsMetaFile(strFilePath))
+					{
+						CViewMetaFileDlg dlgViewMetaFile(this);
+						dlgViewMetaFile.m_strFilePath = strFilePath;
+						dlgViewMetaFile.DoModal();
+						return TRUE;
+					}
 				}
 			}
 		}

@@ -83,6 +83,7 @@ BOOL IsApplication(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
@@ -99,6 +100,7 @@ BOOL IsBinaryFile(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
@@ -118,6 +120,7 @@ BOOL IsTextFile(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
@@ -135,6 +138,7 @@ BOOL IsRichTextFile(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
@@ -151,6 +155,7 @@ BOOL IsCodeFile(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
@@ -170,12 +175,32 @@ BOOL IsDataFile(CString strFilePath)
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
 	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
 	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
 	_tsplitpath_s(strFilePath,
 		lpszDrive, _MAX_DRIVE,
 		lpszFolder, _MAX_DIR,
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 	if (_tcsicmp(lpszExtension, _T(".csv")) == 0)
+		return TRUE;
+	return FALSE;
+}
+
+BOOL IsMetaFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".html")) == 0))
 		return TRUE;
 	return FALSE;
 }

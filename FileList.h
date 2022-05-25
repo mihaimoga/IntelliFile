@@ -29,6 +29,7 @@ BOOL IsTextFile(CString strFilePath);
 BOOL IsRichTextFile(CString strFilePath);
 BOOL IsCodeFile(CString strFilePath);
 BOOL IsDataFile(CString strFilePath);
+BOOL IsMetaFile(CString strFilePath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileData command target

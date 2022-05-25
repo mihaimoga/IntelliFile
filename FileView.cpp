@@ -20,6 +20,7 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "MainFrame.h"
 #include "ChangeDriveDlg.h"
 #include "NewFolderDlg.h"
+#include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
 
 // CFileView
@@ -339,10 +340,23 @@ BOOL CFileView::ViewFile()
 				m_pMainFrame->RecalcLayout();
 				return FALSE;
 			}*/
-			CViewTextFileDlg dlgViewTextFile(this);
-			dlgViewTextFile.m_strFilePath = strFilePath;
-			dlgViewTextFile.DoModal();
-			return TRUE;
+			if (IsTextFile(strFilePath))
+			{
+				CViewTextFileDlg dlgViewTextFile(this);
+				dlgViewTextFile.m_strFilePath = strFilePath;
+				dlgViewTextFile.DoModal();
+				return TRUE;
+			}
+			else
+			{
+				if (IsRichTextFile(strFilePath))
+				{
+					CViewRichFileDlg dlgViewRichFile(this);
+					dlgViewRichFile.m_strFilePath = strFilePath;
+					dlgViewRichFile.DoModal();
+					return TRUE;
+				}
+			}
 		}
 	}
 	return FALSE;

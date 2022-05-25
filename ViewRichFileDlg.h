@@ -15,25 +15,24 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 
 #include "WndResizer.h"
 
-// CViewTextFileDlg dialog
+// CViewRichFileDlg dialog
 
-class CViewTextFileDlg : public CDialogEx
+class CViewRichFileDlg : public CDialogEx
 {
-	DECLARE_DYNAMIC(CViewTextFileDlg)
+	DECLARE_DYNAMIC(CViewRichFileDlg)
 
 public:
-	CViewTextFileDlg(CWnd* pParent = nullptr);   // standard constructor
-	virtual ~CViewTextFileDlg();
+	CViewRichFileDlg(CWnd* pParent = nullptr);   // standard constructor
+	virtual ~CViewRichFileDlg();
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_ViewTextFileDlg };
+	enum { IDD = IDD_ViewRichFileDlg };
 #endif
 
 public:
 	CWndResizer m_pWindowResizer;
-	CFont m_fontTerminal;
-	CEdit m_ctrlTextFile;
+	CRichEditCtrl m_ctrlTextFile;
 	CString m_strFilePath;
 	UINT_PTR m_nTimerID;
 

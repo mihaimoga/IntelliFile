@@ -93,6 +93,93 @@ BOOL IsApplication(CString strFilePath)
 	return FALSE;
 }
 
+BOOL IsBinaryFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".exe")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".com")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".bin")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".elf")) == 0))
+		return TRUE;
+	return FALSE;
+}
+
+BOOL IsTextFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".log")) == 0))
+		return TRUE;
+	return FALSE;
+}
+
+BOOL IsRichTextFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if (_tcsicmp(lpszExtension, _T(".rtf")) == 0)
+		return TRUE;
+	return FALSE;
+}
+
+BOOL IsCodeFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+		return TRUE;
+	return FALSE;
+}
+
+BOOL IsDataFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if (_tcsicmp(lpszExtension, _T(".csv")) == 0)
+		return TRUE;
+	return FALSE;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CFileList member functions
 ///////////////////////////////////////////////////////////////////////////////

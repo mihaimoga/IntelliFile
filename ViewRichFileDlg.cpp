@@ -11,55 +11,59 @@ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 You should have received a copy of the GNU General Public License along with
 IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 
-// ViewTextFileDlg.cpp : implementation file
+// ViewRichFileDlg.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "IntelliFile.h"
-#include "ViewTextFileDlg.h"
+#include "ViewRichFileDlg.h"
 
-// CViewTextFileDlg dialog
+// CViewRichFileDlg dialog
 
-IMPLEMENT_DYNAMIC(CViewTextFileDlg, CDialogEx)
+IMPLEMENT_DYNAMIC(CViewRichFileDlg, CDialogEx)
 
-CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_ViewTextFileDlg, pParent)
+CViewRichFileDlg::CViewRichFileDlg(CWnd* pParent /*=nullptr*/)
+	: CDialogEx(IDD_ViewRichFileDlg, pParent)
 {
 }
 
-CViewTextFileDlg::~CViewTextFileDlg()
+CViewRichFileDlg::~CViewRichFileDlg()
 {
 }
 
-void CViewTextFileDlg::DoDataExchange(CDataExchange* pDX)
+void CViewRichFileDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TEXT_FILE, m_ctrlTextFile);
 }
 
-BEGIN_MESSAGE_MAP(CViewTextFileDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CViewRichFileDlg, CDialogEx)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
-// CViewTextFileDlg message handlers
+// CViewRichFileDlg message handlers
 
-std::wstring utf8_to_wstring(const std::string& str)
+static DWORD CALLBACK StreamInCallback(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb)
 {
-	// convert UTF-8 string to wstring
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-	return myconv.from_bytes(str);
+	try
+	{
+		CFile* pFile = (CFile*)dwCookie;
+		ASSERT_VALID(pFile);
+		*pcb = pFile->Read(pbBuff, cb);
+	}
+	catch (CFileException* pEx)
+	{
+		// if an error occurs, just make a message box
+		pEx->ReportError();
+		pEx->Delete();
+	}
+	return 0;
 }
 
-std::string wstring_to_utf8(const std::wstring& str)
+BOOL CViewRichFileDlg::OnInitDialog()
 {
-	// convert wstring to UTF-8 string
-	std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
-	return myconv.to_bytes(str);
-}
-
-BOOL CViewTextFileDlg::OnInitDialog()
-{
+	EDITSTREAM es;
 	CDialogEx::OnInitDialog();
 
 	SetWindowText(m_strFilePath);
@@ -72,22 +76,9 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		const ULONGLONG nFileLength = pTextFile.GetLength();
 		if (nFileLength > 0)
 		{
-			// allocate buffer for reading file's content
-			char* pFileBuffer = new char[(UINT)nFileLength + 1];
-			if (NULL != pFileBuffer)
-			{
-				memset(pFileBuffer, 0, sizeof(pFileBuffer));
-				// read file's content
-				const UINT nActualLength = pTextFile.Read(pFileBuffer, (UINT)nFileLength);
-				pFileBuffer[nActualLength] = 0;
-				// convert UTF8 to Unicode characters
-				CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
-				// actual show the content of file
-				m_ctrlTextFile.SetWindowText(strConvertedText);
-				// delete buffer
-				delete pFileBuffer;
-				pFileBuffer = NULL;
-			}
+			es.dwCookie = (DWORD_PTR)&pTextFile;
+			es.pfnCallback = (EDITSTREAMCALLBACK)StreamInCallback;
+			m_ctrlTextFile.StreamIn(SF_RTF, es);
 		}
 		// close the file handle
 		pTextFile.Close();
@@ -98,23 +89,6 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		pEx->ReportError();
 		pEx->Delete();
 	}
-
-	VERIFY(m_fontTerminal.CreateFont(
-		-MulDiv(10, GetDeviceCaps(::GetDC(NULL), LOGPIXELSY), 72), // nHeight
-		0,                         // nWidth
-		0,                         // nEscapement
-		0,                         // nOrientation
-		FW_NORMAL,                 // nWeight
-		FALSE,                     // bItalic
-		FALSE,                     // bUnderline
-		0,                         // cStrikeOut
-		ANSI_CHARSET,              // nCharSet
-		OUT_DEFAULT_PRECIS,        // nOutPrecision
-		CLIP_DEFAULT_PRECIS,       // nClipPrecision
-		ANTIALIASED_QUALITY,       // nQuality
-		DEFAULT_PITCH | FF_MODERN, // nPitchAndFamily
-		_T("Consolas")));
-	m_ctrlTextFile.SetFont(&m_fontTerminal);
 
 	VERIFY(m_pWindowResizer.Hook(this));
 	VERIFY(m_pWindowResizer.SetAnchor(IDC_TEXT_FILE, ANCHOR_LEFT | ANCHOR_RIGHT | ANCHOR_TOP | ANCHOR_BOTTOM));
@@ -137,7 +111,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CViewTextFileDlg::OnDestroy()
+void CViewRichFileDlg::OnDestroy()
 {
 	CDialogEx::OnDestroy();
 
@@ -149,12 +123,9 @@ void CViewTextFileDlg::OnDestroy()
 	ASSERT_VALID(pWinApp);
 	pWinApp->WriteProfileInt(_T("Size"), _T("Width"), nWidth);
 	pWinApp->WriteProfileInt(_T("Size"), _T("Height"), nHeight);
-
-	VERIFY(m_fontTerminal.DeleteObject());
 }
 
-
-void CViewTextFileDlg::OnTimer(UINT_PTR nIDEvent)
+void CViewRichFileDlg::OnTimer(UINT_PTR nIDEvent)
 {
 	if (m_nTimerID == nIDEvent)
 	{

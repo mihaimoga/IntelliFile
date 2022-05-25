@@ -24,6 +24,11 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD 
 void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, HRESULT hResult);
 
 BOOL IsApplication(CString strFilePath);
+BOOL IsBinaryFile(CString strFilePath);
+BOOL IsTextFile(CString strFilePath);
+BOOL IsRichTextFile(CString strFilePath);
+BOOL IsCodeFile(CString strFilePath);
+BOOL IsDataFile(CString strFilePath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileData command target

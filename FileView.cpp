@@ -24,6 +24,10 @@ IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
 
+#include <Shobjidl.h>
+#include <ShlObj.h>
+#include <windowsx.h>
+
 // CFileView
 
 IMPLEMENT_DYNCREATE(CFileView, CMFCListView)
@@ -48,6 +52,7 @@ CFileView::~CFileView()
 BEGIN_MESSAGE_MAP(CFileView, CMFCListView)
 	ON_WM_SIZE()
 	ON_NOTIFY(NM_DBLCLK, ID_MFCLISTCTRL, OnDblClickEntry)
+	ON_NOTIFY(NM_RCLICK, ID_MFCLISTCTRL, OnContextMenu)
 END_MESSAGE_MAP()
 
 // CFileView diagnostics
@@ -67,6 +72,82 @@ void CFileView::Dump(CDumpContext& dc) const
 #endif //_DEBUG
 
 // CFileView message handlers
+
+class CItemIdListReleaser {
+public:
+	explicit CItemIdListReleaser(ITEMIDLIST * idList) : _idList(idList) {}
+	~CItemIdListReleaser() { if (_idList) CoTaskMemFree(_idList); }
+private:
+	ITEMIDLIST * _idList;
+};
+
+class CComInterfaceReleaser {
+public:
+	explicit CComInterfaceReleaser(IUnknown * i) : _i(i) {}
+	~CComInterfaceReleaser() { if (_i) _i->Release(); }
+private:
+	IUnknown * _i;
+};
+
+class CItemIdArrayReleaser {
+public:
+	explicit CItemIdArrayReleaser(const std::vector<ITEMIDLIST*>& idArray) : _array(idArray) {}
+	~CItemIdArrayReleaser() {
+		for (ITEMIDLIST* item : _array)
+			CoTaskMemFree(item);
+	}
+
+	CItemIdArrayReleaser& operator=(const CItemIdArrayReleaser&) = delete;
+private:
+	const std::vector<ITEMIDLIST*>& _array;
+};
+
+bool openShellContextMenuForObject(const std::wstring &path, int xPos, int yPos, void* parentWindow)
+{
+	ITEMIDLIST * id = 0;
+	std::wstring windowsPath = path;
+	std::replace(windowsPath.begin(), windowsPath.end(), '/', '\\');
+	HRESULT result = SHParseDisplayName(windowsPath.c_str(), 0, &id, 0, 0);
+	if (!SUCCEEDED(result) || !id)
+		return false;
+	CItemIdListReleaser idReleaser(id);
+
+	IShellFolder* ifolder = 0;
+
+	LPCITEMIDLIST idChild = 0;
+	result = SHBindToParent(id, IID_IShellFolder, (void**)&ifolder, &idChild);
+	if (!SUCCEEDED(result) || !ifolder)
+		return false;
+	CComInterfaceReleaser ifolderReleaser(ifolder);
+
+	IContextMenu* imenu = 0;
+	result = ifolder->GetUIObjectOf((HWND)parentWindow, 1, (const ITEMIDLIST **)&idChild, IID_IContextMenu, 0, (void**)&imenu);
+	if (!SUCCEEDED(result) || !ifolder)
+		return false;
+	CComInterfaceReleaser menuReleaser(imenu);
+
+	HMENU hMenu = CreatePopupMenu();
+	if (!hMenu)
+		return false;
+	if (SUCCEEDED(imenu->QueryContextMenu(hMenu, 0, 1, 0x7FFF, CMF_NORMAL)))
+	{
+		int iCmd = TrackPopupMenuEx(hMenu, TPM_RETURNCMD, xPos, yPos, (HWND)parentWindow, NULL);
+		if (iCmd > 0)
+		{
+			CMINVOKECOMMANDINFOEX info = { 0 };
+			info.cbSize = sizeof(info);
+			info.fMask = CMIC_MASK_UNICODE;
+			info.hwnd = (HWND)parentWindow;
+			info.lpVerb = MAKEINTRESOURCEA(iCmd - 1);
+			info.lpVerbW = MAKEINTRESOURCEW(iCmd - 1);
+			info.nShow = SW_SHOWNORMAL;
+			imenu->InvokeCommand((LPCMINVOKECOMMANDINFO)&info);
+		}
+	}
+	DestroyMenu(hMenu);
+
+	return true;
+}
 
 void CFileView::OnInitialUpdate()
 {
@@ -109,6 +190,38 @@ void CFileView::OnDblClickEntry(NMHDR *pNMHDR, LRESULT *pResult)
 	if (pItemActivate->iItem != -1)
 	{
 		DoubleClickEntry(pItemActivate->iItem);
+	}
+}
+
+void CFileView::OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	CPoint pt(pItemActivate->ptAction);
+	POINT p;
+	p.x = pt.x;
+	p.y = pt.y;
+	::ClientToScreen(pNMHDR->hwndFrom, &p);
+	if (pResult != NULL) *pResult = 0;
+	if (pItemActivate->iItem != -1)
+	{
+		// DoubleClickEntry(pItemActivate->iItem);
+		ASSERT(GetListCtrl().m_hWnd != NULL);
+		CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(pItemActivate->iItem));
+		ASSERT(pFileData != NULL);
+		if (pFileData->IsFolder())
+		{
+			if (pFileData->GetFileName().CompareNoCase(_T("..")) != 0)
+			{
+				const std::wstring strFilePath = m_pFileSystem.GetCurrentFolder() + pFileData->GetFileName() + _T("\\");
+				openShellContextMenuForObject(strFilePath, p.x, p.y, this->m_hWnd);
+			}
+		}
+		else
+		{
+			CString strFolder = m_pFileSystem.GetCurrentFolder();
+			const std::wstring strFilePath = strFolder + pFileData->GetFileName();
+			openShellContextMenuForObject(strFilePath, p.x, p.y, this->m_hWnd);
+		}
 	}
 }
 

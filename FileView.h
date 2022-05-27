@@ -40,6 +40,7 @@ public:
 	virtual void OnInitialUpdate();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDblClickEntry(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 public:

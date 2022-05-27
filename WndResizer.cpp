@@ -929,43 +929,43 @@ LRESULT CALLBACK CWndResizer::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LP
 
 	switch (uMsg)
 	{
-	case WM_SIZE:
-	{
-		int cx = 0;
-		int cy = 0;
-		cx = LOWORD(lParam);
-		cy = HIWORD(lParam);
-		pResizer->OnSize((UINT)wParam, cx, cy);
-	}
-	break;
-	case WM_SIZING:
-		pResizer->OnSizing((UINT)wParam, (LPRECT)lParam);
+		case WM_SIZE:
+		{
+			int cx = 0;
+			int cy = 0;
+			cx = LOWORD(lParam);
+			cy = HIWORD(lParam);
+			pResizer->OnSize((UINT)wParam, cx, cy);
+		}
 		break;
-	case WM_DESTROY:
-		pResizer->OnDestroy();
-		break;
-	case WM_MOUSEMOVE:
-		pResizer->OnMouseMove((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
-		break;
-	case WM_LBUTTONDOWN:
-		pResizer->OnLButtonDown((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
-		break;
-	case WM_LBUTTONUP:
-		pResizer->OnLButtonUp((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
-		break;
-	case WM_PAINT:
-		pResizer->OnPaint();
-		break;
-	case WM_HSCROLL:
-	case WM_VSCROLL:
-		pResizer->OnScroll();
-		break;
+		case WM_SIZING:
+			pResizer->OnSizing((UINT)wParam, (LPRECT)lParam);
+			break;
+		case WM_DESTROY:
+			pResizer->OnDestroy();
+			break;
+		case WM_MOUSEMOVE:
+			pResizer->OnMouseMove((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+			break;
+		case WM_LBUTTONDOWN:
+			pResizer->OnLButtonDown((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+			break;
+		case WM_LBUTTONUP:
+			pResizer->OnLButtonUp((UINT)wParam, CPoint(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)));
+			break;
+		case WM_PAINT:
+			pResizer->OnPaint();
+			break;
+		case WM_HSCROLL:
+		case WM_VSCROLL:
+			pResizer->OnScroll();
+			break;
 
-		//case WM_ERASEBKGND:
-		//  return FALSE;
-		//  break;
-	default:
-		break;
+			//case WM_ERASEBKGND:
+			//  return FALSE;
+			//  break;
+		default:
+			break;
 	}
 
 	return ::CallWindowProc(pResizer->m_pfnWndProc, hWnd, uMsg, wParam, lParam);

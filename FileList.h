@@ -9,7 +9,7 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-IntelliFile.  If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
+IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 
 #pragma once
 

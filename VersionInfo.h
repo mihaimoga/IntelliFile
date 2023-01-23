@@ -2,7 +2,7 @@
 Module : VersionInfo.h
 Purpose: Interface for an C++ class encapsulation of Window's "Version Infos"
 
-Copyright (c) 2000 - 2020 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2000 - 2022 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -23,7 +23,7 @@ to maintain a single distribution point for the source code.
 
 #ifndef __VERSIONINFO_H__
 #define __VERSIONINFO_H__
-
+ 
 #ifndef CVERSIONINFO_EXT_CLASS
 #define CVERSIONINFO_EXT_CLASS
 #endif //#ifndef CVERSIONINFO_EXT_CLASS
@@ -37,9 +37,10 @@ to maintain a single distribution point for the source code.
 #include <string>
 #endif //#ifndef _STRING_
 
-#ifndef _In_
-#define _In_
-#endif //#ifndef _In_
+#ifndef _VECTOR_
+#pragma message("To avoid this message, please put vector in your pre compiled header (normally stdafx.h)")
+#include <vector>
+#endif //#ifndef _VECTOR_
 
 
 /////////////////////////////// Classes ///////////////////////////////////////
@@ -104,7 +105,7 @@ protected:
 	//Data
 	WORD m_wLangID; //The current language ID of the resource
 	WORD m_wCharset; //The current Character set ID of the resource
-	ATL::CHeapPtr<BYTE> m_VerData; //Pointer to the version info blob
+	std::vector<BYTE> m_VerData; //Pointer to the version info blob
 	TRANSLATION* m_pTranslations; //Pointer to the "\\VarFileInfo\\Translation" version info
 	int m_nTranslations; //The number of translated version infos in the resource
 	VS_FIXEDFILEINFO* m_pffi; //Pointer to the fixed size version info data

@@ -45,8 +45,10 @@ History: PJN / 07-07-2006 1. Updated copyright details
                           2. Fixed more Clang-Tidy static code analysis warnings in the code.
          PJN / 12-04-2020 1. Updated copyright details.
                           2. Fixed more Clang-Tidy static code analysis warnings in the code.
+         PJN / 07-02-2022 1. Updated the code to use C++ uniform initialization for all variable declarations
+                          2. Updated copyright details.
 
-Copyright (c) 2000 - 2020 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2000 - 2022 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -88,11 +90,11 @@ to maintain a single distribution point for the source code.
 
 //////////////// Implementation ///////////////////////////////////////////////
 
-CVersionInfo::CVersionInfo() noexcept : m_wLangID(0),
-m_wCharset(1252), //Use the ANSI code page as a default
-m_pTranslations(nullptr),
-m_nTranslations(0),
-m_pffi(nullptr)
+CVersionInfo::CVersionInfo() noexcept : m_wLangID{0},
+                                        m_wCharset{1252}, //Use the ANSI code page as a default
+                                        m_pTranslations{nullptr},
+                                        m_nTranslations{0},
+                                        m_pffi{nullptr}
 {
 }
 
@@ -104,8 +106,7 @@ CVersionInfo::~CVersionInfo() noexcept
 void CVersionInfo::Unload() noexcept
 {
 	m_pffi = nullptr;
-	if (m_VerData != nullptr)
-		m_VerData.Free();
+	m_VerData.clear();
 	m_wLangID = 0;
 	m_wCharset = 1252; //Use the ANSI code page as a default
 	m_pTranslations = nullptr;
@@ -118,28 +119,22 @@ BOOL CVersionInfo::Load(_In_z_ LPCTSTR szFileName)
 	//Free up any previous memory lying around
 	Unload();
 
-	BOOL bSuccess = FALSE;
-	const DWORD dwSize = GetFileVersionInfoSize(szFileName, nullptr);
+	BOOL bSuccess{ FALSE };
+	const DWORD dwSize{ GetFileVersionInfoSize(szFileName, nullptr) };
 	if (dwSize)
 	{
 		//Allocate some memory to hold the version info data
-#pragma warning(suppress: 26477)
-		ATLASSERT(m_VerData == nullptr);
-		if (!m_VerData.Allocate(dwSize))
-		{
-			SetLastError(ERROR_OUTOFMEMORY);
-			return FALSE;
-		}
-		if (GetFileVersionInfo(szFileName, 0, dwSize, m_VerData))
+		m_VerData.resize(dwSize);
+		if (GetFileVersionInfo(szFileName, 0, dwSize, m_VerData.data()))
 		{
 			//Get the fixed size version info data
-			UINT nLen = 0;
+			UINT nLen{ 0 };
 #pragma warning(suppress: 26490)
-			if (VerQueryValue(m_VerData, _T("\\"), reinterpret_cast<LPVOID*>(&m_pffi), &nLen))
+			if (VerQueryValue(m_VerData.data(), _T("\\"), reinterpret_cast<LPVOID*>(&m_pffi), &nLen))
 			{
 				//Retrieve the Lang ID and Character set ID
 #pragma warning(suppress: 26490)
-				if (VerQueryValue(m_VerData, _T("\\VarFileInfo\\Translation"), reinterpret_cast<LPVOID*>(&m_pTranslations), &nLen) && (nLen >= sizeof(TRANSLATION)))
+				if (VerQueryValue(m_VerData.data(), _T("\\VarFileInfo\\Translation"), reinterpret_cast<LPVOID*>(&m_pTranslations), &nLen) && (nLen >= sizeof(TRANSLATION)))
 				{
 					m_nTranslations = nLen / sizeof(TRANSLATION);
 #pragma warning(suppress: 26481)
@@ -150,13 +145,13 @@ BOOL CVersionInfo::Load(_In_z_ LPCTSTR szFileName)
 				bSuccess = TRUE;
 			}
 			else
-				ATLTRACE(_T("CVersionInfo::Load, Failed to query file size version info for file %s, LastError:%u\n"), szFileName, ::GetLastError());
+				ATLTRACE(_T("CVersionInfo::Load, Failed to query file size version info for file %s, Error:%u\n"), szFileName, ::GetLastError());
 		}
 		else
-			ATLTRACE(_T("CVersionInfo::Load, Failed to read in version info for file %s, LastError:%u\n"), szFileName, ::GetLastError());
+			ATLTRACE(_T("CVersionInfo::Load, Failed to read in version info for file %s, Error:%u\n"), szFileName, ::GetLastError());
 	}
 	else
-		ATLTRACE(_T("CVersionInfo::Load, Failed to get version info for file %s, LastError:%u\n"), szFileName, ::GetLastError());
+		ATLTRACE(_T("CVersionInfo::Load, Failed to get version info for file %s, Error:%u\n"), szFileName, ::GetLastError());
 
 	return bSuccess;
 }
@@ -217,7 +212,7 @@ FILETIME CVersionInfo::GetCreationTime() const noexcept
 #pragma warning(suppress: 26477)
 	ATLASSUME(m_pffi != nullptr);
 
-	FILETIME CreationTime;
+	FILETIME CreationTime{};
 	CreationTime.dwHighDateTime = m_pffi->dwFileDateMS;
 	CreationTime.dwLowDateTime = m_pffi->dwFileDateLS;
 	return CreationTime;
@@ -229,7 +224,7 @@ unsigned __int64 CVersionInfo::GetFileVersion() const noexcept
 #pragma warning(suppress: 26477)
 	ATLASSUME(m_pffi != nullptr);
 
-	unsigned __int64 nFileVersion = m_pffi->dwFileVersionLS;
+	unsigned __int64 nFileVersion{ m_pffi->dwFileVersionLS };
 #pragma warning(suppress: 26472)
 	nFileVersion += ((static_cast<unsigned __int64>(m_pffi->dwFileVersionMS)) << 32);
 	return nFileVersion;
@@ -241,7 +236,7 @@ unsigned __int64 CVersionInfo::GetProductVersion() const noexcept
 #pragma warning(suppress: 26477)
 	ATLASSUME(m_pffi != nullptr);
 
-	unsigned __int64 nProductVersion = m_pffi->dwProductVersionLS;
+	unsigned __int64 nProductVersion{ m_pffi->dwProductVersionLS };
 #pragma warning(suppress: 26472)
 	nProductVersion += ((static_cast<unsigned __int64>(m_pffi->dwProductVersionMS)) << 32);
 	return nProductVersion;
@@ -249,10 +244,6 @@ unsigned __int64 CVersionInfo::GetProductVersion() const noexcept
 
 CVersionInfo::String CVersionInfo::GetValue(_In_z_ LPCTSTR pszKey) const
 {
-	//Validate our parameters
-#pragma warning(suppress: 26477)
-	ATLASSUME(m_VerData != nullptr);
-
 	//What will be the return value from this function
 	String sVal;
 
@@ -273,10 +264,10 @@ CVersionInfo::String CVersionInfo::GetValue(_In_z_ LPCTSTR pszKey) const
 	LPCTSTR pszQueryValue = sQueryValue.c_str();
 
 	//Do the query
-	LPTSTR pVal = nullptr;
-	UINT nLen = 0;
+	LPTSTR pVal{ nullptr };
+	UINT nLen{ 0 };
 #pragma warning(suppress: 26490)
-	if (VerQueryValue(m_VerData, pszQueryValue, reinterpret_cast<LPVOID*>(&pVal), &nLen))
+	if (VerQueryValue(m_VerData.data(), pszQueryValue, reinterpret_cast<LPVOID*>(&pVal), &nLen))
 		sVal = pVal;
 
 	return sVal;
@@ -351,7 +342,7 @@ CVersionInfo::TRANSLATION* CVersionInfo::GetTranslation(_In_ int nIndex) const n
 {
 	//Validate our parameters
 #pragma warning(suppress: 26477)
-	ATLASSERT(nIndex >= 0 && nIndex < m_nTranslations);
+	ATLASSERT((nIndex >= 0) && (nIndex < m_nTranslations));
 #pragma warning(suppress: 26477)
 	ATLASSUME(m_pTranslations != nullptr);
 
@@ -361,10 +352,10 @@ CVersionInfo::TRANSLATION* CVersionInfo::GetTranslation(_In_ int nIndex) const n
 
 void CVersionInfo::SetTranslation(_In_ int nIndex) noexcept
 {
-	const TRANSLATION* pTranslation = GetTranslation(nIndex);
+	const TRANSLATION* pTranslation{ GetTranslation(nIndex) };
 #pragma warning(suppress: 26477)
 	ATLASSUME(pTranslation != nullptr);
 
-	m_wLangID = pTranslation->m_wLangID;
+	m_wLangID = pTranslation->m_wLangID; //NOLINT(clang-analyzer-core.NullDereference)
 	m_wCharset = pTranslation->m_wCodePage;
 }

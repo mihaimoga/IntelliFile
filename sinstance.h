@@ -3,7 +3,7 @@ Module : sinstance.h
 Purpose: Defines the interface for a C++ wrapper class to do instance checking
 Created: PJN / 29-07-1998
 
-Copyright (c) 1996 - 2020 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 1996 - 2022 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 

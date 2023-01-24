@@ -143,8 +143,10 @@ History: PJN / 25-03-2000 Neville Franks made the following changes. Contact nev
          PJN / 21-09-2019 1. Fixed a number of compiler warnings when the code is compiled with VS 2019 Preview
          PJN / 17-03-2020 1. Updated copyright details.
                           2. Fixed more Clang-Tidy static code analysis warnings in the code.
+         PJN / 09-03-2022 1. Updated copyright details
+                          2. Updated the code to use C++ uniform initialization for all variable declarations.
 
-Copyright (c) 1996 - 2020 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 1996 - 2022 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -154,27 +156,27 @@ You are allowed to include the source code in any product (commercial, shareware
 when your product is released in binary form. You are allowed to modify the source code in any way you want 
 except you cannot modify the copyright details at the top of each module. If you want to distribute source 
 code with your application, then you are only allowed to distribute versions released by the author. This is 
-to maintain a single distribution point for the source code. 
+to maintain a single distribution point for the source code.
 
 */
 
 
-///////////////////////////////// Includes ////////////////////////////////////
+/////////////////////////// Includes //////////////////////////////////////////
 
 #include "stdafx.h"
 #include "sinstance.h"
 
 
-///////////////////////////////// Implementation //////////////////////////////
+/////////////////////////// Implementation ////////////////////////////////////
 
 //The struct which we put into the MMF
 struct CWindowInstance
 {
-	unsigned __int64 hMainWnd;
+  unsigned __int64 hMainWnd;
 };
 
 
-CInstanceChecker::CInstanceChecker(_In_z_ LPCTSTR pszUniqueName) : m_sName(pszUniqueName)
+CInstanceChecker::CInstanceChecker(_In_z_ LPCTSTR pszUniqueName) : m_sName{ pszUniqueName }
 {
 }
 
@@ -186,16 +188,16 @@ _Return_type_success_(return != false) bool CInstanceChecker::TrackFirstInstance
 		return false;
 
 	//Serialize access using the execute mutex
-	ATL::CMutexLock ExecuteLock(m_ExecuteMutex, true);
+	ATL::CMutexLock ExecuteLock{ m_ExecuteMutex, true };
 
 	//First create the MMF if required
-	constexpr const int nMMFSize = sizeof(CWindowInstance);
+	constexpr const int nMMFSize{ sizeof(CWindowInstance) };
 	if (m_MMF == nullptr)
 	{
 #pragma warning(suppress: 26477)
 		ATLASSERT(m_sName.GetLength()); //Validate our parameter
 
-		HANDLE hMMF = CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, nMMFSize, m_sName);
+		HANDLE hMMF{ CreateFileMapping(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, nMMFSize, m_sName) };
 		if (hMMF == nullptr)
 		{
 			ATLTRACE(_T("CInstanceChecker::TrackFirstInstanceRunning, Failed in call to CreateFileMapping, Error:%u\n"), GetLastError());
@@ -205,7 +207,7 @@ _Return_type_success_(return != false) bool CInstanceChecker::TrackFirstInstance
 	}
 
 	//Open the MMF for writing
-	auto pInstanceData = static_cast<CWindowInstance*>(MapViewOfFile(m_MMF, FILE_MAP_WRITE, 0, 0, nMMFSize));
+	auto pInstanceData{ static_cast<CWindowInstance*>(MapViewOfFile(m_MMF, FILE_MAP_WRITE, 0, 0, nMMFSize)) };
 	if (pInstanceData == nullptr)
 	{
 		ATLTRACE(_T("CInstanceChecker::TrackFirstInstanceRunning, Failed in call to MapViewOfFile, Error:%u\n"), GetLastError());
@@ -239,11 +241,11 @@ _Return_type_success_(return != false) bool CInstanceChecker::PreviousInstanceRu
 		return false;
 
 	//Serialize access using the execute mutex
-	ATL::CMutexLock ExecuteLock(m_ExecuteMutex, true);
+	ATL::CMutexLock ExecuteLock{ m_ExecuteMutex, true };
 
 	//Try to open the MMF first to see if we have an instance already running
-	HANDLE hPrevInstance = OpenFileMapping(FILE_MAP_READ, FALSE, m_sName);
-	const bool bPreviousInstance = (hPrevInstance != nullptr);
+	HANDLE hPrevInstance{ OpenFileMapping(FILE_MAP_READ, FALSE, m_sName) };
+	const bool bPreviousInstance{ hPrevInstance != nullptr };
 	if (hPrevInstance)
 		CloseHandle(hPrevInstance);
 
@@ -252,7 +254,7 @@ _Return_type_success_(return != false) bool CInstanceChecker::PreviousInstanceRu
 
 ATL::CAtlString CInstanceChecker::GetExecuteMutexName()
 {
-	ATL::CAtlString sExecuteMutexName(m_sName);
+	ATL::CAtlString sExecuteMutexName{ m_sName };
 	sExecuteMutexName += _T("_CInstanceChecker_XMUTEX");
 	return sExecuteMutexName;
 }
@@ -282,20 +284,20 @@ _Return_type_success_(return != false) bool CInstanceChecker::FindPreviousHWND(_
 		return false;
 
 	//Serialize access using the execute mutex
-	ATL::CMutexLock ExecuteLock(m_ExecuteMutex, true);
+	ATL::CMutexLock ExecuteLock{ m_ExecuteMutex, true };
 
 	//Try to open the MMF for reading
-	HANDLE hInstance = OpenFileMapping(FILE_MAP_READ, FALSE, m_sName);
+	HANDLE hInstance{ OpenFileMapping(FILE_MAP_READ, FALSE, m_sName) };
 	if (hInstance == nullptr)
 	{
 		ATLTRACE(_T("CInstanceChecker::FindPreviousHWND, Failed in call to OpenFileMapping, Error:%u\n"), GetLastError());
 		return false;
 	}
-	ATL::CHandle hPrevInstance(hInstance);
+	ATL::CHandle hPrevInstance{ hInstance };
 
 	//Open up the MMF to get the data
-	constexpr const int nMMFSize = sizeof(CWindowInstance);
-	auto pInstanceData = static_cast<CWindowInstance*>(MapViewOfFile(hPrevInstance, FILE_MAP_READ, 0, 0, nMMFSize));
+	constexpr const int nMMFSize{ sizeof(CWindowInstance) };
+	auto pInstanceData{ static_cast<CWindowInstance*>(MapViewOfFile(hPrevInstance, FILE_MAP_READ, 0, 0, nMMFSize)) };
 	if (pInstanceData == nullptr)
 	{
 		ATLTRACE(_T("CInstanceChecker::FindPreviousHWND, Failed in call to MapViewOfFile, Error:%u\n"), GetLastError());
@@ -322,10 +324,10 @@ _Return_type_success_(return != false) bool CInstanceChecker::ActivatePreviousIn
 		return false;
 
 	//Serialize access using the execute mutex
-	ATL::CMutexLock ExecuteLock(m_ExecuteMutex, true);
+	ATL::CMutexLock ExecuteLock{ m_ExecuteMutex, true };
 
 	//First find the previous HWND
-	HWND hPrevWnd = nullptr;
+	HWND hPrevWnd{ nullptr };
 	if (!FindPreviousHWND(hPrevWnd))
 		return false;
 	if (hPrevWnd == nullptr)
@@ -335,28 +337,28 @@ _Return_type_success_(return != false) bool CInstanceChecker::ActivatePreviousIn
 	}
 
 	//activate, restore the focus and and bring to the foreground the previous instance's HWND
-	HWND hWndChild = GetLastActivePopup(hPrevWnd);
+	HWND hWndChild{ GetLastActivePopup(hPrevWnd) };
 	if (IsIconic(hPrevWnd))
 		ShowWindow(hPrevWnd, SW_RESTORE);
 	if (hWndChild != nullptr)
 		SetForegroundWindow(hWndChild);
 
 	//Send the specified command line to the previous instance using SendMessageTimeout & WM_COPYDATA if required
-	LRESULT lResult = 0;
+	LRESULT lResult{ 0 };
 	if (lpCmdLine != nullptr)
 	{
-		COPYDATASTRUCT cds;
+		COPYDATASTRUCT cds{};
 		cds.dwData = dwCopyDataItemData;
 #pragma warning(suppress: 26472)
-		const auto dwCmdLength = static_cast<DWORD>(_tcslen(lpCmdLine) + 1);
+		const auto dwCmdLength{ static_cast<DWORD>(_tcslen(lpCmdLine) + 1) };
 		cds.cbData = dwCmdLength * sizeof(TCHAR);
-		ATL::CAtlString sCmdLine(lpCmdLine);
-		LPTSTR pszCmdLine = sCmdLine.GetBuffer();
+		ATL::CAtlString sCmdLine{ lpCmdLine };
+		LPTSTR pszCmdLine{ sCmdLine.GetBuffer() };
 		cds.lpData = pszCmdLine;
 
 		//Send the message to the previous instance. Use SendMessageTimeout instead of SendMessage to ensure we 
 		//do not hang if the previous instance itself is hung
-		DWORD_PTR dwResult = 0;
+		DWORD_PTR dwResult{ 0 };
 #pragma warning(suppress: 26490)
 		lResult = SendMessageTimeout(hPrevWnd, WM_COPYDATA, reinterpret_cast<WPARAM>(hSender), reinterpret_cast<LPARAM>(&cds),
 			SMTO_ABORTIFHUNG, dwTimeout, &dwResult);
@@ -377,10 +379,10 @@ _Return_type_success_(return != false) bool CInstanceChecker::QuitPreviousInstan
 		return false;
 
 	//Serialize access using the execute mutex
-	ATL::CMutexLock ExecuteLock(m_ExecuteMutex, true);
+	ATL::CMutexLock ExecuteLock{ m_ExecuteMutex, true };
 
 	//First find the previous HWND
-	HWND hPrevWnd = nullptr;
+	HWND hPrevWnd{ nullptr };
 	if (!FindPreviousHWND(hPrevWnd))
 		return false;
 
@@ -391,7 +393,7 @@ _Return_type_success_(return != false) bool CInstanceChecker::QuitPreviousInstan
 	}
 
 	//Ask it to exit
-	HWND hChildWnd = GetLastActivePopup(hPrevWnd);
+	HWND hChildWnd{ GetLastActivePopup(hPrevWnd) };
 	PostMessage(hChildWnd, WM_QUIT, nExitCode, 0);
 
 	return true;

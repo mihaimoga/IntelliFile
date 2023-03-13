@@ -81,7 +81,7 @@ void CHtmlCtrl::OnBeforeNavigate2(LPCTSTR		lpszURL,
 	BOOL*			pbCancel)
 {
 	const TCHAR APP_PROTOCOL[] = _T("app:");
-	int len = _tcslen(APP_PROTOCOL);
+	int len = (int)_tcslen(APP_PROTOCOL);
 	if (_tcsnicmp(lpszURL, APP_PROTOCOL, len) == 0)
 	{
 		OnAppCmd(lpszURL + len);

@@ -74,7 +74,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		{
 			// allocate buffer for reading file's content
 			char* pFileBuffer = new char[(UINT)nFileLength + 1];
-			if (NULL != pFileBuffer)
+			if (nullptr != pFileBuffer)
 			{
 				memset(pFileBuffer, 0, sizeof(pFileBuffer));
 				// read file's content
@@ -86,7 +86,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 				m_ctrlTextFile.SetWindowText(strConvertedText);
 				// delete buffer
 				delete pFileBuffer;
-				pFileBuffer = NULL;
+				pFileBuffer = nullptr;
 			}
 		}
 		// close the file handle
@@ -100,7 +100,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	}
 
 	VERIFY(m_fontTerminal.CreateFont(
-		-MulDiv(10, GetDeviceCaps(::GetDC(NULL), LOGPIXELSY), 72), // nHeight
+		-MulDiv(10, GetDeviceCaps(::GetDC(nullptr), LOGPIXELSY), 72), // nHeight
 		0,                         // nWidth
 		0,                         // nEscapement
 		0,                         // nOrientation
@@ -131,7 +131,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		UpdateWindow();
 	}
 
-	m_nTimerID = SetTimer(0x1234, 0x100, NULL);
+	m_nTimerID = SetTimer(0x1234, 0x100, nullptr);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE

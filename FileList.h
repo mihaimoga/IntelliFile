@@ -23,13 +23,13 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD dwError);
 void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, HRESULT hResult);
 
-BOOL IsApplication(CString strFilePath);
-BOOL IsBinaryFile(CString strFilePath);
-BOOL IsTextFile(CString strFilePath);
-BOOL IsRichTextFile(CString strFilePath);
-BOOL IsCodeFile(CString strFilePath);
-BOOL IsDataFile(CString strFilePath);
-BOOL IsMetaFile(CString strFilePath);
+bool IsApplication(CString strFilePath);
+bool IsBinaryFile(CString strFilePath);
+bool IsTextFile(CString strFilePath);
+bool IsRichTextFile(CString strFilePath);
+bool IsCodeFile(CString strFilePath);
+bool IsDataFile(CString strFilePath);
+bool IsMetaFile(CString strFilePath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileData command target
@@ -71,7 +71,7 @@ public:
 	CString FormatSize();
 	CString FormatDate();
 	CString FormatAttr();
-	BOOL IsFolder();
+	bool IsFolder();
 
 protected:
 	DWORD m_dwFileAttributes;
@@ -99,7 +99,7 @@ public:
 	virtual ~CFileSystem();
 
 public:
-	BOOL RemoveAll();
+	bool RemoveAll();
 	int GetSize() { return (int)m_arrFiles.GetSize(); }
 	CFileData* GetAt(int nIndex) { return m_arrFiles.GetAt(nIndex); }
 
@@ -113,15 +113,15 @@ public:
 	void SetParent(HWND hWndParent) { m_hWndParent = hWndParent; }
 
 	CString GetCurrentFolder() { return m_strCurrentFolder; }
-	BOOL SetCurrentFolder(CString strFolder);
+	bool SetCurrentFolder(CString strFolder);
 
-	BOOL Refresh();
-	BOOL ViewFile(CString strFilePath);
-	BOOL EditFile(CString strFilePath);
-	BOOL CopyFile(CFileSystem* pDestination, CFileList* arrSelection);
-	BOOL MoveFile(CFileSystem* pDestination, CFileList* arrSelection);
-	BOOL NewFolder(CFileSystem* pDestination, CString strNewFolderName);
-	BOOL DeleteFile(CFileSystem* pDestination, CFileList* arrSelection);
+	bool Refresh();
+	bool ViewFile(CString strFilePath);
+	bool EditFile(CString strFilePath);
+	bool CopyFile(CFileSystem* pDestination, CFileList* arrSelection);
+	bool MoveFile(CFileSystem* pDestination, CFileList* arrSelection);
+	bool NewFolder(CFileSystem* pDestination, CString strNewFolderName);
+	bool DeleteFile(CFileSystem* pDestination, CFileList* arrSelection);
 
 protected:
 	CMFCCaptionBar* m_wndCaptionBar;

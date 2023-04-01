@@ -47,7 +47,7 @@ VERSION HISTORY:
 
 #ifndef		SAFE_DELETE2
 #define SAFE_DELETE2( p ) \
-		if( p ){ delete[] p; p = NULL; }
+		if( p ){ delete[] p; p = nullptr; }
 #endif
 
 #ifndef		SAFE_ZEROMEMORY
@@ -58,16 +58,16 @@ VERSION HISTORY:
 #ifndef	SAFE_RELEASE
 #if defined( __cplusplus )
 #define SAFE_RELEASE( p ) \
-			if( p ){ p->Release(); p = NULL; }
+			if( p ){ p->Release(); p = nullptr; }
 #else
 #define SAFE_RELEASE( p ) \
-			if( p ){ p->lpVtbl->Release( p ); p = NULL; }
+			if( p ){ p->lpVtbl->Release( p ); p = nullptr; }
 #endif
 #endif
 
 #ifndef		SAFE_COTASKMEMFREE
 #define SAFE_COTASKMEMFREE( p ) \
-		if( p ){ CoTaskMemFree( (LPVOID)p ); p = NULL; }
+		if( p ){ CoTaskMemFree( (LPVOID)p ); p = nullptr; }
 #endif
 
 #ifndef		_countof
@@ -99,9 +99,9 @@ class CFolderDialog : public CCommonDialog
 	DECLARE_DYNAMIC(CFolderDialog)
 
 public:
-	CFolderDialog(IN LPCTSTR	pszTitle = NULL,
-		IN LPCTSTR	pszSelPath = NULL,
-		IN CWnd*	pWndParent = NULL,
+	CFolderDialog(IN LPCTSTR	pszTitle = nullptr,
+		IN LPCTSTR	pszSelPath = nullptr,
+		IN CWnd*	pWndParent = nullptr,
 		IN UINT		uFlags = BIF_RETURNONLYFSDIRS);
 	virtual ~CFolderDialog(VOID);
 
@@ -112,9 +112,9 @@ public:
 	virtual INT			DoModal(VOID);
 #endif
 
-	BOOL	SetRootFolder(IN LPCTSTR pszPath);
-	BOOL	GetRootFolder(IN OUT LPTSTR pszPath);
-	BOOL	SetSelectedFolder(IN LPCTSTR pszPath);
+	bool	SetRootFolder(IN LPCTSTR pszPath);
+	bool	GetRootFolder(IN OUT LPTSTR pszPath);
+	bool	SetSelectedFolder(IN LPCTSTR pszPath);
 
 public:
 	AFX_INLINE LPCTSTR	GetFolderPath(VOID)  const;

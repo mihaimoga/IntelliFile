@@ -24,7 +24,7 @@ IMPLEMENT_DYNAMIC(CSortListCtrl, CMFCListCtrl)
 
 CSortListCtrl::CSortListCtrl()
 {
-	m_pFileSystem = NULL;
+	m_pFileSystem = nullptr;
 }
 
 CSortListCtrl::~CSortListCtrl()
@@ -39,11 +39,11 @@ END_MESSAGE_MAP()
 int CSortListCtrl::OnCompareItems(LPARAM lParam1, LPARAM lParam2, int iColumn)
 {
 	UNREFERENCED_PARAMETER(iColumn);
-	if (m_pFileSystem != NULL)
+	if (m_pFileSystem != nullptr)
 	{
 		CFileData* pParam1 = m_pFileSystem->GetAt((int)lParam1);
 		CFileData* pParam2 = m_pFileSystem->GetAt((int)lParam2);
-		if ((pParam1 != NULL) && (pParam2 != NULL))
+		if ((pParam1 != nullptr) && (pParam2 != nullptr))
 		{
 			if (((pParam1->GetFileAttributes() & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) &&
 				((pParam2->GetFileAttributes() & FILE_ATTRIBUTE_DIRECTORY) == 0))

@@ -85,7 +85,7 @@ void CMFCListView::OnSize(UINT nType, int cx, int cy)
 {
 	CFormView::OnSize(nType, cx, cy);
 
-	if (m_mfcListCtrl.GetSafeHwnd() != NULL)
+	if (m_mfcListCtrl.GetSafeHwnd() != nullptr)
 		m_mfcListCtrl.MoveWindow(0, 0, cx, cy);
 }
 

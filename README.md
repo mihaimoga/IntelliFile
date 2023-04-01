@@ -1,3 +1,5 @@
+![IntelliFile.png](IntelliFile.png)
+
 [IntelliFile](https://www.emvs.site/intellifile/) is an alternative Windows version to the famous Total Commander!
 
 This application is developed in Microsoft Visual C++, and it is licensed under GNU General Public License v3.0.

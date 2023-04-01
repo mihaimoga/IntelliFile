@@ -1903,7 +1903,7 @@ CString CWndResizer::CPanel::ToString()
 {
 	CString sTo;
 	sTo.Format(_T("Name(%s), Type(%s), Anchor(%u), Size(w:%d, h:%d), Area(l:%d, t:%d, r:%d, b:%d), MinSize(w:%d, h:%d), MaxSize(w:%d, h:%d), Parent(%s), ChildrenCount(%d)"),
-		Name, GetTypeName(), Anchor, Width(), Height(), left, top, right, bottom, MinSize.cx, MinSize.cy, MaxSize.cx, MaxSize.cy, (Parent == NULL ? _T("NULL") : Parent->Name), Children.GetCount());
+		static_cast<LPCWSTR>(Name), static_cast<LPCWSTR>(GetTypeName()), Anchor, Width(), Height(), left, top, right, bottom, MinSize.cx, MinSize.cy, MaxSize.cx, MaxSize.cy, (Parent == NULL ? _T("NULL") : static_cast<LPCWSTR>(Parent->Name)), Children.GetCount());
 	return sTo;
 }
 CString CWndResizer::CPanel::GetTypeName()

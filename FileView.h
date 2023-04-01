@@ -46,23 +46,23 @@ public:
 public:
 	void ResizeListCtrl();
 	void DoubleClickEntry(int nIndex);
-	BOOL Refresh(CString* strNewFolderName = NULL);
-	BOOL ChangeDrive();
-	BOOL ViewFile();
-	BOOL EditFile();
-	BOOL CopyFile(CFileView* pDestination);
-	BOOL MoveFile(CFileView* pDestination);
-	BOOL NewFolder(CFileView* pDestination);
-	BOOL DeleteFile(CFileView* pDestination);
+	bool Refresh(CString* strNewFolderName = nullptr);
+	bool ChangeDrive();
+	bool ViewFile();
+	bool EditFile();
+	bool CopyFile(CFileView* pDestination);
+	bool MoveFile(CFileView* pDestination);
+	bool NewFolder(CFileView* pDestination);
+	bool DeleteFile(CFileView* pDestination);
 
 public:
-	BOOL m_bInitialized;
+	bool m_bInitialized;
 	CMainFrame* m_pMainFrame;
-	BOOL m_bIsLeftPane;
+	bool m_bIsLeftPane;
 	CFileSystem m_pFileSystem;
-	BOOL m_bShiftPressed;
-	BOOL m_bCtrlPressed;
-	BOOL m_bMenuPressed;
+	bool m_bShiftPressed;
+	bool m_bCtrlPressed;
+	bool m_bMenuPressed;
 
 	DECLARE_MESSAGE_MAP()
 };

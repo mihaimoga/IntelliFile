@@ -56,9 +56,9 @@ protected:  // control bar embedded members
 	CFileView*    m_wndLeftFileView;
 	CFileView*    m_wndRightFileView;
 	CImageList m_pImageList;
-	BOOL m_bShiftPressed;
-	BOOL m_bCtrlPressed;
-	BOOL m_bMenuPressed;
+	bool m_bShiftPressed;
+	bool m_bCtrlPressed;
+	bool m_bMenuPressed;
 
 // Generated message map functions
 protected:
@@ -80,10 +80,10 @@ protected:
 	afx_msg void OnDeleteFile();
 
 public:
-	BOOL CreateCaptionBar();
-	BOOL HideMessageBar();
-	BOOL ShowMessageBar(CString strMessage);
-	BOOL SetStatusBar(BOOL bIsLeftPane, CString strMessage);
+	bool CreateCaptionBar();
+	bool HideMessageBar();
+	bool ShowMessageBar(CString strMessage);
+	bool SetStatusBar(bool bIsLeftPane, CString strMessage);
 
 	DECLARE_MESSAGE_MAP()
 };

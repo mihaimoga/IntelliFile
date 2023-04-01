@@ -89,7 +89,7 @@ BOOL CIntelliFileApp::InitInstance()
 		return FALSE;
 	}
 
-	CoInitialize(NULL);
+	CoInitialize(nullptr);
 
 	AfxEnableControlContainer();
 
@@ -135,9 +135,7 @@ BOOL CIntelliFileApp::InitInstance()
 		return FALSE;
 	m_pMainWnd = pFrame;
 	// create and load the frame with its resources
-	pFrame->LoadFrame(IDR_MAINFRAME,
-		WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, NULL,
-		NULL);
+	pFrame->LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, nullptr, nullptr);
 
 	// The one and only window has been initialized, so show and update it
 	pFrame->ShowWindow(SW_SHOW);
@@ -244,7 +242,7 @@ BOOL CAboutDlg::OnInitDialog()
 	// logfont.lfQuality = ANTIALIASED_QUALITY;
 	logfont.lfOutPrecision = OUT_TT_PRECIS;
 	logfont.lfWeight = FW_NORMAL;
-	logfont.lfHeight = -MulDiv(6, GetDeviceCaps(::GetDC(NULL), LOGPIXELSY), 72);;
+	logfont.lfHeight = -MulDiv(6, GetDeviceCaps(::GetDC(nullptr), LOGPIXELSY), 72);;
 	_tcscpy_s(logfont.lfFaceName, LF_FACESIZE, _T("Tahoma"));
 	VERIFY(m_fontCourier.CreateFontIndirect(&logfont));
 

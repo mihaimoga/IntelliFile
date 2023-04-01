@@ -62,7 +62,7 @@ BOOL CChangeDriveDlg::OnInitDialog()
 			{
 				case DRIVE_REMOVABLE:
 				{
-					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, NULL, NULL, NULL, NULL, 0))
+					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, nullptr, nullptr, nullptr, nullptr, 0))
 					{
 						m_arrDriveName.Add(strDriveName);
 						strDriveName.Format(_T("%c: %s (%s)"), (_T('A') + nIndex), VolumeNameBuffer, _T("REMOVABLE"));
@@ -72,7 +72,7 @@ BOOL CChangeDriveDlg::OnInitDialog()
 				}
 				case DRIVE_FIXED:
 				{
-					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, NULL, NULL, NULL, NULL, 0))
+					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, nullptr, nullptr, nullptr, nullptr, 0))
 					{
 						m_arrDriveName.Add(strDriveName);
 						strDriveName.Format(_T("%c: %s (%s)"), (_T('A') + nIndex), VolumeNameBuffer, _T("FIXED"));
@@ -82,7 +82,7 @@ BOOL CChangeDriveDlg::OnInitDialog()
 				}
 				case DRIVE_REMOTE:
 				{
-					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, NULL, NULL, NULL, NULL, 0))
+					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, nullptr, nullptr, nullptr, nullptr, 0))
 					{
 						m_arrDriveName.Add(strDriveName);
 						strDriveName.Format(_T("%c: %s (%s)"), (_T('A') + nIndex), VolumeNameBuffer, _T("REMOTE"));
@@ -92,7 +92,7 @@ BOOL CChangeDriveDlg::OnInitDialog()
 				}
 				case DRIVE_CDROM:
 				{
-					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, NULL, NULL, NULL, NULL, 0))
+					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, nullptr, nullptr, nullptr, nullptr, 0))
 					{
 						m_arrDriveName.Add(strDriveName);
 						strDriveName.Format(_T("%c: %s (%s)"), (_T('A') + nIndex), VolumeNameBuffer, _T("CDROM"));
@@ -102,7 +102,7 @@ BOOL CChangeDriveDlg::OnInitDialog()
 				}
 				case DRIVE_RAMDISK:
 				{
-					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, NULL, NULL, NULL, NULL, 0))
+					if (::GetVolumeInformation(strDriveName, VolumeNameBuffer, nVolumeNameSize, nullptr, nullptr, nullptr, nullptr, 0))
 					{
 						m_arrDriveName.Add(strDriveName);
 						strDriveName.Format(_T("%c: %s (%s)"), (_T('A') + nIndex), VolumeNameBuffer, _T("RAMDISK"));

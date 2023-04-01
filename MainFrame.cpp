@@ -53,13 +53,13 @@ END_MESSAGE_MAP()
 
 CMainFrame::CMainFrame()
 {
-	m_MainButton = NULL;
-	m_wndLeftFileView = NULL;
-	m_wndRightFileView = NULL;
+	m_MainButton = nullptr;
+	m_wndLeftFileView = nullptr;
+	m_wndRightFileView = nullptr;
 
-	m_bShiftPressed = FALSE;
-	m_bCtrlPressed = FALSE;
-	m_bMenuPressed = FALSE;
+	m_bShiftPressed = false;
+	m_bCtrlPressed = false;
+	m_bMenuPressed = false;
 }
 
 CMainFrame::~CMainFrame()
@@ -75,7 +75,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerOffice2007));
 
 	// create a view to occupy the client area of the frame
-	/*if (!m_wndLeftView.Create(NULL, NULL, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, NULL))
+	/*if (!m_wndLeftView.Create(nullptr, nullptr, AFX_WS_DEFAULT_VIEW, CRect(0, 0, 0, 0), this, AFX_IDW_PANE_FIRST, nullptr))
 	{
 		TRACE0("Failed to create view window\n");
 		return -1;
@@ -95,10 +95,10 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	m_wndStatusBar.AddElement(new CMFCRibbonStatusBarPane(
-		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetCurrentFolder(), TRUE, NULL,
+		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetCurrentFolder(), TRUE, nullptr,
 		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
 	m_wndStatusBar.AddExtendedElement(new CMFCRibbonStatusBarPane(
-		ID_STATUSBAR_PANE2, m_wndRightFileView->m_pFileSystem.GetCurrentFolder(), TRUE, NULL,
+		ID_STATUSBAR_PANE2, m_wndRightFileView->m_pFileSystem.GetCurrentFolder(), TRUE, nullptr,
 		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
 
 	// enable Visual Studio 2005 style docking window behavior
@@ -133,18 +133,18 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CFileView), CSize(nDefaultViewWidth, nDefaultViewHeight), pContext))
 		return FALSE;
 
-	if ((m_wndLeftFileView = (CFileView*) m_wndSplitter.GetPane(0, 0)) != NULL)
+	if ((m_wndLeftFileView = (CFileView*) m_wndSplitter.GetPane(0, 0)) != nullptr)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
-		m_wndLeftFileView->m_bIsLeftPane = TRUE;
+		m_wndLeftFileView->m_bIsLeftPane = true;
 		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
-	if ((m_wndRightFileView = (CFileView*) m_wndSplitter.GetPane(0, 1)) != NULL)
+	if ((m_wndRightFileView = (CFileView*) m_wndSplitter.GetPane(0, 1)) != nullptr)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
-		m_wndRightFileView->m_bIsLeftPane = FALSE;
+		m_wndRightFileView->m_bIsLeftPane = false;
 		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
 		VERIFY(m_wndRightFileView->Refresh());
 	}
@@ -160,7 +160,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 		&pshFileInfo,
 		sizeof(pshFileInfo),
 		SHGFI_ICON | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
-	if (hSystemImageList != NULL)
+	if (hSystemImageList != nullptr)
 	{
 		VERIFY(m_pImageList.Attach(hSystemImageList));
 		m_wndLeftFileView->GetListCtrl().SetImageList(&m_pImageList, LVSIL_SMALL);
@@ -177,7 +177,7 @@ void CMainFrame::OnSize(UINT nType, int cx, int cy)
 	const int nDefaultViewWidth = (cx - 12) / 2;
 	// const int nDefaultViewHeight = cy;
 
-	if (m_wndSplitter.GetSafeHwnd() != NULL)
+	if (m_wndSplitter.GetSafeHwnd() != nullptr)
 	{
 		m_wndSplitter.SetColumnInfo(0, nDefaultViewWidth, 100);
 		m_wndSplitter.SetColumnInfo(1, nDefaultViewWidth, 100);
@@ -198,7 +198,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg != NULL)
+	if (pMsg != nullptr)
 	{
 		if (pMsg->message == WM_KEYDOWN)
 		{
@@ -206,7 +206,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			{
 				case VK_MENU:
 				{
-					m_bMenuPressed = TRUE;
+					m_bMenuPressed = true;
 					break;
 				}
 			}
@@ -220,7 +220,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 			{
 				case VK_MENU:
 				{
-					m_bMenuPressed = FALSE;
+					m_bMenuPressed = false;
 					break;
 				}
 				case VK_TAB:
@@ -310,7 +310,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 	return CFrameWndEx::PreTranslateMessage(pMsg);
 }
 
-BOOL CMainFrame::CreateCaptionBar()
+bool CMainFrame::CreateCaptionBar()
 {
 	if (!m_wndCaptionBar.Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, this, ID_VIEW_CAPTION_BAR, -1, TRUE))
 	{
@@ -318,8 +318,7 @@ BOOL CMainFrame::CreateCaptionBar()
 		return FALSE;
 	}
 
-	BOOL bNameValid;
-
+	bool bNameValid;
 	CString strTemp, strTemp2;
 	/*bNameValid = strTemp.LoadString(IDS_CAPTION_BUTTON);
 	ASSERT(bNameValid);
@@ -344,7 +343,7 @@ BOOL CMainFrame::CreateCaptionBar()
 	ASSERT_VALID(m_wndRightFileView);
 	m_wndRightFileView->m_pFileSystem.SetWindow(&m_wndCaptionBar);
 
-	return TRUE;
+	return true;
 }
 
 // CMainFrame diagnostics
@@ -393,33 +392,33 @@ void CMainFrame::OnUpdateViewCaptionBar(CCmdUI* pCmdUI)
 void CMainFrame::OnOptions()
 {
 	CMFCRibbonCustomizeDialog *pOptionsDlg = new CMFCRibbonCustomizeDialog(this, &m_wndRibbonBar);
-	ASSERT(pOptionsDlg != NULL);
+	ASSERT(pOptionsDlg != nullptr);
 
 	pOptionsDlg->DoModal();
 	delete pOptionsDlg;
 }
 
-BOOL CMainFrame::HideMessageBar()
+bool CMainFrame::HideMessageBar()
 {
 	m_wndCaptionBar.ShowWindow(SW_HIDE);
 	m_wndCaptionBar.Invalidate();
 	m_wndCaptionBar.UpdateWindow();
 	RecalcLayout();
-	return TRUE;
+	return true;
 }
 
-BOOL CMainFrame::ShowMessageBar(CString strMessage)
+bool CMainFrame::ShowMessageBar(CString strMessage)
 {
 	m_wndCaptionBar.SetText(strMessage, CMFCCaptionBar::ALIGN_LEFT);
 	m_wndCaptionBar.ShowWindow(SW_SHOW);
 	m_wndCaptionBar.Invalidate();
 	m_wndCaptionBar.UpdateWindow();
-	return TRUE;
+	return true;
 }
 
-BOOL CMainFrame::SetStatusBar(BOOL bIsLeftPane, CString strMessage)
+bool CMainFrame::SetStatusBar(bool bIsLeftPane, CString strMessage)
 {
-	if (m_wndStatusBar.GetSafeHwnd() != NULL)
+	if (m_wndStatusBar.GetSafeHwnd() != nullptr)
 	{
 		if (bIsLeftPane)
 		{
@@ -431,16 +430,16 @@ BOOL CMainFrame::SetStatusBar(BOOL bIsLeftPane, CString strMessage)
 		}
 		m_wndStatusBar.Invalidate();
 		m_wndStatusBar.UpdateWindow();
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
 void CMainFrame::OnRefresh()
 {
 	CFileView* pActiveView = (CFileView*) GetActiveView();
 	ASSERT_VALID(pActiveView);
-	VERIFY(pActiveView->Refresh(NULL));
+	VERIFY(pActiveView->Refresh(nullptr));
 }
 
 void CMainFrame::OnChangeDrive()

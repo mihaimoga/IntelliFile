@@ -18,8 +18,8 @@ CHyperlinkStatic::CHyperlinkStatic()
 	_strCaption = _strHyperlink = _T("");	 
 	_bMouseInControl = _bCreateFont = _bGetCaptionSize = false;
 
-	_hHandCursor = ::LoadCursor(0, MAKEINTRESOURCE(IDC_HAND));
-	_hArrowCursor = ::LoadCursor(0, MAKEINTRESOURCE(IDC_ARROW));
+	_hHandCursor = ::LoadCursor(nullptr, IDC_HAND);
+	_hArrowCursor = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
 CHyperlinkStatic::~CHyperlinkStatic()

@@ -36,13 +36,13 @@ BOOL CHtmlCtrl::CreateFromStatic(UINT nID, CWnd* pParent)
 	wndStatic.DestroyWindow();
 
 	// create HTML control (CHtmlView)
-	return Create(NULL,					// class name
-		NULL,							// title
+	return Create(nullptr,				// class name
+		nullptr,						// title
 		(WS_CHILD | WS_VISIBLE),		// style
 		rc,								// rectangle
 		pParent,						// parent
 		nID,							// control ID
-		NULL);							// frame/doc context not used
+		nullptr);						// frame/doc context not used
 }
 
 ////////////////
@@ -55,7 +55,7 @@ void CHtmlCtrl::OnDestroy()
 	if (m_pBrowserApp)
 	{
 		//FYI m_pBrowserApp->Release();
-		m_pBrowserApp = NULL;
+		m_pBrowserApp = nullptr;
 	}
 	CWnd::OnDestroy(); // bypass CView doc/frame stuff
 }

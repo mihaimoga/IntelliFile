@@ -26,18 +26,18 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD 
 { 
 	// Retrieve the system error message for the last-error code
 
-	LPVOID lpszMsgBuf = NULL;
-	LPVOID lpszDisplayBuf = NULL;
+	LPVOID lpszMsgBuf = nullptr;
+	LPVOID lpszDisplayBuf = nullptr;
 
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 		FORMAT_MESSAGE_FROM_SYSTEM |
 		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
+		nullptr,
 		dwError,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR) &lpszMsgBuf,
-		0, NULL);
+		0, nullptr);
 
 	// Display the error message and clean up
 
@@ -48,7 +48,7 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD 
 		TEXT("%s failed with error %d: %s\n"), 
 		lpszFunction, dwError, (LPCTSTR) lpszMsgBuf);
 	OutputDebugString((LPCTSTR) lpszDisplayBuf);
-	if (wndCaptionBar != NULL)
+	if (wndCaptionBar != nullptr)
 	{
 		wndCaptionBar->SetText((LPCTSTR) lpszMsgBuf, CMFCCaptionBar::ALIGN_LEFT);
 		wndCaptionBar->ShowWindow(SW_SHOW);
@@ -68,7 +68,7 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, HRESUL
 	CString lpszDisplayBuf;
 	lpszDisplayBuf.Format(TEXT("%s failed with error 0x%X: %s\n"), lpszFunction, hResult, lpszMsgBuf);
 	OutputDebugString((LPCTSTR) lpszDisplayBuf);
-	if (wndCaptionBar != NULL)
+	if (wndCaptionBar != nullptr)
 	{
 		wndCaptionBar->SetText((LPCTSTR) lpszMsgBuf, CMFCCaptionBar::ALIGN_LEFT);
 		wndCaptionBar->ShowWindow(SW_SHOW);
@@ -77,7 +77,7 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, HRESUL
 	}
 }
 
-BOOL IsApplication(CString strFilePath)
+bool IsApplication(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -90,11 +90,11 @@ BOOL IsApplication(CString strFilePath)
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 	if (_tcsicmp(lpszExtension, _T(".exe")) == 0)
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsBinaryFile(CString strFilePath)
+bool IsBinaryFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -110,11 +110,11 @@ BOOL IsBinaryFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".com")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".bin")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".elf")) == 0))
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsTextFile(CString strFilePath)
+bool IsTextFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -128,11 +128,11 @@ BOOL IsTextFile(CString strFilePath)
 		lpszExtension, _MAX_EXT);
 	if ((_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".log")) == 0))
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsRichTextFile(CString strFilePath)
+bool IsRichTextFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -145,11 +145,11 @@ BOOL IsRichTextFile(CString strFilePath)
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 	if (_tcsicmp(lpszExtension, _T(".rtf")) == 0)
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsCodeFile(CString strFilePath)
+bool IsCodeFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -165,11 +165,11 @@ BOOL IsCodeFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsDataFile(CString strFilePath)
+bool IsDataFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -182,11 +182,11 @@ BOOL IsDataFile(CString strFilePath)
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 	if (_tcsicmp(lpszExtension, _T(".csv")) == 0)
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
-BOOL IsMetaFile(CString strFilePath)
+bool IsMetaFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
 	TCHAR lpszFolder[_MAX_DIR] = { 0 };
@@ -201,8 +201,8 @@ BOOL IsMetaFile(CString strFilePath)
 	if ((_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0))
-		return TRUE;
-	return FALSE;
+		return true;
+	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ CString CFileData::FormatAttr()
 	return strFormatAttr;
 }
 
-BOOL CFileData::IsFolder()
+bool CFileData::IsFolder()
 {
 	return ((m_dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY);
 }
@@ -319,8 +319,8 @@ BOOL CFileData::IsFolder()
 
 CFileSystem::CFileSystem()
 {
-	m_wndCaptionBar = NULL;
-	m_hWndParent = NULL;
+	m_wndCaptionBar = nullptr;
+	m_hWndParent = nullptr;
 	m_nSystemType = FILE_TYPE_FAT;
 	m_strCurrentFolder = DEFAULT_FOLDER;
 }
@@ -330,21 +330,21 @@ CFileSystem::~CFileSystem()
 	VERIFY(RemoveAll());
 }
 
-BOOL CFileSystem::RemoveAll()
+bool CFileSystem::RemoveAll()
 {
 	const int nSize = (int)m_arrFiles.GetSize();
 	for (int nIndex = 0; nIndex < nSize; nIndex++)
 	{
 		CFileData* pFileData = m_arrFiles.GetAt(nIndex);
-		ASSERT(pFileData != NULL);
+		ASSERT(pFileData != nullptr);
 		delete pFileData;
-		pFileData = NULL;
+		pFileData = nullptr;
 	}
 	m_arrFiles.RemoveAll();
-	return TRUE;
+	return true;
 }
 
-BOOL CFileSystem::SetCurrentFolder(CString strFolder)
+bool CFileSystem::SetCurrentFolder(CString strFolder)
 {
 	switch (m_nSystemType)
 	{
@@ -353,7 +353,7 @@ BOOL CFileSystem::SetCurrentFolder(CString strFolder)
 			if (SetCurrentDirectory(strFolder))
 			{
 				m_strCurrentFolder = strFolder;
-				return TRUE;
+				return true;
 			}
 			else
 			{
@@ -362,12 +362,12 @@ BOOL CFileSystem::SetCurrentFolder(CString strFolder)
 			break;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::Refresh()
+bool CFileSystem::Refresh()
 {
-	HANDLE hFindFile = NULL;
+	HANDLE hFindFile = nullptr;
 	WIN32_FIND_DATA pFindData = { 0 };
 
 	VERIFY(RemoveAll());
@@ -376,7 +376,7 @@ BOOL CFileSystem::Refresh()
 		case FILE_TYPE_FAT:
 		{
 			if (!SetCurrentFolder(m_strCurrentFolder))
-				return FALSE;
+				return false;
 
 			hFindFile = FindFirstFile(_T("*.*"), &pFindData);
 			if (hFindFile != INVALID_HANDLE_VALUE)
@@ -424,21 +424,21 @@ BOOL CFileSystem::Refresh()
 					_T(".."),
 					_T(".."));
 				m_arrFiles.Add(pFileData);*/
-				return FALSE;
+				return false;
 			}
-			return TRUE;
+			return true;
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::ViewFile(CString strFilePath)
+bool CFileSystem::ViewFile(CString strFilePath)
 {
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::EditFile(CString strFilePath)
+bool CFileSystem::EditFile(CString strFilePath)
 {
 	const int nDot = strFilePath.ReverseFind(_T('.'));
 	if ((nDot != -1) && !IsApplication(strFilePath))
@@ -457,7 +457,7 @@ BOOL CFileSystem::EditFile(CString strFilePath)
 		if (strApplication.IsEmpty())
 		{
 			MessageBox(m_hWndParent, _T("There is no application associated with this type of file."), _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
-			return FALSE;
+			return false;
 		}
 
 		if (strApplication.Find(_T("%1")) != -1)
@@ -474,10 +474,10 @@ BOOL CFileSystem::EditFile(CString strFilePath)
 		CString strParam;
 		if (strApplication.Find(_T("rundll32.exe")) != -1)
 		{
-			if ((int) ShellExecute(m_hWndParent, _T("open"), strFilePath, NULL, NULL, SW_SHOWNORMAL) <= 32)
+			if (ShellExecute(m_hWndParent, _T("open"), strFilePath, nullptr, nullptr, SW_SHOWNORMAL) <= (HINSTANCE)32)
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("ShellExecute"), GetLastError());
-				return FALSE;
+				return false;
 			}
 		}
 		else
@@ -516,31 +516,31 @@ BOOL CFileSystem::EditFile(CString strFilePath)
 			pShellExecuteInfo.cbSize = sizeof(SHELLEXECUTEINFO);
 			pShellExecuteInfo.fMask = SEE_MASK_FLAG_DDEWAIT | SEE_MASK_NOCLOSEPROCESS | SEE_MASK_DOENVSUBST;
 			pShellExecuteInfo.hwnd = m_hWndParent;
-			pShellExecuteInfo.lpVerb = NULL;
+			pShellExecuteInfo.lpVerb = nullptr;
 			pShellExecuteInfo.lpFile = (LPCWSTR)(strExe);
 			pShellExecuteInfo.lpParameters = (LPCWSTR)(strParam);
-			pShellExecuteInfo.lpDirectory = NULL;
+			pShellExecuteInfo.lpDirectory = nullptr;
 			pShellExecuteInfo.nShow = SW_SHOWNORMAL;
 
 			if (!ShellExecuteEx(&pShellExecuteInfo))
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("ShellExecute"), GetLastError());
-				return FALSE;
+				return false;
 			}
 		}
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
+bool CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
 	HRESULT hResult = S_OK;
-	if ((pDestination != NULL) && (arrSelection != NULL))
+	if ((pDestination != nullptr) && (arrSelection != nullptr))
 	{
-		IFileOperation* pFileOperation = NULL;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		IFileOperation* pFileOperation = nullptr;
+		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
 		{
 			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
 			{
@@ -550,8 +550,8 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 					FOFX_SHOWELEVATIONPROMPT)))
 				{
 					CString strDestination = pDestination->GetCurrentFolder();
-					IShellItem* pFolderItem = NULL;
-					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, NULL, IID_PPV_ARGS(&pFolderItem))))
+					IShellItem* pFolderItem = nullptr;
+					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem))))
 					{
 						if (arrSelection->GetCount() == 1)
 						{
@@ -561,10 +561,10 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 							CString strFolder = GetCurrentFolder();
 							CString strFilePath = strFolder + strFileName;
 
-							IShellItem* pShellItem = NULL;
-							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, NULL, IID_PPV_ARGS(&pShellItem))))
+							IShellItem* pShellItem = nullptr;
+							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
 							{
-								if (SUCCEEDED(hResult = pFileOperation->CopyItem(pShellItem, pFolderItem, NULL, NULL)))
+								if (SUCCEEDED(hResult = pFileOperation->CopyItem(pShellItem, pFolderItem, nullptr, nullptr)))
 								{
 								}
 								else
@@ -573,18 +573,18 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 									pShellItem->Release();
 									pFolderItem->Release();
 									pFileOperation->Release();
-									return FALSE;
+									return false;
 								}
 
 								pShellItem->Release();
-								pShellItem = NULL;
+								pShellItem = nullptr;
 							}
 							else
 							{
 								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
 								pFolderItem->Release();
 								pFileOperation->Release();
-								return FALSE;
+								return false;
 							}
 						}
 						else
@@ -602,7 +602,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
 							}
 
-							IShellItemArray* pShellItemArray = NULL;
+							IShellItemArray* pShellItemArray = nullptr;
 							if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
 							{
 								if (SUCCEEDED(hResult = pFileOperation->CopyItems(pShellItemArray, pFolderItem)))
@@ -615,11 +615,11 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 									pFolderItem->Release();
 									pFileOperation->Release();
 									delete arrItemIDList;
-									return FALSE;
+									return false;
 								}
 
 								pShellItemArray->Release();
-								pShellItemArray = NULL;
+								pShellItemArray = nullptr;
 							}
 							else
 							{
@@ -627,7 +627,7 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 								pFileOperation->Release();
 								pFolderItem->Release();
 								delete arrItemIDList;
-								return FALSE;
+								return false;
 							}
 
 							for (int nIndex = 0; nIndex < nCount; nIndex++)
@@ -635,17 +635,17 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 							}
 							delete arrItemIDList;
-							arrItemIDList = NULL;
+							arrItemIDList = nullptr;
 						}
 
 						pFolderItem->Release();
-						pFolderItem = NULL;
+						pFolderItem = nullptr;
 					}
 					else
 					{
 						DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
 						pFileOperation->Release();
-						return FALSE;
+						return false;
 					}
 
 					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
@@ -655,43 +655,43 @@ BOOL CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 					{
 						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
 						pFileOperation->Release();
-						return FALSE;
+						return false;
 					}
 				}
 				else
 				{
 					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
 					pFileOperation->Release();
-					return FALSE;
+					return false;
 				}
 			}
 			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
 				pFileOperation->Release();
-				return FALSE;
+				return false;
 			}
 
 			pFileOperation->Release();
-			pFileOperation = NULL;
+			pFileOperation = nullptr;
 
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
+bool CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
 	HRESULT hResult = S_OK;
-	if ((pDestination != NULL) && (arrSelection != NULL))
+	if ((pDestination != nullptr) && (arrSelection != nullptr))
 	{
-		IFileOperation* pFileOperation = NULL;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		IFileOperation* pFileOperation = nullptr;
+		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
 		{
 			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
 			{
@@ -701,8 +701,8 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 					FOFX_SHOWELEVATIONPROMPT)))
 				{
 					CString strDestination = pDestination->GetCurrentFolder();
-					IShellItem* pFolderItem = NULL;
-					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, NULL, IID_PPV_ARGS(&pFolderItem))))
+					IShellItem* pFolderItem = nullptr;
+					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem))))
 					{
 						if (arrSelection->GetCount() == 1)
 						{
@@ -712,10 +712,10 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 							CString strFolder = GetCurrentFolder();
 							CString strFilePath = strFolder + strFileName;
 
-							IShellItem* pShellItem = NULL;
-							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, NULL, IID_PPV_ARGS(&pShellItem))))
+							IShellItem* pShellItem = nullptr;
+							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
 							{
-								if (SUCCEEDED(hResult = pFileOperation->MoveItem(pShellItem, pFolderItem, NULL, NULL)))
+								if (SUCCEEDED(hResult = pFileOperation->MoveItem(pShellItem, pFolderItem, nullptr, nullptr)))
 								{
 								}
 								else
@@ -724,18 +724,18 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 									pShellItem->Release();
 									pFolderItem->Release();
 									pFileOperation->Release();
-									return FALSE;
+									return false;
 								}
 
 								pShellItem->Release();
-								pShellItem = NULL;
+								pShellItem = nullptr;
 							}
 							else
 							{
 								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
 								pFolderItem->Release();
 								pFileOperation->Release();
-								return FALSE;
+								return false;
 							}
 						}
 						else
@@ -753,7 +753,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
 							}
 
-							IShellItemArray* pShellItemArray = NULL;
+							IShellItemArray* pShellItemArray = nullptr;
 							if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
 							{
 								if (SUCCEEDED(hResult = pFileOperation->MoveItems(pShellItemArray, pFolderItem)))
@@ -766,11 +766,11 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 									pFolderItem->Release();
 									pFileOperation->Release();
 									delete arrItemIDList;
-									return FALSE;
+									return false;
 								}
 
 								pShellItemArray->Release();
-								pShellItemArray = NULL;
+								pShellItemArray = nullptr;
 							}
 							else
 							{
@@ -778,7 +778,7 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 								pFileOperation->Release();
 								pFolderItem->Release();
 								delete arrItemIDList;
-								return FALSE;
+								return false;
 							}
 
 							for (int nIndex = 0; nIndex < nCount; nIndex++)
@@ -786,17 +786,17 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 							}
 							delete arrItemIDList;
-							arrItemIDList = NULL;
+							arrItemIDList = nullptr;
 						}
 
 						pFolderItem->Release();
-						pFolderItem = NULL;
+						pFolderItem = nullptr;
 					}
 					else
 					{
 						DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
 						pFileOperation->Release();
-						return FALSE;
+						return false;
 					}
 
 					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
@@ -806,48 +806,48 @@ BOOL CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 					{
 						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
 						pFileOperation->Release();
-						return FALSE;
+						return false;
 					}
 				}
 				else
 				{
 					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
 					pFileOperation->Release();
-					return FALSE;
+					return false;
 				}
 			}
 			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
 				pFileOperation->Release();
-				return FALSE;
+				return false;
 			}
 
 			pFileOperation->Release();
-			pFileOperation = NULL;
+			pFileOperation = nullptr;
 
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
 		}
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
+bool CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
 {
-	if (pDestination != NULL)
+	if (pDestination != nullptr)
 	{
 		switch (m_nSystemType)
 		{
 			case FILE_TYPE_FAT:
 			{
 				if (!SetCurrentFolder(m_strCurrentFolder))
-					return FALSE;
+					return false;
 
-				if (::CreateDirectory(strNewFolderName, NULL))
+				if (::CreateDirectory(strNewFolderName, nullptr))
 				{
 
 				}
@@ -855,22 +855,22 @@ BOOL CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
 				{
 					const DWORD dwError = GetLastError();
 					DisplayErrorBox(m_wndCaptionBar, _T("CreateDirectory"), dwError);
-					return FALSE;
+					return false;
 				}
 			}
 		}
-		return TRUE;
+		return true;
 	}
-	return FALSE;
+	return false;
 }
 
-BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
+bool CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
 	HRESULT hResult = S_OK;
-	if ((pDestination != NULL) && (arrSelection != NULL))
+	if ((pDestination != nullptr) && (arrSelection != nullptr))
 	{
-		IFileOperation* pFileOperation = NULL;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		IFileOperation* pFileOperation = nullptr;
+		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
 		{
 			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
 			{
@@ -887,10 +887,10 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 						CString strFolder = GetCurrentFolder();
 						CString strFilePath = strFolder + strFileName;
 
-						IShellItem* pShellItem = NULL;
-						if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, NULL, IID_PPV_ARGS(&pShellItem))))
+						IShellItem* pShellItem = nullptr;
+						if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
 						{
-							if (SUCCEEDED(hResult = pFileOperation->DeleteItem(pShellItem, NULL)))
+							if (SUCCEEDED(hResult = pFileOperation->DeleteItem(pShellItem, nullptr)))
 							{
 							}
 							else
@@ -898,17 +898,17 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 								DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->DeleteItem"), hResult);
 								pShellItem->Release();
 								pFileOperation->Release();
-								return FALSE;
+								return false;
 							}
 
 							pShellItem->Release();
-							pShellItem = NULL;
+							pShellItem = nullptr;
 						}
 						else
 						{
 							DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
 							pFileOperation->Release();
-							return FALSE;
+							return false;
 						}
 					}
 					else
@@ -926,7 +926,7 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 							arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
 						}
 
-						IShellItemArray* pShellItemArray = NULL;
+						IShellItemArray* pShellItemArray = nullptr;
 						if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
 						{
 							if (SUCCEEDED(hResult = pFileOperation->DeleteItems(pShellItemArray)))
@@ -938,18 +938,18 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 								pShellItemArray->Release();
 								pFileOperation->Release();
 								delete arrItemIDList;
-								return FALSE;
+								return false;
 							}
 
 							pShellItemArray->Release();
-							pShellItemArray = NULL;
+							pShellItemArray = nullptr;
 						}
 						else
 						{
 							DisplayErrorBox(m_wndCaptionBar, _T("SHCreateShellItemArrayFromIDLists"), hResult);
 							pFileOperation->Release();
 							delete arrItemIDList;
-							return FALSE;
+							return false;
 						}
 
 						for (int nIndex = 0; nIndex < nCount; nIndex++)
@@ -957,7 +957,7 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 							ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
 						}
 						delete arrItemIDList;
-						arrItemIDList = NULL;
+						arrItemIDList = nullptr;
 					}
 
 					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
@@ -967,32 +967,32 @@ BOOL CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 					{
 						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
 						pFileOperation->Release();
-						return FALSE;
+						return false;
 					}
 				}
 				else
 				{
 					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
 					pFileOperation->Release();
-					return FALSE;
+					return false;
 				}
 			}
 			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
 				pFileOperation->Release();
-				return FALSE;
+				return false;
 			}
 
 			pFileOperation->Release();
-			pFileOperation = NULL;
+			pFileOperation = nullptr;
 
-			return TRUE;
+			return true;
 		}
 		else
 		{
 			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
 		}
 	}
-	return FALSE;
+	return false;
 }

@@ -70,7 +70,7 @@ BOOL CViewMetaFileDlg::OnInitDialog()
 		UpdateWindow();
 	}
 
-	m_nTimerID = SetTimer(0x1234, 0x100, NULL);
+	m_nTimerID = SetTimer(0x1234, 0x100, nullptr);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE

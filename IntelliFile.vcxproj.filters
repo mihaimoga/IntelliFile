@@ -332,6 +332,15 @@
     <ClInclude Include="FolderDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Base64Dlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileDialogST.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -386,6 +395,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FolderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="base64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Base64Dlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileDialogST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

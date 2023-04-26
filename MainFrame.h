@@ -78,6 +78,7 @@ protected:
 	afx_msg void OnMoveFile();
 	afx_msg void OnNewFolder();
 	afx_msg void OnDeleteFile();
+	afx_msg void OnBase64EncodeDecode();
 
 public:
 	bool CreateCaptionBar();

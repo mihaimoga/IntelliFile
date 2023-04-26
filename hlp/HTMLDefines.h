@@ -13,6 +13,7 @@
 #define HID_NEW_FOLDER                          0x1800A
 #define HID_DELETE_FILE                         0x1800B
 #define HID_CHANGE_DRIVE                        0x1800C
+#define HID_BASE64_ENCODE_DECODE                0x1800D
  
 // Prompts (IDP_*) 
 #define HIDP_OLE_INIT_FAILED                    0x30064
@@ -36,6 +37,7 @@
 #define HIDD_ViewTextFileDlg                    0x2013B
 #define HIDD_ViewRichFileDlg                    0x2013C
 #define HIDD_ViewMetaFileDlg                    0x2013D
+#define HIDD_Base64Dlg                          0x2013E
  
 // Frame Controls (IDW_*) 
 // This is a part of the Microsoft Foundation Classes C++ library.

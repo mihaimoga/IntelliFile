@@ -17,6 +17,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "stdafx.h"
 #include "IntelliFile.h"
 #include "MainFrame.h"
+#include "Base64Dlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -47,6 +48,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_NEW_FOLDER, &CMainFrame::OnNewFolder)
 	ON_COMMAND(ID_DELETE_FILE, &CMainFrame::OnDeleteFile)
 	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
+	ON_COMMAND(ID_BASE64_ENCODE_DECODE, &CMainFrame::OnBase64EncodeDecode)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -489,4 +491,10 @@ void CMainFrame::OnDeleteFile()
 	CFileView* pActiveView = (CFileView*) GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->DeleteFile(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView));
+}
+
+void CMainFrame::OnBase64EncodeDecode()
+{
+	CBase64Dlg dlgBase64(this);
+	dlgBase64.DoModal();
 }

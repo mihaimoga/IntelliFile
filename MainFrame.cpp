@@ -29,6 +29,7 @@ IMPLEMENT_DYNAMIC(CMainFrame, CFrameWndEx)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
+	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_SETFOCUS()
 	// Global help commands
@@ -49,6 +50,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_DELETE_FILE, &CMainFrame::OnDeleteFile)
 	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
 	ON_COMMAND(ID_BASE64_ENCODE_DECODE, &CMainFrame::OnBase64EncodeDecode)
+	ON_COMMAND(ID_RESET_VIEW, &CMainFrame::OnResetView)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -118,10 +120,26 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+void CMainFrame::OnDestroy()
+{
+	if ((m_wndLeftFileView != nullptr) && (m_wndRightFileView != nullptr))
+	{
+		CString strLeftLastFolder = m_wndLeftFileView->m_pFileSystem.GetCurrentFolder();
+		CString strRightLastFolder = m_wndRightFileView->m_pFileSystem.GetCurrentFolder();
+		CWinApp *pWinApp = AfxGetApp();
+		ASSERT_VALID(pWinApp);
+		pWinApp->WriteProfileString(_T("Options"), _T("LeftLastFolder"), strLeftLastFolder);
+		pWinApp->WriteProfileString(_T("Options"), _T("RightLastFolder"), strRightLastFolder);
+	}
+	CFrameWndEx::OnDestroy();
+}
+
 BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
 	CRect rectClient;
 	GetClientRect(&rectClient);
+	CWinApp *pWinApp = AfxGetApp();
+	ASSERT_VALID(pWinApp);
 
 	const int nDefaultViewWidth = (rectClient.Width() - 12) / 2;
 	const int nDefaultViewHeight = rectClient.Height();
@@ -139,7 +157,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
 		m_wndLeftFileView->m_bIsLeftPane = true;
-		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
+		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(pWinApp->GetProfileString(_T("Options"), _T("LeftLastFolder"), _T("C:\\")));
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
@@ -147,7 +165,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
 		m_wndRightFileView->m_bIsLeftPane = false;
-		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(_T("C:\\"));
+		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(pWinApp->GetProfileString(_T("Options"), _T("RightLastFolder"), _T("C:\\")));
 		VERIFY(m_wndRightFileView->Refresh());
 	}
 
@@ -442,6 +460,13 @@ void CMainFrame::OnRefresh()
 	CFileView* pActiveView = (CFileView*) GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->Refresh(nullptr));
+}
+
+void CMainFrame::OnResetView()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->ResetView());
 }
 
 void CMainFrame::OnChangeDrive()

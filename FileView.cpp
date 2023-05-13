@@ -410,6 +410,23 @@ bool CFileView::Refresh(CString* strNewFolderName)
 	return bRetVal;
 }
 
+bool CFileView::ResetView()
+{
+	if (m_pFileSystem.SetCurrentFolder(_T("C:\\")) && Refresh(nullptr))
+	{
+		ASSERT_VALID(m_pMainFrame);
+		m_pMainFrame->HideMessageBar();
+		return true;
+	}
+	else
+	{
+		ASSERT_VALID(m_pMainFrame);
+		m_pMainFrame->RecalcLayout();
+		return false;
+	}
+	return true;
+}
+
 bool CFileView::ChangeDrive()
 {
 	CChangeDriveDlg dlgChangeDrive(this);

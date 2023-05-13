@@ -47,6 +47,7 @@ public:
 	void ResizeListCtrl();
 	void DoubleClickEntry(int nIndex);
 	bool Refresh(CString* strNewFolderName = nullptr);
+	bool ResetView();
 	bool ChangeDrive();
 	bool ViewFile();
 	bool EditFile();

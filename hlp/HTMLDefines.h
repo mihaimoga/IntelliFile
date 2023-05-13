@@ -14,6 +14,7 @@
 #define HID_DELETE_FILE                         0x1800B
 #define HID_CHANGE_DRIVE                        0x1800C
 #define HID_BASE64_ENCODE_DECODE                0x1800D
+#define HID_RESET_VIEW                          0x1800E
  
 // Prompts (IDP_*) 
 #define HIDP_OLE_INIT_FAILED                    0x30064

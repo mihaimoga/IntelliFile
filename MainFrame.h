@@ -63,6 +63,7 @@ protected:  // control bar embedded members
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	virtual BOOL OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext);
 	afx_msg void OnSetFocus(CWnd *pOldWnd);
@@ -71,6 +72,7 @@ protected:
 	afx_msg void OnOptions();
 
 	afx_msg void OnRefresh();
+	afx_msg void OnResetView();
 	afx_msg void OnChangeDrive();
 	afx_msg void OnViewFile();
 	afx_msg void OnEditFile();

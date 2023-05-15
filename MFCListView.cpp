@@ -42,7 +42,6 @@ BEGIN_MESSAGE_MAP(CMFCListView, CFormView)
 	ON_WM_DESTROY()
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
-	// ON_NOTIFY(NM_DBLCLK, ID_MFCLISTCTRL, OnDblClickEntry)
 END_MESSAGE_MAP()
 
 // CMFCListView diagnostics
@@ -68,7 +67,7 @@ int CMFCListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CFormView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
-	if (!m_mfcListCtrl.Create(WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS, CRect(0, 0, 0, 0), this, ID_MFCLISTCTRL))
+	if (!m_mfcListCtrl.Create(WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_SHOWSELALWAYS | LVS_EDITLABELS, CRect(0, 0, 0, 0), this, ID_MFCLISTCTRL))
 		return -1;
 
 	return 0;

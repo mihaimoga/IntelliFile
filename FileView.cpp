@@ -53,6 +53,7 @@ BEGIN_MESSAGE_MAP(CFileView, CMFCListView)
 	ON_WM_SIZE()
 	ON_NOTIFY(NM_DBLCLK, ID_MFCLISTCTRL, OnDblClickEntry)
 	ON_NOTIFY(NM_RCLICK, ID_MFCLISTCTRL, OnContextMenu)
+	ON_NOTIFY(LVN_ENDLABELEDIT, ID_MFCLISTCTRL, OnEndLabelEdit)
 END_MESSAGE_MAP()
 
 // CFileView diagnostics
@@ -225,6 +226,16 @@ void CFileView::OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 }
 
+void CFileView::OnEndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	NMLVDISPINFO *pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
+	if (pResult != nullptr) *pResult = 0;
+	if (pDispInfo->item.iItem != -1)
+	{
+		RenameClickEntry(pDispInfo->item.iItem, pDispInfo->item.pszText);
+	}
+}
+
 BOOL CFileView::PreTranslateMessage(MSG* pMsg)
 {
 	if (pMsg != nullptr)
@@ -349,6 +360,30 @@ void CFileView::DoubleClickEntry(int nIndex)
 	}
 }
 
+bool CFileView::RenameClickEntry(int nIndex, CString strText)
+{
+	ASSERT(GetListCtrl().m_hWnd != nullptr);
+	CFileData* pFileData = m_pFileSystem.GetAt((int)GetListCtrl().GetItemData(nIndex));
+	ASSERT(pFileData != nullptr);
+	CString strFolder = m_pFileSystem.GetCurrentFolder();
+	CString strOldFilePath = strFolder + pFileData->GetFileName();
+	TRACE(_T("strOldFilePath = %s\n"), static_cast<LPCWSTR>(strOldFilePath));
+	CString strNewFilePath = strFolder + strText;
+	TRACE(_T("strNewFilePath = %s\n"), static_cast<LPCWSTR>(strNewFilePath));
+	if (m_pFileSystem.RenameFile(strOldFilePath, strNewFilePath) && Refresh(&strText))
+	{
+		ASSERT_VALID(m_pMainFrame);
+		m_pMainFrame->HideMessageBar();
+		return true;
+	}
+	else
+	{
+		ASSERT_VALID(m_pMainFrame);
+		m_pMainFrame->RecalcLayout();
+		return false;
+	}
+}
+
 bool CFileView::Refresh(CString* strNewFolderName)
 {
 	CString strListItem;
@@ -424,7 +459,6 @@ bool CFileView::ResetView()
 		m_pMainFrame->RecalcLayout();
 		return false;
 	}
-	return true;
 }
 
 bool CFileView::ChangeDrive()

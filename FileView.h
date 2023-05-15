@@ -42,10 +42,12 @@ public:
 	afx_msg void OnDblClickEntry(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnEndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
 
 public:
 	void ResizeListCtrl();
 	void DoubleClickEntry(int nIndex);
+	bool RenameClickEntry(int nIndex, CString strText);
 	bool Refresh(CString* strNewFolderName = nullptr);
 	bool ResetView();
 	bool ChangeDrive();

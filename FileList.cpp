@@ -996,3 +996,17 @@ bool CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 	}
 	return false;
 }
+
+bool CFileSystem::RenameFile(const CString& strOldFilePath, const CString& strNewFilePath)
+{
+	if (MoveFileEx(strOldFilePath, strNewFilePath, 0))
+	{
+		return true;
+	}
+	else
+	{
+		const DWORD dwError = GetLastError();
+		DisplayErrorBox(m_wndCaptionBar, _T("RenameFile"), dwError);
+		return false;
+	}
+}

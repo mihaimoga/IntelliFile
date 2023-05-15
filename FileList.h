@@ -122,6 +122,7 @@ public:
 	bool MoveFile(CFileSystem* pDestination, CFileList* arrSelection);
 	bool NewFolder(CFileSystem* pDestination, CString strNewFolderName);
 	bool DeleteFile(CFileSystem* pDestination, CFileList* arrSelection);
+	bool RenameFile(const CString& strOldFilePath, const CString& strNewFilePath);
 
 protected:
 	CMFCCaptionBar* m_wndCaptionBar;

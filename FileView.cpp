@@ -530,6 +530,12 @@ bool CFileView::ViewFile()
 						dlgViewMetaFile.DoModal();
 						return true;
 					}
+					else
+					{
+						MessageBox(_T("The selected file format cannot be viewed!\n Text, RichText or Metafile formats are supported"), _T("View File Warning"), MB_OK | MB_ICONWARNING);
+						return true;
+					}
+
 				}
 			}
 		}

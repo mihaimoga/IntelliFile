@@ -453,6 +453,14 @@ bool CFileSystem::EditFile(CString strFilePath)
 			lpszBuffer[cbLength] = 0;
 			strApplication = lpszBuffer;
 		}
+		else
+		{
+			if (SUCCEEDED(AssocQueryString(0, ASSOCSTR_COMMAND, strExtension, _T("edit"), lpszBuffer, &cbLength)))
+			{
+				lpszBuffer[cbLength] = 0;
+				strApplication = lpszBuffer;
+			}
+		}
 
 		if (strApplication.IsEmpty())
 		{

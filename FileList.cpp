@@ -415,15 +415,6 @@ bool CFileSystem::Refresh()
 			else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), GetLastError());
-				/*CFileData* pFileData = new CFileData(
-					FILE_ATTRIBUTE_DIRECTORY,
-					COleDateTime(), // ftCreationTime
-					COleDateTime(), // ftLastAccessTime,
-					COleDateTime(), // ftLastWriteTime,
-					0,
-					_T(".."),
-					_T(".."));
-				m_arrFiles.Add(pFileData);*/
 				return false;
 			}
 			return true;

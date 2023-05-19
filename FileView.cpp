@@ -51,6 +51,7 @@ CFileView::~CFileView()
 
 BEGIN_MESSAGE_MAP(CFileView, CMFCListView)
 	ON_WM_SIZE()
+	ON_WM_SETFOCUS()
 	ON_NOTIFY(NM_DBLCLK, ID_MFCLISTCTRL, OnDblClickEntry)
 	ON_NOTIFY(NM_RCLICK, ID_MFCLISTCTRL, OnContextMenu)
 	ON_NOTIFY(LVN_ENDLABELEDIT, ID_MFCLISTCTRL, OnEndLabelEdit)
@@ -234,6 +235,12 @@ void CFileView::OnEndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 		RenameClickEntry(pDispInfo->item.iItem, pDispInfo->item.pszText);
 	}
+}
+
+void CFileView::OnSetFocus(CWnd* /*pOldWnd*/)
+{
+	ASSERT_VALID(m_pMainFrame);
+	m_pMainFrame->SetStatusBar(m_pFileSystem.GetCurrentFolder());
 }
 
 BOOL CFileView::PreTranslateMessage(MSG* pMsg)
@@ -441,7 +448,7 @@ bool CFileView::Refresh(CString* strNewFolderName)
 	GetListCtrl().UpdateWindow();
 	ResizeListCtrl();
 	ASSERT_VALID(m_pMainFrame);
-	m_pMainFrame->SetStatusBar(m_bIsLeftPane, m_pFileSystem.GetCurrentFolder());
+	m_pMainFrame->SetStatusBar(m_pFileSystem.GetCurrentFolder());
 	return bRetVal;
 }
 

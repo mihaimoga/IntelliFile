@@ -43,6 +43,7 @@ public:
 	afx_msg void OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnEndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
 
 public:
 	void ResizeListCtrl();

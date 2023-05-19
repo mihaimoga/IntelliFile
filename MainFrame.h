@@ -86,7 +86,7 @@ public:
 	bool CreateCaptionBar();
 	bool HideMessageBar();
 	bool ShowMessageBar(CString strMessage);
-	bool SetStatusBar(bool bIsLeftPane, CString strMessage);
+	bool SetStatusBar(CString strMessage);
 
 	DECLARE_MESSAGE_MAP()
 };

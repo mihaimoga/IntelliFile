@@ -101,9 +101,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndStatusBar.AddElement(new CMFCRibbonStatusBarPane(
 		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetCurrentFolder(), TRUE, nullptr,
 		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
-	m_wndStatusBar.AddExtendedElement(new CMFCRibbonStatusBarPane(
-		ID_STATUSBAR_PANE2, m_wndRightFileView->m_pFileSystem.GetCurrentFolder(), TRUE, nullptr,
-		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
@@ -436,18 +433,11 @@ bool CMainFrame::ShowMessageBar(CString strMessage)
 	return true;
 }
 
-bool CMainFrame::SetStatusBar(bool bIsLeftPane, CString strMessage)
+bool CMainFrame::SetStatusBar(CString strMessage)
 {
 	if (m_wndStatusBar.GetSafeHwnd() != nullptr)
 	{
-		if (bIsLeftPane)
-		{
-			m_wndStatusBar.GetElement(0)->SetText(strMessage);
-		}
-		else
-		{
-			m_wndStatusBar.GetExElement(0)->SetText(strMessage);
-		}
+		m_wndStatusBar.GetElement(0)->SetText(strMessage);
 		m_wndStatusBar.Invalidate();
 		m_wndStatusBar.UpdateWindow();
 		return true;

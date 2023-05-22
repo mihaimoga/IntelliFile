@@ -123,10 +123,8 @@ void CMainFrame::OnDestroy()
 	{
 		CString strLeftLastFolder = m_wndLeftFileView->m_pFileSystem.GetCurrentFolder();
 		CString strRightLastFolder = m_wndRightFileView->m_pFileSystem.GetCurrentFolder();
-		CWinApp *pWinApp = AfxGetApp();
-		ASSERT_VALID(pWinApp);
-		pWinApp->WriteProfileString(_T("Options"), _T("LeftLastFolder"), strLeftLastFolder);
-		pWinApp->WriteProfileString(_T("Options"), _T("RightLastFolder"), strRightLastFolder);
+		theApp.WriteProfileString(_T("Options"), _T("LeftLastFolder"), strLeftLastFolder);
+		theApp.WriteProfileString(_T("Options"), _T("RightLastFolder"), strRightLastFolder);
 	}
 	CFrameWndEx::OnDestroy();
 }
@@ -135,8 +133,6 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 {
 	CRect rectClient;
 	GetClientRect(&rectClient);
-	CWinApp *pWinApp = AfxGetApp();
-	ASSERT_VALID(pWinApp);
 
 	const int nDefaultViewWidth = (rectClient.Width() - 12) / 2;
 	const int nDefaultViewHeight = rectClient.Height();
@@ -154,7 +150,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
 		m_wndLeftFileView->m_bIsLeftPane = true;
-		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(pWinApp->GetProfileString(_T("Options"), _T("LeftLastFolder"), _T("C:\\")));
+		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(theApp.GetProfileString(_T("Options"), _T("LeftLastFolder"), _T("C:\\")));
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
@@ -162,7 +158,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
 		m_wndRightFileView->m_bIsLeftPane = false;
-		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(pWinApp->GetProfileString(_T("Options"), _T("RightLastFolder"), _T("C:\\")));
+		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(theApp.GetProfileString(_T("Options"), _T("RightLastFolder"), _T("C:\\")));
 		VERIFY(m_wndRightFileView->Refresh());
 	}
 

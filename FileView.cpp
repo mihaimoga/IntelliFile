@@ -350,12 +350,14 @@ void CFileView::DoubleClickEntry(int nIndex)
 	{
 		CString strFolder = m_pFileSystem.GetCurrentFolder();
 		CString strFilePath = strFolder + pFileData->GetFileName();
-		if (IsApplication(strFilePath))
+		// if (IsApplication(strFilePath)) # requested by Rick Dishman
 		{
 			if (ShellExecute(m_hWnd, _T("open"), strFilePath, nullptr, strFolder, SW_SHOWNORMAL) > (HINSTANCE)32)
 			{
 				ASSERT_VALID(m_pMainFrame);
 				m_pMainFrame->HideMessageBar();
+				// call function to add strFilePath to the MRU file list
+				theApp.AddToRecentFileList(strFilePath);
 			}
 			else
 			{
@@ -500,23 +502,13 @@ bool CFileView::ViewFile()
 		{
 			CString strFolder = m_pFileSystem.GetCurrentFolder();
 			CString strFilePath = strFolder + pFileData->GetFileName();
-			/*if (m_pFileSystem.ViewFile(strFilePath))
-			{
-				ASSERT_VALID(m_pMainFrame);
-				m_pMainFrame->HideMessageBar();
-				return true;
-			}
-			else
-			{
-				ASSERT_VALID(m_pMainFrame);
-				m_pMainFrame->RecalcLayout();
-				return false;
-			}*/
 			if (IsTextFile(strFilePath))
 			{
 				CViewTextFileDlg dlgViewTextFile(this);
 				dlgViewTextFile.m_strFilePath = strFilePath;
 				dlgViewTextFile.DoModal();
+				// call function to add strFilePath to the MRU file list
+				theApp.AddToRecentFileList(strFilePath);
 				return true;
 			}
 			else
@@ -526,6 +518,8 @@ bool CFileView::ViewFile()
 					CViewRichFileDlg dlgViewRichFile(this);
 					dlgViewRichFile.m_strFilePath = strFilePath;
 					dlgViewRichFile.DoModal();
+					// call function to add strFilePath to the MRU file list
+					theApp.AddToRecentFileList(strFilePath);
 					return true;
 				}
 				else
@@ -535,12 +529,14 @@ bool CFileView::ViewFile()
 						CViewMetaFileDlg dlgViewMetaFile(this);
 						dlgViewMetaFile.m_strFilePath = strFilePath;
 						dlgViewMetaFile.DoModal();
+						// call function to add strFilePath to the MRU file list
+						theApp.AddToRecentFileList(strFilePath);
 						return true;
 					}
 					else
 					{
-						MessageBox(_T("The selected file format cannot be viewed!\n Text, RichText or Metafile formats are supported"), _T("View File Warning"), MB_OK | MB_ICONWARNING);
-						return true;
+						MessageBox(_T("The selected file format cannot be viewed!\n Text, RichText or Metafile formats are supported"), _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
+						return false;
 					}
 
 				}
@@ -565,6 +561,8 @@ bool CFileView::EditFile()
 			{
 				ASSERT_VALID(m_pMainFrame);
 				m_pMainFrame->HideMessageBar();
+				// call function to add strFilePath to the MRU file list
+				theApp.AddToRecentFileList(strFilePath);
 				return true;
 			}
 			else

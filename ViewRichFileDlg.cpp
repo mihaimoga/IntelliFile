@@ -93,10 +93,8 @@ BOOL CViewRichFileDlg::OnInitDialog()
 	VERIFY(m_pWindowResizer.Hook(this));
 	VERIFY(m_pWindowResizer.SetAnchor(IDC_TEXT_FILE, ANCHOR_LEFT | ANCHOR_RIGHT | ANCHOR_TOP | ANCHOR_BOTTOM));
 
-	CWinApp *pWinApp = AfxGetApp();
-	ASSERT_VALID(pWinApp);
-	const int nWidth = pWinApp->GetProfileInt(_T("Size"), _T("Width"), -1);
-	const int nHeight = pWinApp->GetProfileInt(_T("Size"), _T("Height"), -1);
+	const int nWidth = theApp.GetProfileInt(_T("Size"), _T("Width"), -1);
+	const int nHeight = theApp.GetProfileInt(_T("Size"), _T("Height"), -1);
 	if ((-1 != nWidth) && (-1 != nHeight))
 	{
 		CRect pWndRect(0, 0, nWidth, nHeight);
@@ -119,10 +117,8 @@ void CViewRichFileDlg::OnDestroy()
 	GetWindowRect(&pWndRect);
 	const int nWidth = pWndRect.right - pWndRect.left;
 	const int nHeight = pWndRect.bottom - pWndRect.top;
-	CWinApp *pWinApp = AfxGetApp();
-	ASSERT_VALID(pWinApp);
-	pWinApp->WriteProfileInt(_T("Size"), _T("Width"), nWidth);
-	pWinApp->WriteProfileInt(_T("Size"), _T("Height"), nHeight);
+	theApp.WriteProfileInt(_T("Size"), _T("Width"), nWidth);
+	theApp.WriteProfileInt(_T("Size"), _T("Height"), nHeight);
 }
 
 void CViewRichFileDlg::OnTimer(UINT_PTR nIDEvent)

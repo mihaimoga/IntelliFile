@@ -118,6 +118,8 @@ BOOL CIntelliFileApp::InitInstance()
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Mihai Moga"));
 
+	LoadStdProfileSettings(10);
+
 	InitContextMenuManager();
 
 	InitKeyboardManager();

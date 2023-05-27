@@ -182,7 +182,6 @@ public:
 	afx_msg void OnDestroy();
 
 protected:
-	CFont m_fontCourier;
 	CStatic m_ctrlVersion;
 	CEdit m_ctrlWarning;
 	CVersionInfo m_pVersionInfo;
@@ -236,20 +235,7 @@ BOOL CAboutDlg::OnInitDialog()
 		m_ctrlVersion.SetWindowText(strName + _T(" version ") + strVersion);
 	}
 
-	// set up window's terminal fixed font
-	LOGFONT logfont;
-	memset(&logfont, 0, sizeof(logfont));
-	logfont.lfCharSet = OEM_CHARSET;
-	logfont.lfPitchAndFamily = FIXED_PITCH;
-	// logfont.lfQuality = ANTIALIASED_QUALITY;
-	logfont.lfOutPrecision = OUT_TT_PRECIS;
-	logfont.lfWeight = FW_NORMAL;
-	logfont.lfHeight = -MulDiv(6, GetDeviceCaps(::GetDC(nullptr), LOGPIXELSY), 72);;
-	_tcscpy_s(logfont.lfFaceName, LF_FACESIZE, _T("Tahoma"));
-	VERIFY(m_fontCourier.CreateFontIndirect(&logfont));
-
-	m_ctrlWarning.SetFont(&m_fontCourier);
-	m_ctrlWarning.SetWindowText(_T("THE SOFTWARE IS PROVIDED \"AS-IS\" AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL STEFAN-MIHAI MOGA BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE."));
+	m_ctrlWarning.SetWindowText(_T("This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>."));
 
 	m_ctrlWebsite.SetHyperlink(_T("https://www.emvs.site/"));
 	m_ctrlEmail.SetHyperlink(_T("mailto:contact@emvs.site"));
@@ -262,8 +248,6 @@ BOOL CAboutDlg::OnInitDialog()
 void CAboutDlg::OnDestroy()
 {
 	CDialog::OnDestroy();
-
-	VERIFY(m_fontCourier.DeleteObject());
 }
 
 // App command to run the dialog

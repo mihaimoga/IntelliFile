@@ -35,6 +35,9 @@ public:
 #endif
 
 protected:
+	CSortListCtrl m_mfcListCtrl;
+
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -44,9 +47,6 @@ public:
 	virtual void OnInitialUpdate();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	CSortListCtrl& GetListCtrl() { return m_mfcListCtrl; }
-
-protected:
-	CSortListCtrl m_mfcListCtrl;
 
 	DECLARE_MESSAGE_MAP()
 };

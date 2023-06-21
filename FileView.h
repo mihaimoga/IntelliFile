@@ -46,20 +46,6 @@ public:
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 
 public:
-	void ResizeListCtrl();
-	void DoubleClickEntry(int nIndex);
-	bool RenameClickEntry(int nIndex, CString strText);
-	bool Refresh(CString* strNewFolderName = nullptr);
-	bool ResetView();
-	bool ChangeDrive();
-	bool ViewFile();
-	bool EditFile();
-	bool CopyFile(CFileView* pDestination);
-	bool MoveFile(CFileView* pDestination);
-	bool NewFolder(CFileView* pDestination);
-	bool DeleteFile(CFileView* pDestination);
-
-public:
 	bool m_bInitialized;
 	CMainFrame* m_pMainFrame;
 	bool m_bIsLeftPane;
@@ -67,6 +53,21 @@ public:
 	bool m_bShiftPressed;
 	bool m_bCtrlPressed;
 	bool m_bMenuPressed;
+
+public:
+	void ResizeListCtrl();
+	void DoubleClickEntry(int nIndex);
+	bool RenameClickEntry(int nIndex, CString strText);
+	bool Refresh(CString* strNewFolderName = nullptr);
+	bool ResetView();
+	bool ChangeDrive();
+	bool ChangeFolder();
+	bool ViewFile();
+	bool EditFile();
+	bool CopyFile(CFileView* pDestination);
+	bool MoveFile(CFileView* pDestination);
+	bool NewFolder(CFileView* pDestination);
+	bool DeleteFile(CFileView* pDestination);
 
 	DECLARE_MESSAGE_MAP()
 };

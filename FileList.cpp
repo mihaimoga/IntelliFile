@@ -294,7 +294,6 @@ CString CFileData::FormatSize()
 
 CString CFileData::FormatDate()
 {
-	// CString strFormatDate;
 	return m_ftLastWriteTime.Format();
 }
 

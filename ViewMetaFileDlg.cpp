@@ -58,8 +58,8 @@ BOOL CViewMetaFileDlg::OnInitDialog()
 	VERIFY(m_pWindowResizer.Hook(this));
 	VERIFY(m_pWindowResizer.SetAnchor(IDC_STATIC_BROWSER, ANCHOR_LEFT | ANCHOR_RIGHT | ANCHOR_TOP | ANCHOR_BOTTOM));
 
-	const int nWidth = theApp.GetProfileInt(_T("Size"), _T("Width"), -1);
-	const int nHeight = theApp.GetProfileInt(_T("Size"), _T("Height"), -1);
+	const int nWidth = theApp.GetInt(_T("Width"), -1);
+	const int nHeight = theApp.GetInt(_T("Height"), -1);
 	if ((-1 != nWidth) && (-1 != nHeight))
 	{
 		CRect pWndRect(0, 0, nWidth, nHeight);
@@ -82,10 +82,9 @@ void CViewMetaFileDlg::OnDestroy()
 	GetWindowRect(&pWndRect);
 	const int nWidth = pWndRect.right - pWndRect.left;
 	const int nHeight = pWndRect.bottom - pWndRect.top;
-	theApp.WriteProfileInt(_T("Size"), _T("Width"), nWidth);
-	theApp.WriteProfileInt(_T("Size"), _T("Height"), nHeight);
+	theApp.WriteInt(_T("Width"), nWidth);
+	theApp.WriteInt(_T("Height"), nHeight);
 }
-
 
 void CViewMetaFileDlg::OnTimer(UINT_PTR nIDEvent)
 {

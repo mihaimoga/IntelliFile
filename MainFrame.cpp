@@ -51,6 +51,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
 	ON_COMMAND(ID_BASE64_ENCODE_DECODE, &CMainFrame::OnBase64EncodeDecode)
 	ON_COMMAND(ID_RESET_VIEW, &CMainFrame::OnResetView)
+	ON_COMMAND(ID_QUICK_ACCESS, &CMainFrame::OnQuickAccess)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -150,7 +151,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
 		m_wndLeftFileView->m_bIsLeftPane = true;
-		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(theApp.GetProfileString(_T("Options"), _T("LeftLastFolder"), _T("C:\\")));
+		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(theApp.GetString( _T("LeftLastFolder"), _T("C:\\")));
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
@@ -158,7 +159,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
 		m_wndRightFileView->m_bIsLeftPane = false;
-		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(theApp.GetProfileString(_T("Options"), _T("RightLastFolder"), _T("C:\\")));
+		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(theApp.GetString(_T("RightLastFolder"), _T("C:\\")));
 		VERIFY(m_wndRightFileView->Refresh());
 	}
 
@@ -408,7 +409,7 @@ void CMainFrame::OnOptions()
 	ASSERT(pOptionsDlg != nullptr);
 
 	pOptionsDlg->DoModal();
-	delete pOptionsDlg;
+delete pOptionsDlg;
 }
 
 bool CMainFrame::HideMessageBar()
@@ -443,7 +444,7 @@ bool CMainFrame::SetStatusBar(CString strMessage)
 
 void CMainFrame::OnRefresh()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->Refresh(nullptr));
 }
@@ -464,44 +465,51 @@ void CMainFrame::OnChangeDrive()
 
 void CMainFrame::OnViewFile()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->ViewFile());
 }
 
 void CMainFrame::OnEditFile()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->EditFile());
 }
 
 void CMainFrame::OnCopyFile()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->CopyFile(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView));
 }
 
 void CMainFrame::OnMoveFile()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->MoveFile(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView));
 }
 
 void CMainFrame::OnNewFolder()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->NewFolder(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView));
 }
 
 void CMainFrame::OnDeleteFile()
 {
-	CFileView* pActiveView = (CFileView*) GetActiveView();
+	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->DeleteFile(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView));
+}
+
+void CMainFrame::OnQuickAccess()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->ChangeFolder());
 }
 
 void CMainFrame::OnBase64EncodeDecode()

@@ -35,6 +35,7 @@ public:
 	CButton m_ctrlDecode;
 	CString m_strInputFile;
 	CString m_strOutputFile;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();

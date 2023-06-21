@@ -127,7 +127,6 @@ void CChangeDriveDlg::OnOK()
 	CDialogEx::OnOK();
 }
 
-
 void CChangeDriveDlg::OnDblclkDriveList()
 {
 	m_strNewDriveName = m_arrDriveName.GetAt(m_ctrlDriveList.GetCurSel());

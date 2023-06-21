@@ -19,6 +19,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "FileView.h"
 #include "MainFrame.h"
 #include "ChangeDriveDlg.h"
+#include "QuickAccessDlg.h"
 #include "NewFolderDlg.h"
 #include "ViewMetaFileDlg.h"
 #include "ViewRichFileDlg.h"
@@ -167,15 +168,15 @@ void CFileView::OnInitialUpdate()
 		CRect rectClient;
 		GetListCtrl().GetClientRect(&rectClient);
 
-		const int nSizeColumnLength = SIZE_COLUMN_LENGTH;
-		const int nDateColumnLength = DATE_COLUMN_LENGTH;
-		const int nAttrColumnLength = ATTR_COLUMN_LENGTH;
-		const int nNameColumnLength = rectClient.Width() - nSizeColumnLength - nDateColumnLength - nAttrColumnLength;
+		const int nSize = theApp.GetInt(_T("Size"), SIZE_COLUMN_LENGTH);
+		const int nDate = theApp.GetInt(_T("Date"), DATE_COLUMN_LENGTH);
+		const int nAttr = theApp.GetInt(_T("Attr"), ATTR_COLUMN_LENGTH);
+		const int nName = rectClient.Width() - (nSize + nDate + nAttr);
 
-		GetListCtrl().InsertColumn(0, _T("Name"), LVCFMT_LEFT, nNameColumnLength);
-		GetListCtrl().InsertColumn(1, _T("Size"), LVCFMT_RIGHT, nSizeColumnLength);
-		GetListCtrl().InsertColumn(2, _T("Date"), LVCFMT_RIGHT, nDateColumnLength);
-		GetListCtrl().InsertColumn(3, _T("Attr"), LVCFMT_RIGHT, nAttrColumnLength);
+		GetListCtrl().InsertColumn(0, _T("Name"), LVCFMT_LEFT, nName);
+		GetListCtrl().InsertColumn(1, _T("Size"), LVCFMT_CENTER, nSize);
+		GetListCtrl().InsertColumn(2, _T("Date"), LVCFMT_CENTER, nDate);
+		GetListCtrl().InsertColumn(3, _T("Attr"), LVCFMT_CENTER, nAttr);
 	}
 }
 
@@ -280,26 +281,39 @@ BOOL CFileView::PreTranslateMessage(MSG* pMsg)
 void CFileView::ResizeListCtrl()
 {
 	HDITEM hdItem = { 0 };
-	hdItem.cxy = 0;
-	hdItem.mask = HDI_WIDTH;
 	if (GetListCtrl().GetSafeHwnd() != nullptr)
 	{
 		CRect rectClient;
 		GetListCtrl().GetClientRect(&rectClient);
 
-		const int nSizeColumnLength = SIZE_COLUMN_LENGTH;
-		const int nDateColumnLength = DATE_COLUMN_LENGTH;
-		const int nAttrColumnLength = ATTR_COLUMN_LENGTH;
-		const int nNameColumnLength = rectClient.Width() - nSizeColumnLength - nDateColumnLength - nAttrColumnLength;
-
 		CMFCHeaderCtrl& pHeaderCtrl = GetListCtrl().GetHeaderCtrl();
-		if (pHeaderCtrl.GetItem(0, &hdItem))
+		hdItem.mask = HDI_WIDTH;
+		if (pHeaderCtrl.GetItem(1, &hdItem))
 		{
-			hdItem.cxy = nNameColumnLength;
-			if (pHeaderCtrl.SetItem(0, &hdItem))
+			const int nSize = hdItem.cxy;
+			theApp.WriteInt(_T("Size"), nSize);
+			hdItem.mask = HDI_WIDTH;
+			if (pHeaderCtrl.GetItem(2, &hdItem))
 			{
-				GetListCtrl().Invalidate();
-				GetListCtrl().UpdateWindow();
+				const int nDate = hdItem.cxy;
+				theApp.WriteInt(_T("Date"), nSize);
+				hdItem.mask = HDI_WIDTH;
+				if (pHeaderCtrl.GetItem(3, &hdItem))
+				{
+					const int nAttr = hdItem.cxy;
+					theApp.WriteInt(_T("Attr"), nSize);
+
+					const int nName = rectClient.Width() - (nSize + nDate + nAttr);
+					if (pHeaderCtrl.GetItem(0, &hdItem))
+					{
+						hdItem.cxy = nName;
+						if (pHeaderCtrl.SetItem(0, &hdItem))
+						{
+							GetListCtrl().Invalidate();
+							GetListCtrl().UpdateWindow();
+						}
+					}
+				}
 			}
 		}
 	}
@@ -432,7 +446,12 @@ bool CFileView::Refresh(CString* strNewFolderName)
 		lviItem.iImage = (pFileData->GetFileName().CompareNoCase(_T("..")) == 0) ? 0 : pshFileInfo.iIcon;
 		VERIFY(GetListCtrl().SetItem(&lviItem));
 	}
-	GetListCtrl().Sort(0, TRUE, FALSE);
+	const int nSortColumn = GetListCtrl().GetHeaderCtrl().GetSortColumn();
+	const bool bIsAscending = GetListCtrl().GetHeaderCtrl().IsAscending();
+	if (-1 == nSortColumn)
+		GetListCtrl().Sort(0, true, false);
+	else
+		GetListCtrl().Sort(nSortColumn, bIsAscending, false);
 	nListItem = 0;
 	if (!strListItem.IsEmpty())
 	{
@@ -476,6 +495,27 @@ bool CFileView::ChangeDrive()
 	if (dlgChangeDrive.DoModal() == IDOK)
 	{
 		if (m_pFileSystem.SetCurrentFolder(dlgChangeDrive.m_strNewDriveName) && Refresh(nullptr))
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return true;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CFileView::ChangeFolder()
+{
+	CQuickAccessDlg dlgQuickAccess(this);
+	if (dlgQuickAccess.DoModal() == IDOK)
+	{
+		if (m_pFileSystem.SetCurrentFolder(dlgQuickAccess.m_strSelectedFolder) && Refresh(nullptr))
 		{
 			ASSERT_VALID(m_pMainFrame);
 			m_pMainFrame->HideMessageBar();

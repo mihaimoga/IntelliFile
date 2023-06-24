@@ -16,6 +16,7 @@
 #define HID_BASE64_ENCODE_DECODE                0x1800D
 #define HID_RESET_VIEW                          0x1800E
 #define HID_QUICK_ACCESS                        0x1800F
+#define HID_COMMAND_PROMPT                      0x18010
  
 // Prompts (IDP_*) 
 #define HIDP_OLE_INIT_FAILED                    0x30064

@@ -1008,3 +1008,23 @@ bool CFileSystem::RenameFile(const CString& strOldFilePath, const CString& strNe
 		return false;
 	}
 }
+
+bool CFileSystem::CommandPrompt(bool bAdministrator)
+{
+	SHELLEXECUTEINFO pShellExecuteInfo;
+	pShellExecuteInfo.cbSize = sizeof(SHELLEXECUTEINFO);
+	pShellExecuteInfo.fMask = SEE_MASK_FLAG_DDEWAIT | SEE_MASK_NOCLOSEPROCESS | SEE_MASK_DOENVSUBST;
+	pShellExecuteInfo.hwnd = m_hWndParent;
+	pShellExecuteInfo.lpVerb = (bAdministrator ? _T("runas") : nullptr);
+	pShellExecuteInfo.lpFile = _T("cmd.exe");
+	pShellExecuteInfo.lpParameters = nullptr;
+	pShellExecuteInfo.lpDirectory = GetCurrentFolder();
+	pShellExecuteInfo.nShow = SW_SHOWNORMAL;
+
+	if (!ShellExecuteEx(&pShellExecuteInfo))
+	{
+		DisplayErrorBox(m_wndCaptionBar, _T("ShellExecute"), GetLastError());
+		return false;
+	}
+	return true;
+}

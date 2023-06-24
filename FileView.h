@@ -61,13 +61,14 @@ public:
 	bool Refresh(CString* strNewFolderName = nullptr);
 	bool ResetView();
 	bool ChangeDrive();
-	bool ChangeFolder();
 	bool ViewFile();
 	bool EditFile();
 	bool CopyFile(CFileView* pDestination);
 	bool MoveFile(CFileView* pDestination);
 	bool NewFolder(CFileView* pDestination);
 	bool DeleteFile(CFileView* pDestination);
+	bool QuickAccess();
+	bool CommandPrompt();
 
 	DECLARE_MESSAGE_MAP()
 };

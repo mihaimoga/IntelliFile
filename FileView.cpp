@@ -510,27 +510,6 @@ bool CFileView::ChangeDrive()
 	return true;
 }
 
-bool CFileView::ChangeFolder()
-{
-	CQuickAccessDlg dlgQuickAccess(this);
-	if (dlgQuickAccess.DoModal() == IDOK)
-	{
-		if (m_pFileSystem.SetCurrentFolder(dlgQuickAccess.m_strSelectedFolder) && Refresh(nullptr))
-		{
-			ASSERT_VALID(m_pMainFrame);
-			m_pMainFrame->HideMessageBar();
-			return true;
-		}
-		else
-		{
-			ASSERT_VALID(m_pMainFrame);
-			m_pMainFrame->RecalcLayout();
-			return false;
-		}
-	}
-	return true;
-}
-
 bool CFileView::ViewFile()
 {
 	int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
@@ -722,4 +701,46 @@ bool CFileView::DeleteFile(CFileView* pDestination)
 		}
 	}
 	return false;
+}
+
+bool CFileView::QuickAccess()
+{
+	CQuickAccessDlg dlgQuickAccess(this);
+	if (dlgQuickAccess.DoModal() == IDOK)
+	{
+		if (m_pFileSystem.SetCurrentFolder(dlgQuickAccess.m_strSelectedFolder) && Refresh(nullptr))
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return true;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return false;
+		}
+	}
+	return true;
+}
+
+bool CFileView::CommandPrompt()
+{
+	const int nMessageBox = MessageBox(_T("Do you want to run CMD.EXE as Administrator?"), _T("IntelliFile"), MB_YESNOCANCEL | MB_ICONQUESTION);
+	if (nMessageBox != IDCANCEL)
+	{
+		if (m_pFileSystem.CommandPrompt(nMessageBox == IDYES))
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return true;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return false;
+		}
+	}
+	return true;
 }

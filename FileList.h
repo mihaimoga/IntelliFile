@@ -124,6 +124,8 @@ public:
 	bool DeleteFile(CFileSystem* pDestination, CFileList* arrSelection);
 	bool RenameFile(const CString& strOldFilePath, const CString& strNewFilePath);
 
+	bool CommandPrompt(bool bAdministrator);
+
 protected:
 	CMFCCaptionBar* m_wndCaptionBar;
 	HWND m_hWndParent;

@@ -82,6 +82,7 @@ protected:
 	afx_msg void OnDeleteFile();
 	afx_msg void OnQuickAccess();
 	afx_msg void OnBase64EncodeDecode();
+	afx_msg void OnCommandPrompt();
 
 public:
 	bool CreateCaptionBar();

@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_BASE64_ENCODE_DECODE, &CMainFrame::OnBase64EncodeDecode)
 	ON_COMMAND(ID_RESET_VIEW, &CMainFrame::OnResetView)
 	ON_COMMAND(ID_QUICK_ACCESS, &CMainFrame::OnQuickAccess)
+	ON_COMMAND(ID_COMMAND_PROMPT, &CMainFrame::OnCommandPrompt)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -509,11 +510,18 @@ void CMainFrame::OnQuickAccess()
 {
 	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
-	VERIFY(pActiveView->ChangeFolder());
+	VERIFY(pActiveView->QuickAccess());
 }
 
 void CMainFrame::OnBase64EncodeDecode()
 {
 	CBase64Dlg dlgBase64(this);
 	dlgBase64.DoModal();
+}
+
+void CMainFrame::OnCommandPrompt()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->CommandPrompt());
 }

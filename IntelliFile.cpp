@@ -232,7 +232,13 @@ BOOL CAboutDlg::OnInitDialog()
 		const int nFirst = strVersion.Find(_T('.'));
 		const int nSecond = strVersion.Find(_T('.'), nFirst + 1);
 		strVersion.Truncate(nSecond);
-		m_ctrlVersion.SetWindowText(strName + _T(" version ") + strVersion);
+#if _WIN32 || _WIN64
+#if _WIN64
+		m_ctrlVersion.SetWindowText(strName + _T(" version ") + strVersion + _T(" (64-bit)"));
+#else
+		m_ctrlVersion.SetWindowText(strName + _T(" version ") + strVersion + _T(" (32-bit)"));
+#endif
+#endif
 	}
 
 	m_ctrlWarning.SetWindowText(_T("This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>."));

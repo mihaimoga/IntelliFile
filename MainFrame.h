@@ -72,8 +72,9 @@ protected:
 	afx_msg void OnOptions();
 
 	afx_msg void OnRefresh();
-	afx_msg void OnResetView();
 	afx_msg void OnChangeDrive();
+	afx_msg void OnResetView();
+	afx_msg void OnSwitchViews();
 	afx_msg void OnViewFile();
 	afx_msg void OnEditFile();
 	afx_msg void OnCopyFile();
@@ -83,6 +84,13 @@ protected:
 	afx_msg void OnQuickAccess();
 	afx_msg void OnBase64EncodeDecode();
 	afx_msg void OnCommandPrompt();
+	afx_msg void OnTwitter();
+	afx_msg void OnLinkedin();
+	afx_msg void OnFacebook();
+	afx_msg void OnInstagram();
+	afx_msg void OnIssues();
+	afx_msg void OnDiscussions();
+	afx_msg void OnWiki();
 
 public:
 	bool CreateCaptionBar();

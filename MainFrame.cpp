@@ -42,17 +42,25 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(ID_TOOLS_OPTIONS, &CMainFrame::OnOptions)
 
 	ON_COMMAND(ID_REFRESH, &CMainFrame::OnRefresh)
+	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
+	ON_COMMAND(ID_RESET_VIEW, &CMainFrame::OnResetView)
+	ON_COMMAND(IDC_SWITCH_VIEWS, &CMainFrame::OnSwitchViews)
 	ON_COMMAND(ID_VIEW_FILE, &CMainFrame::OnViewFile)
 	ON_COMMAND(ID_EDIT_FILE, &CMainFrame::OnEditFile)
 	ON_COMMAND(ID_COPY_FILE, &CMainFrame::OnCopyFile)
 	ON_COMMAND(ID_MOVE_FILE, &CMainFrame::OnMoveFile)
 	ON_COMMAND(ID_NEW_FOLDER, &CMainFrame::OnNewFolder)
 	ON_COMMAND(ID_DELETE_FILE, &CMainFrame::OnDeleteFile)
-	ON_COMMAND(ID_CHANGE_DRIVE, &CMainFrame::OnChangeDrive)
 	ON_COMMAND(ID_BASE64_ENCODE_DECODE, &CMainFrame::OnBase64EncodeDecode)
-	ON_COMMAND(ID_RESET_VIEW, &CMainFrame::OnResetView)
 	ON_COMMAND(ID_QUICK_ACCESS, &CMainFrame::OnQuickAccess)
 	ON_COMMAND(ID_COMMAND_PROMPT, &CMainFrame::OnCommandPrompt)
+	ON_COMMAND(IDC_TWITTER, &CMainFrame::OnTwitter)
+	ON_COMMAND(IDC_LINKEDIN, &CMainFrame::OnLinkedin)
+	ON_COMMAND(IDC_FACEBOOK, &CMainFrame::OnFacebook)
+	ON_COMMAND(IDC_INSTAGRAM, &CMainFrame::OnInstagram)
+	ON_COMMAND(IDC_ISSUES, &CMainFrame::OnIssues)
+	ON_COMMAND(IDC_DISCUSSIONS, &CMainFrame::OnDiscussions)
+	ON_COMMAND(IDC_WIKI, &CMainFrame::OnWiki)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -450,6 +458,13 @@ void CMainFrame::OnRefresh()
 	VERIFY(pActiveView->Refresh(nullptr));
 }
 
+void CMainFrame::OnChangeDrive()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->ChangeDrive());
+}
+
 void CMainFrame::OnResetView()
 {
 	CFileView* pActiveView = (CFileView*)GetActiveView();
@@ -457,11 +472,19 @@ void CMainFrame::OnResetView()
 	VERIFY(pActiveView->ResetView());
 }
 
-void CMainFrame::OnChangeDrive()
+void CMainFrame::OnSwitchViews()
 {
-	CFileView* pActiveView = (CFileView*)GetActiveView();
-	ASSERT_VALID(pActiveView);
-	VERIFY(pActiveView->ChangeDrive());
+	ASSERT_VALID(m_wndLeftFileView);
+	CString strLeftFolder = m_wndLeftFileView->m_pFileSystem.GetCurrentFolder();
+	ASSERT_VALID(m_wndRightFileView);
+	CString strRightFolder = m_wndRightFileView->m_pFileSystem.GetCurrentFolder();
+	if (strLeftFolder.CompareNoCase(strRightFolder) != 0)
+	{
+		m_wndLeftFileView->m_pFileSystem.SetCurrentFolder(strRightFolder);
+		m_wndLeftFileView->Refresh(nullptr);
+		m_wndRightFileView->m_pFileSystem.SetCurrentFolder(strLeftFolder);
+		m_wndRightFileView->Refresh(nullptr);
+	}
 }
 
 void CMainFrame::OnViewFile()
@@ -524,4 +547,39 @@ void CMainFrame::OnCommandPrompt()
 	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->CommandPrompt());
+}
+
+void CMainFrame::OnTwitter()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://twitter.com/stefanmihaimoga"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnLinkedin()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://www.linkedin.com/in/stefanmihaimoga/"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnFacebook()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://www.facebook.com/stefanmihaimoga"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnInstagram()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://www.instagram.com/stefanmihaimoga/"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnIssues()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://github.com/mihaimoga/IntelliFile/issues"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnDiscussions()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://github.com/mihaimoga/IntelliFile/discussions"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnWiki()
+{
+	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://github.com/mihaimoga/IntelliFile/wiki"), nullptr, nullptr, SW_SHOW);
 }

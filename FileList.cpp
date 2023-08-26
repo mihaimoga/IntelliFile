@@ -534,304 +534,208 @@ bool CFileSystem::EditFile(CString strFilePath)
 
 bool CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
+	bool bRetVal = false;
 	HRESULT hResult = S_OK;
-	if ((pDestination != nullptr) && (arrSelection != nullptr))
+	IFileOperation* pFileOperation = nullptr;
+	IShellItem* pFolderItem = nullptr;
+	IShellItem* pShellItem = nullptr;
+	IShellItemArray* pShellItemArray = nullptr;
+	CString strDestination = pDestination->GetCurrentFolder();
+
+	ASSERT(pDestination != nullptr);
+	ASSERT(arrSelection != nullptr);
+	if ((SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation)))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOperationFlags(FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOFX_SHOWELEVATIONPROMPT))) &&
+		(SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem)))))
 	{
-		IFileOperation* pFileOperation = nullptr;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		if (arrSelection->GetCount() == 1)
 		{
-			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
+			CFileData* pFileData = arrSelection->GetAt(0);
+			ASSERT_VALID(pFileData);
+			CString strFileName = pFileData->GetFileName();
+			CString strFolder = GetCurrentFolder();
+			CString strFilePath = strFolder + strFileName;
+
+			if ((SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem)))) &&
+				(SUCCEEDED(hResult = pFileOperation->CopyItem(pShellItem, pFolderItem, nullptr, nullptr))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
 			{
-				if (SUCCEEDED(hResult = pFileOperation->SetOperationFlags(
-					FOF_NOCONFIRMMKDIR |
-					FOF_NOERRORUI |
-					FOFX_SHOWELEVATIONPROMPT)))
-				{
-					CString strDestination = pDestination->GetCurrentFolder();
-					IShellItem* pFolderItem = nullptr;
-					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem))))
-					{
-						if (arrSelection->GetCount() == 1)
-						{
-							CFileData* pFileData = arrSelection->GetAt(0);
-							ASSERT_VALID(pFileData);
-							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetCurrentFolder();
-							CString strFilePath = strFolder + strFileName;
+				bRetVal = true;
 
-							IShellItem* pShellItem = nullptr;
-							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
-							{
-								if (SUCCEEDED(hResult = pFileOperation->CopyItem(pShellItem, pFolderItem, nullptr, nullptr)))
-								{
-								}
-								else
-								{
-									DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->CopyItem"), hResult);
-									pShellItem->Release();
-									pFolderItem->Release();
-									pFileOperation->Release();
-									return false;
-								}
-
-								pShellItem->Release();
-								pShellItem = nullptr;
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
-								pFolderItem->Release();
-								pFileOperation->Release();
-								return false;
-							}
-						}
-						else
-						{
-							const int nCount = (int)arrSelection->GetCount();
-							LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-							for (int nIndex = 0; nIndex < nCount; nIndex++)
-							{
-								CFileData* pFileData = arrSelection->GetAt(nIndex);
-								ASSERT_VALID(pFileData);
-								CString strFileName = pFileData->GetFileName();
-								CString strFolder = GetCurrentFolder();
-								CString strFilePath = strFolder + strFileName;
-
-								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
-							}
-
-							IShellItemArray* pShellItemArray = nullptr;
-							if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
-							{
-								if (SUCCEEDED(hResult = pFileOperation->CopyItems(pShellItemArray, pFolderItem)))
-								{
-								}
-								else
-								{
-									DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->CopyItems"), hResult);
-									pShellItemArray->Release();
-									pFolderItem->Release();
-									pFileOperation->Release();
-									delete arrItemIDList;
-									return false;
-								}
-
-								pShellItemArray->Release();
-								pShellItemArray = nullptr;
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateShellItemArrayFromIDLists"), hResult);
-								pFileOperation->Release();
-								pFolderItem->Release();
-								delete arrItemIDList;
-								return false;
-							}
-
-							for (int nIndex = 0; nIndex < nCount; nIndex++)
-							{
-								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
-							}
-							delete arrItemIDList;
-							arrItemIDList = nullptr;
-						}
-
-						pFolderItem->Release();
-						pFolderItem = nullptr;
-					}
-					else
-					{
-						DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
-						pFileOperation->Release();
-						return false;
-					}
-
-					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
-					{
-					}
-					else
-					{
-						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
-						pFileOperation->Release();
-						return false;
-					}
-				}
-				else
-				{
-					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
-					pFileOperation->Release();
-					return false;
-				}
 			}
 			else
 			{
-				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
-				pFileOperation->Release();
-				return false;
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::CopyFile"), hResult);
 			}
-
-			pFileOperation->Release();
-			pFileOperation = nullptr;
-
-			return true;
 		}
 		else
 		{
-			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
+			const int nCount = (int)arrSelection->GetCount();
+			LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				CFileData* pFileData = arrSelection->GetAt(nIndex);
+				ASSERT_VALID(pFileData);
+				CString strFileName = pFileData->GetFileName();
+				CString strFolder = GetCurrentFolder();
+				CString strFilePath = strFolder + strFileName;
+
+				arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
+			}
+
+			if ((SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray))) &&
+				(SUCCEEDED(hResult = pFileOperation->CopyItems(pShellItemArray, pFolderItem))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
+			{
+				bRetVal = true;
+			}
+			else
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::CopyFile"), hResult);
+			}
+
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
+			}
+			delete arrItemIDList;
+			arrItemIDList = nullptr;
 		}
 	}
-	return false;
+	else
+	{
+		DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::CopyFile"), hResult);
+	}
+
+	if (pShellItemArray != nullptr)
+	{
+		pShellItemArray->Release();
+		pShellItemArray = nullptr;
+	}
+
+	if (pShellItem != nullptr)
+	{
+		pShellItem->Release();
+		pShellItem = nullptr;
+	}
+
+	if (pFolderItem != nullptr)
+	{
+		pFolderItem->Release();
+		pFolderItem = nullptr;
+	}
+
+	if (pFileOperation != nullptr)
+	{
+		pFileOperation->Release();
+		pFileOperation = nullptr;
+	}
+
+	return bRetVal;
 }
 
 bool CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
+	bool bRetVal = false;
 	HRESULT hResult = S_OK;
-	if ((pDestination != nullptr) && (arrSelection != nullptr))
+	IFileOperation* pFileOperation = nullptr;
+	IShellItem* pFolderItem = nullptr;
+	IShellItem* pShellItem = nullptr;
+	IShellItemArray* pShellItemArray = nullptr;
+	CString strDestination = pDestination->GetCurrentFolder();
+
+	ASSERT(pDestination != nullptr);
+	ASSERT(arrSelection != nullptr);
+	if ((SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation)))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOperationFlags(FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOFX_SHOWELEVATIONPROMPT))) &&
+		(SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem)))))
 	{
-		IFileOperation* pFileOperation = nullptr;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		if (arrSelection->GetCount() == 1)
 		{
-			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
+			CFileData* pFileData = arrSelection->GetAt(0);
+			ASSERT_VALID(pFileData);
+			CString strFileName = pFileData->GetFileName();
+			CString strFolder = GetCurrentFolder();
+			CString strFilePath = strFolder + strFileName;
+
+			if ((SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem)))) &&
+				(SUCCEEDED(hResult = pFileOperation->MoveItem(pShellItem, pFolderItem, nullptr, nullptr))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
 			{
-				if (SUCCEEDED(hResult = pFileOperation->SetOperationFlags(
-					FOF_NOCONFIRMMKDIR |
-					FOF_NOERRORUI |
-					FOFX_SHOWELEVATIONPROMPT)))
-				{
-					CString strDestination = pDestination->GetCurrentFolder();
-					IShellItem* pFolderItem = nullptr;
-					if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strDestination, nullptr, IID_PPV_ARGS(&pFolderItem))))
-					{
-						if (arrSelection->GetCount() == 1)
-						{
-							CFileData* pFileData = arrSelection->GetAt(0);
-							ASSERT_VALID(pFileData);
-							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetCurrentFolder();
-							CString strFilePath = strFolder + strFileName;
+				bRetVal = true;
 
-							IShellItem* pShellItem = nullptr;
-							if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
-							{
-								if (SUCCEEDED(hResult = pFileOperation->MoveItem(pShellItem, pFolderItem, nullptr, nullptr)))
-								{
-								}
-								else
-								{
-									DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->MoveItem"), hResult);
-									pShellItem->Release();
-									pFolderItem->Release();
-									pFileOperation->Release();
-									return false;
-								}
-
-								pShellItem->Release();
-								pShellItem = nullptr;
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
-								pFolderItem->Release();
-								pFileOperation->Release();
-								return false;
-							}
-						}
-						else
-						{
-							const int nCount = (int)arrSelection->GetCount();
-							LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-							for (int nIndex = 0; nIndex < nCount; nIndex++)
-							{
-								CFileData* pFileData = arrSelection->GetAt(nIndex);
-								ASSERT_VALID(pFileData);
-								CString strFileName = pFileData->GetFileName();
-								CString strFolder = GetCurrentFolder();
-								CString strFilePath = strFolder + strFileName;
-
-								arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
-							}
-
-							IShellItemArray* pShellItemArray = nullptr;
-							if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
-							{
-								if (SUCCEEDED(hResult = pFileOperation->MoveItems(pShellItemArray, pFolderItem)))
-								{
-								}
-								else
-								{
-									DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->MoveItems"), hResult);
-									pShellItemArray->Release();
-									pFolderItem->Release();
-									pFileOperation->Release();
-									delete arrItemIDList;
-									return false;
-								}
-
-								pShellItemArray->Release();
-								pShellItemArray = nullptr;
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("SHCreateShellItemArrayFromIDLists"), hResult);
-								pFileOperation->Release();
-								pFolderItem->Release();
-								delete arrItemIDList;
-								return false;
-							}
-
-							for (int nIndex = 0; nIndex < nCount; nIndex++)
-							{
-								ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
-							}
-							delete arrItemIDList;
-							arrItemIDList = nullptr;
-						}
-
-						pFolderItem->Release();
-						pFolderItem = nullptr;
-					}
-					else
-					{
-						DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
-						pFileOperation->Release();
-						return false;
-					}
-
-					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
-					{
-					}
-					else
-					{
-						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
-						pFileOperation->Release();
-						return false;
-					}
-				}
-				else
-				{
-					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
-					pFileOperation->Release();
-					return false;
-				}
 			}
 			else
 			{
-				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
-				pFileOperation->Release();
-				return false;
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::MoveFile"), hResult);
 			}
-
-			pFileOperation->Release();
-			pFileOperation = nullptr;
-
-			return true;
 		}
 		else
 		{
-			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
+			const int nCount = (int)arrSelection->GetCount();
+			LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				CFileData* pFileData = arrSelection->GetAt(nIndex);
+				ASSERT_VALID(pFileData);
+				CString strFileName = pFileData->GetFileName();
+				CString strFolder = GetCurrentFolder();
+				CString strFilePath = strFolder + strFileName;
+
+				arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
+			}
+
+			if ((SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray))) &&
+				(SUCCEEDED(hResult = pFileOperation->MoveItems(pShellItemArray, pFolderItem))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
+			{
+				bRetVal = true;
+			}
+			else
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::MoveFile"), hResult);
+			}
+
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
+			}
+			delete arrItemIDList;
+			arrItemIDList = nullptr;
 		}
 	}
-	return false;
+	else
+	{
+		DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::MoveFile"), hResult);
+	}
+
+	if (pShellItemArray != nullptr)
+	{
+		pShellItemArray->Release();
+		pShellItemArray = nullptr;
+	}
+
+	if (pShellItem != nullptr)
+	{
+		pShellItem->Release();
+		pShellItem = nullptr;
+	}
+
+	if (pFolderItem != nullptr)
+	{
+		pFolderItem->Release();
+		pFolderItem = nullptr;
+	}
+
+	if (pFileOperation != nullptr)
+	{
+		pFileOperation->Release();
+		pFileOperation = nullptr;
+	}
+
+	return bRetVal;
 }
 
 bool CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
@@ -864,135 +768,97 @@ bool CFileSystem::NewFolder(CFileSystem* pDestination, CString strNewFolderName)
 
 bool CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 {
+	bool bRetVal = false;
 	HRESULT hResult = S_OK;
-	if ((pDestination != nullptr) && (arrSelection != nullptr))
+	IFileOperation* pFileOperation = nullptr;
+	IShellItem* pShellItem = nullptr;
+	IShellItemArray* pShellItemArray = nullptr;
+	CString strDestination = pDestination->GetCurrentFolder();
+
+	ASSERT(pDestination != nullptr);
+	ASSERT(arrSelection != nullptr);
+	if ((SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation)))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent))) &&
+		(SUCCEEDED(hResult = pFileOperation->SetOperationFlags(FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOFX_SHOWELEVATIONPROMPT))))
 	{
-		IFileOperation* pFileOperation = nullptr;
-		if (SUCCEEDED(hResult = CoCreateInstance(CLSID_FileOperation, nullptr, CLSCTX_ALL, IID_PPV_ARGS(&pFileOperation))))
+		if (arrSelection->GetCount() == 1)
 		{
-			if (SUCCEEDED(hResult = pFileOperation->SetOwnerWindow(m_hWndParent)))
+			CFileData* pFileData = arrSelection->GetAt(0);
+			ASSERT_VALID(pFileData);
+			CString strFileName = pFileData->GetFileName();
+			CString strFolder = GetCurrentFolder();
+			CString strFilePath = strFolder + strFileName;
+
+			if ((SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem)))) &&
+				(SUCCEEDED(hResult = pFileOperation->DeleteItem(pShellItem, nullptr))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
 			{
-				if (SUCCEEDED(hResult = pFileOperation->SetOperationFlags(
-					FOF_NOCONFIRMMKDIR |
-					FOF_NOERRORUI |
-					FOFX_SHOWELEVATIONPROMPT)))
-				{
-					if (arrSelection->GetCount() == 1)
-					{
-						CFileData* pFileData = arrSelection->GetAt(0);
-						ASSERT_VALID(pFileData);
-						CString strFileName = pFileData->GetFileName();
-						CString strFolder = GetCurrentFolder();
-						CString strFilePath = strFolder + strFileName;
+				bRetVal = true;
 
-						IShellItem* pShellItem = nullptr;
-						if (SUCCEEDED(hResult = SHCreateItemFromParsingName(strFilePath, nullptr, IID_PPV_ARGS(&pShellItem))))
-						{
-							if (SUCCEEDED(hResult = pFileOperation->DeleteItem(pShellItem, nullptr)))
-							{
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->DeleteItem"), hResult);
-								pShellItem->Release();
-								pFileOperation->Release();
-								return false;
-							}
-
-							pShellItem->Release();
-							pShellItem = nullptr;
-						}
-						else
-						{
-							DisplayErrorBox(m_wndCaptionBar, _T("SHCreateItemFromParsingName"), hResult);
-							pFileOperation->Release();
-							return false;
-						}
-					}
-					else
-					{
-						const int nCount = (int)arrSelection->GetCount();
-						LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
-						for (int nIndex = 0; nIndex < nCount; nIndex++)
-						{
-							CFileData* pFileData = arrSelection->GetAt(nIndex);
-							ASSERT_VALID(pFileData);
-							CString strFileName = pFileData->GetFileName();
-							CString strFolder = GetCurrentFolder();
-							CString strFilePath = strFolder + strFileName;
-
-							arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
-						}
-
-						IShellItemArray* pShellItemArray = nullptr;
-						if (SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray)))
-						{
-							if (SUCCEEDED(hResult = pFileOperation->DeleteItems(pShellItemArray)))
-							{
-							}
-							else
-							{
-								DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->DeleteItems"), hResult);
-								pShellItemArray->Release();
-								pFileOperation->Release();
-								delete arrItemIDList;
-								return false;
-							}
-
-							pShellItemArray->Release();
-							pShellItemArray = nullptr;
-						}
-						else
-						{
-							DisplayErrorBox(m_wndCaptionBar, _T("SHCreateShellItemArrayFromIDLists"), hResult);
-							pFileOperation->Release();
-							delete arrItemIDList;
-							return false;
-						}
-
-						for (int nIndex = 0; nIndex < nCount; nIndex++)
-						{
-							ILFree((LPITEMIDLIST) arrItemIDList[nIndex]);
-						}
-						delete arrItemIDList;
-						arrItemIDList = nullptr;
-					}
-
-					if (SUCCEEDED(hResult = pFileOperation->PerformOperations()))
-					{
-					}
-					else
-					{
-						DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->PerformOperations"), hResult);
-						pFileOperation->Release();
-						return false;
-					}
-				}
-				else
-				{
-					DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOperationFlags"), hResult);
-					pFileOperation->Release();
-					return false;
-				}
 			}
 			else
 			{
-				DisplayErrorBox(m_wndCaptionBar, _T("pFileOperation->SetOwnerWindow"), hResult);
-				pFileOperation->Release();
-				return false;
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::DeleteFile"), hResult);
 			}
-
-			pFileOperation->Release();
-			pFileOperation = nullptr;
-
-			return true;
 		}
 		else
 		{
-			OutputDebugString(_T("CoCreateInstance(IFileOperation) failed!\n"));
+			const int nCount = (int)arrSelection->GetCount();
+			LPCITEMIDLIST* arrItemIDList = new LPCITEMIDLIST[nCount];
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				CFileData* pFileData = arrSelection->GetAt(nIndex);
+				ASSERT_VALID(pFileData);
+				CString strFileName = pFileData->GetFileName();
+				CString strFolder = GetCurrentFolder();
+				CString strFilePath = strFolder + strFileName;
+
+				arrItemIDList[nIndex] = ILCreateFromPath(strFilePath);
+			}
+
+			if ((SUCCEEDED(hResult = SHCreateShellItemArrayFromIDLists(nCount, arrItemIDList, &pShellItemArray))) &&
+				(SUCCEEDED(hResult = pFileOperation->DeleteItems(pShellItemArray))) &&
+				(SUCCEEDED(hResult = pFileOperation->PerformOperations())))
+			{
+				bRetVal = true;
+			}
+			else
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::DeleteFile"), hResult);
+			}
+
+			for (int nIndex = 0; nIndex < nCount; nIndex++)
+			{
+				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
+			}
+			delete arrItemIDList;
+			arrItemIDList = nullptr;
 		}
 	}
-	return false;
+	else
+	{
+		DisplayErrorBox(m_wndCaptionBar, _T("CFileSystem::DeleteFile"), hResult);
+	}
+
+	if (pShellItemArray != nullptr)
+	{
+		pShellItemArray->Release();
+		pShellItemArray = nullptr;
+	}
+
+	if (pShellItem != nullptr)
+	{
+		pShellItem->Release();
+		pShellItem = nullptr;
+	}
+
+	if (pFileOperation != nullptr)
+	{
+		pFileOperation->Release();
+		pFileOperation = nullptr;
+	}
+
+	return bRetVal;
 }
 
 bool CFileSystem::RenameFile(const CString& strOldFilePath, const CString& strNewFilePath)

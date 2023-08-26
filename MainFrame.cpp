@@ -133,8 +133,8 @@ void CMainFrame::OnDestroy()
 	{
 		CString strLeftLastFolder = m_wndLeftFileView->m_pFileSystem.GetCurrentFolder();
 		CString strRightLastFolder = m_wndRightFileView->m_pFileSystem.GetCurrentFolder();
-		theApp.WriteProfileString(_T("Options"), _T("LeftLastFolder"), strLeftLastFolder);
-		theApp.WriteProfileString(_T("Options"), _T("RightLastFolder"), strRightLastFolder);
+		theApp.WriteString( _T("LeftLastFolder"), strLeftLastFolder);
+		theApp.WriteString(_T("RightLastFolder"), strRightLastFolder);
 	}
 	CFrameWndEx::OnDestroy();
 }

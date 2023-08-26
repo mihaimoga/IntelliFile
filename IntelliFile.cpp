@@ -243,8 +243,8 @@ BOOL CAboutDlg::OnInitDialog()
 
 	m_ctrlWarning.SetWindowText(_T("This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>."));
 
-	m_ctrlWebsite.SetHyperLink(_T("https://www.emvs.site/"));
-	m_ctrlEmail.SetHyperLink(_T("mailto:contact@emvs.site"));
+	m_ctrlWebsite.SetHyperLink(_T("https://www.moga.doctor/"));
+	m_ctrlEmail.SetHyperLink(_T("mailto:stefan-mihai@moga.doctor"));
 	m_ctrlContributors.SetHyperLink(_T("https://github.com/mihaimoga/IntelliFile/graphs/contributors"));
 
 	return TRUE;  // return TRUE unless you set the focus to a control

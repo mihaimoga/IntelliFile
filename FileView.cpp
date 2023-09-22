@@ -215,14 +215,17 @@ void CFileView::OnContextMenu(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			if (pFileData->GetFileName().CompareNoCase(_T("..")) != 0)
 			{
-				const std::wstring strFilePath = m_pFileSystem.GetCurrentFolder() + pFileData->GetFileName() + _T("\\");
+				std::wstring strFilePath(m_pFileSystem.GetCurrentFolder());
+				strFilePath += pFileData->GetFileName();
+				strFilePath += _T("\\");
 				openShellContextMenuForObject(strFilePath, p.x, p.y, this->m_hWnd);
 			}
 		}
 		else
 		{
 			CString strFolder = m_pFileSystem.GetCurrentFolder();
-			const std::wstring strFilePath = strFolder + pFileData->GetFileName();
+			std::wstring strFilePath(strFolder);
+			strFilePath += pFileData->GetFileName();
 			openShellContextMenuForObject(strFilePath, p.x, p.y, this->m_hWnd);
 		}
 	}

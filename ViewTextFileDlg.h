@@ -14,6 +14,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #pragma once
 
 #include "WndResizer.h"
+#include "ScintillaCtrl.h"
 
 // CViewTextFileDlg dialog
 
@@ -32,8 +33,7 @@ public:
 
 public:
 	CWndResizer m_pWindowResizer;
-	CFont m_fontTerminal;
-	CEdit m_ctrlTextFile;
+	Scintilla::CScintillaCtrl m_ctrlTextFile;
 	CString m_strFilePath;
 	UINT_PTR m_nTimerID;
 
@@ -42,6 +42,9 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
+
+	void SetAStyle(int style, COLORREF fore, COLORREF back = RGB(0xff, 0xff, 0xff), int size = -1, const char* face = nullptr);
+	void DefineMarker(int marker, Scintilla::MarkerSymbol markerType, COLORREF fore, COLORREF back);
 
 	DECLARE_MESSAGE_MAP()
 };

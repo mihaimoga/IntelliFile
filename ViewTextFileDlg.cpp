@@ -22,6 +22,18 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 
 IMPLEMENT_DYNAMIC(CViewTextFileDlg, CDialogEx)
 
+const TCHAR* g_cppKeyWords
+{
+	_T("alignas alignof and and_eq asm atomic_cancel atomic_commit atomic_noexcept auto bitand bitor bool break ")
+		_T("case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue ")
+		_T("co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for ")
+		_T("friend goto if inline int long mutable namespace new noexcept not not_eq nullptr ")
+		_T("operator or or_eq private protected public ")
+		_T("reflexpr register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch synchronized ")
+		_T("template this thread_local throw true try typedef typeid typename union unsigned using ")
+		_T("virtual void volatile wchar_t while xor xor_eq")
+};
+
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewTextFileDlg, pParent)
 {
@@ -58,11 +70,85 @@ std::string wstring_to_utf8(const std::wstring& str)
 	return myconv.to_bytes(str);
 }
 
+void CViewTextFileDlg::SetAStyle(int style, COLORREF fore, COLORREF back, int size, const char* face)
+{
+	m_ctrlTextFile.StyleSetFore(style, fore);
+	m_ctrlTextFile.StyleSetBack(style, back);
+	if (size >= 1)
+		m_ctrlTextFile.StyleSetSize(style, size);
+	if (face)
+		m_ctrlTextFile.StyleSetFont(style, face);
+}
+
+void CViewTextFileDlg::DefineMarker(int marker, Scintilla::MarkerSymbol markerType, COLORREF fore, COLORREF back)
+{
+	m_ctrlTextFile.MarkerDefine(marker, markerType);
+	m_ctrlTextFile.MarkerSetFore(marker, fore);
+	m_ctrlTextFile.MarkerSetBack(marker, back);
+}
+
+#define STR_SCINTILLAWND _T("Scintilla")
+
 BOOL CViewTextFileDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
 	SetWindowText(m_strFilePath);
+
+	/* Create the C++ Lexer
+#pragma warning(suppress: 26429)
+	theApp.m_pCLexer = theApp.m_pCreateLexer("cpp");
+	if (theApp.m_pCLexer == nullptr)
+		return FALSE;*/
+
+	m_ctrlTextFile.SetupDirectAccess();
+
+	// Setup the C++ Lexer
+	m_ctrlTextFile.SetILexer(theApp.m_pCLexer);
+	m_ctrlTextFile.SetKeyWords(0, g_cppKeyWords);
+
+	SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 10, "Consolas");
+	/* Setup styles
+	m_ctrlTextFile.StyleClearAll();
+	SetAStyle(SCE_C_DEFAULT, RGB(0, 0, 0));
+	SetAStyle(SCE_C_COMMENT, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_COMMENTLINE, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_COMMENTDOC, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_COMMENTLINEDOC, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_COMMENTDOCKEYWORD, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_COMMENTDOCKEYWORDERROR, RGB(0, 0x80, 0));
+	SetAStyle(SCE_C_NUMBER, RGB(0, 0x80, 0x80));
+	SetAStyle(SCE_C_WORD, RGB(0, 0, 0x80));
+	m_ctrlTextFile.StyleSetBold(SCE_C_WORD, 1);
+	SetAStyle(SCE_C_STRING, RGB(0x80, 0, 0x80));
+	SetAStyle(SCE_C_IDENTIFIER, RGB(0, 0, 0));
+	SetAStyle(SCE_C_PREPROCESSOR, RGB(0x80, 0, 0));
+	SetAStyle(SCE_C_OPERATOR, RGB(0x80, 0x80, 0));
+
+	// Setup folding
+	m_ctrlTextFile.SetMarginWidthN(2, 16);
+	m_ctrlTextFile.SetMarginSensitiveN(2, TRUE);
+	m_ctrlTextFile.SetMarginTypeN(2, Scintilla::MarginType::Symbol);
+	m_ctrlTextFile.SetMarginMaskN(2, Scintilla::MaskFolders);
+	m_ctrlTextFile.SetSCIProperty(_T("fold"), _T("1"));
+
+	// Setup markers
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderOpen), Scintilla::MarkerSymbol::Minus, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0xFF));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::Folder), Scintilla::MarkerSymbol::Plus, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderSub), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderTail), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderEnd), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderOpenMid), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+	DefineMarker(static_cast<int>(Scintilla::MarkerOutline::FolderMidTail), Scintilla::MarkerSymbol::Empty, RGB(0xff, 0xff, 0xff), RGB(0, 0, 0));
+
+	// Setup auto completion
+	m_ctrlTextFile.AutoCSetSeparator(10); //Use a separator of line feed
+
+	// Setup call tips
+	m_ctrlTextFile.SetMouseDwellTime(1000);
+
+	// Enable Multiple selection
+	// m_ctrlTextFile.SetMultipleSelection(TRUE);*/
 
 	try
 	{
@@ -83,7 +169,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 				// convert UTF8 to Unicode characters
 				CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
 				// actual show the content of file
-				m_ctrlTextFile.SetWindowText(strConvertedText);
+				m_ctrlTextFile.SetText(strConvertedText);
 				// delete buffer
 				delete pFileBuffer;
 				pFileBuffer = nullptr;
@@ -99,23 +185,6 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		pEx->Delete();
 	}
 
-	VERIFY(m_fontTerminal.CreateFont(
-		-MulDiv(10, GetDeviceCaps(::GetDC(nullptr), LOGPIXELSY), 72), // nHeight
-		0,                         // nWidth
-		0,                         // nEscapement
-		0,                         // nOrientation
-		FW_NORMAL,                 // nWeight
-		FALSE,                     // bItalic
-		FALSE,                     // bUnderline
-		0,                         // cStrikeOut
-		ANSI_CHARSET,              // nCharSet
-		OUT_DEFAULT_PRECIS,        // nOutPrecision
-		CLIP_DEFAULT_PRECIS,       // nClipPrecision
-		ANTIALIASED_QUALITY,       // nQuality
-		DEFAULT_PITCH | FF_MODERN, // nPitchAndFamily
-		_T("Consolas")));
-	m_ctrlTextFile.SetFont(&m_fontTerminal);
-
 	VERIFY(m_pWindowResizer.Hook(this));
 	VERIFY(m_pWindowResizer.SetAnchor(IDC_TEXT_FILE, ANCHOR_LEFT | ANCHOR_RIGHT | ANCHOR_TOP | ANCHOR_BOTTOM));
 
@@ -130,6 +199,10 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	}
 
 	m_nTimerID = SetTimer(0x1234, 0x100, nullptr);
+	const int nMarginWidth{ m_ctrlTextFile.GetMarginWidthN(0) };
+	m_ctrlTextFile.SetMarginWidthN(0, 32);
+
+	m_ctrlTextFile.SetReadOnly(TRUE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -145,10 +218,7 @@ void CViewTextFileDlg::OnDestroy()
 	const int nHeight = pWndRect.bottom - pWndRect.top;
 	theApp.WriteInt(_T("Width"), nWidth);
 	theApp.WriteInt(_T("Height"), nHeight);
-
-	VERIFY(m_fontTerminal.DeleteObject());
 }
-
 
 void CViewTextFileDlg::OnTimer(UINT_PTR nIDEvent)
 {

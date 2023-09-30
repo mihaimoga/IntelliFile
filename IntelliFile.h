@@ -33,11 +33,16 @@ public:
 
 public:
 	CInstanceChecker m_pInstanceChecker;
+	Lexilla::CreateLexerFn m_pCreateLexer;
+	HINSTANCE m_hScintilla;
+	HINSTANCE m_hLexilla;
+	Scintilla::ILexer5* m_pCLexer;
 
 // Overrides
 public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+	HMODULE LoadLibraryFromApplicationDirectory(LPCTSTR lpFileName);
 
 // Implementation
 

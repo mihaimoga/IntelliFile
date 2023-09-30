@@ -84,3 +84,15 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #define SIZE_COLUMN_LENGTH 60
 #define DATE_COLUMN_LENGTH 140
 #define ATTR_COLUMN_LENGTH 40
+
+//Pull in support for Scintilla \ Lexilla
+#pragma warning(push)
+#pragma warning(disable: 26812)
+#pragma warning(pop)
+#include <ScintillaTypes.h>
+#include <ScintillaCall.h>
+#include <ScintillaMessages.h>
+#include <ScintillaStructures.h>
+#include <ILexer.h>
+#include <Lexilla.h>
+#include <SciLexer.h>

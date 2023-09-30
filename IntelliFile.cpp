@@ -35,7 +35,10 @@ END_MESSAGE_MAP()
 
 // CIntelliFileApp construction
 
-CIntelliFileApp::CIntelliFileApp() : m_pInstanceChecker(_T("IntelliFile"))
+CIntelliFileApp::CIntelliFileApp() : m_pInstanceChecker(_T("IntelliFile")),
+m_pCreateLexer{ nullptr },
+m_hScintilla{ nullptr },
+m_hLexilla{ nullptr }
 {
 	EnableHtmlHelp();
 
@@ -109,6 +112,32 @@ BOOL CIntelliFileApp::InitInstance()
 		return FALSE;
 	}
 
+	CString sLexillaDLL;
+	sLexillaDLL.Format(_T("%s%s"), _T(LEXILLA_LIB), _T(LEXILLA_EXTENSION));
+	m_hLexilla = LoadLibraryFromApplicationDirectory(sLexillaDLL);
+	if (m_hLexilla == nullptr)
+	{
+		CString sMsg;
+		sMsg.Format(_T("%s is not installed, Please built the Scintilla '%s' and copy it into this application's directory"), sLexillaDLL.GetString(), sLexillaDLL.GetString());
+		AfxMessageBox(sMsg);
+		return FALSE;
+	}
+	m_hScintilla = LoadLibraryFromApplicationDirectory(_T("Scintilla.dll"));
+	if (m_hScintilla == nullptr)
+	{
+		AfxMessageBox(_T("Scintilla DLL is not installed, Please built the Scintilla 'Scintilla.dll' and copy it into this application's directory"));
+		return FALSE;
+	}
+
+	//Create the C++ Lexer from Lexilla
+#pragma warning(suppress: 26490)
+	m_pCreateLexer = reinterpret_cast<Lexilla::CreateLexerFn>(GetProcAddress(m_hLexilla, LEXILLA_CREATELEXER));
+	if (m_pCreateLexer == nullptr)
+	{
+		AfxMessageBox(_T("Could not find the Lexilla CreateLexer function"));
+		return FALSE;
+	}
+
 	// Standard initialization
 	// If you are not using these features and wish to reduce the size
 	// of your final executable, you should remove from the following
@@ -154,6 +183,17 @@ BOOL CIntelliFileApp::InitInstance()
 int CIntelliFileApp::ExitInstance()
 {
 	// TODO: handle additional resources you may have added
+	if (m_hScintilla != nullptr)
+	{
+		FreeLibrary(m_hScintilla);
+		m_hScintilla = nullptr;
+	}
+	if (m_hLexilla != nullptr)
+	{
+		FreeLibrary(m_hLexilla);
+		m_hLexilla = nullptr;
+	}
+
 	AfxOleTerm(FALSE);
 
 	CoUninitialize();
@@ -162,6 +202,34 @@ int CIntelliFileApp::ExitInstance()
 }
 
 // CIntelliFileApp message handlers
+HMODULE CIntelliFileApp::LoadLibraryFromApplicationDirectory(LPCTSTR lpFileName)
+{
+	//Get the Application directory
+	CString sFullPath;
+	const DWORD dwGMFN{ GetModuleFileName(nullptr, sFullPath.GetBuffer(_MAX_PATH), _MAX_PATH) };
+	sFullPath.ReleaseBuffer();
+	if (dwGMFN == 0)
+#pragma warning(suppress: 26487)
+		return nullptr;
+
+	//Form the new path
+	CString sDrive;
+	CString sDir;
+	_tsplitpath_s(sFullPath, sDrive.GetBuffer(_MAX_DRIVE), _MAX_DRIVE, sDir.GetBuffer(_MAX_DIR), _MAX_DIR, nullptr, 0, nullptr, 0);
+	sDir.ReleaseBuffer();
+	sDrive.ReleaseBuffer();
+	CString sFname;
+	CString sExt;
+	_tsplitpath_s(lpFileName, nullptr, 0, nullptr, 0, sFname.GetBuffer(_MAX_FNAME), _MAX_FNAME, sExt.GetBuffer(_MAX_EXT), _MAX_EXT);
+	sExt.ReleaseBuffer();
+	sFname.ReleaseBuffer();
+	_tmakepath_s(sFullPath.GetBuffer(_MAX_PATH), _MAX_PATH, sDrive, sDir, sFname, sExt);
+	sFullPath.ReleaseBuffer();
+
+	//Delegate to LoadLibrary
+#pragma warning(suppress: 26487)
+	return LoadLibrary(sFullPath);
+}
 
 // CAboutDlg dialog used for App About
 

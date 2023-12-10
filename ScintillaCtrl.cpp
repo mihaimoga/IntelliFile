@@ -355,10 +355,10 @@ using namespace Scintilla;
 IMPLEMENT_DYNAMIC(CScintillaCtrl, CWnd)
 #endif //#ifdef _AFX
 
-CScintillaCtrl::CScintillaCtrl() noexcept : m_bCallDirect{ TRUE },
-m_DirectStatusFunction{ nullptr },
+CScintillaCtrl::CScintillaCtrl() noexcept : m_DirectStatusFunction{ nullptr },
 m_DirectPointer{ 0 },
-m_LastStatus(Status::Ok)
+m_LastStatus(Status::Ok),
+m_dwOwnerThreadID(0)
 {
 }
 
@@ -380,6 +380,9 @@ BOOL CScintillaCtrl::Create(_In_ HWND hWndParent, _In_ ATL::_U_RECT rect, _In_ D
 	//Setup the direct access data
 	SetupDirectAccess();
 
+	//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
+	m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+
 	//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
 #ifdef _UNICODE
 	SetCodePage(CpUtf8);
@@ -389,6 +392,27 @@ BOOL CScintillaCtrl::Create(_In_ HWND hWndParent, _In_ ATL::_U_RECT rect, _In_ D
 
 	return TRUE;
 }
+
+#ifdef _AFX
+void CScintillaCtrl::PreSubclassWindow()
+{
+	//Let the parent class do its thing
+	__super::PreSubclassWindow();
+
+	//Setup the direct access data
+	SetupDirectAccess();
+
+	//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
+	m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+
+	//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
+#ifdef _UNICODE
+	SetCodePage(CpUtf8);
+#else
+	SetCodePage(0);
+#endif //#ifdef _UNICODE
+}
+#endif //#ifdef _AFX
 
 void CScintillaCtrl::SetupDirectAccess()
 {
@@ -403,16 +427,6 @@ sptr_t CScintillaCtrl::GetDirectPointer()
 	return SendMessage(static_cast<UINT>(Message::GetDirectPointer), 0, 0);
 }
 
-BOOL CScintillaCtrl::GetCallDirect() const noexcept
-{
-	return m_bCallDirect;
-}
-
-void CScintillaCtrl::SetCallDirect(_In_ BOOL bDirect) noexcept
-{
-	m_bCallDirect = bDirect;
-}
-
 #pragma warning(suppress: 26440)
 FunctionDirect CScintillaCtrl::GetDirectStatusFunction()
 {
@@ -420,7 +434,7 @@ FunctionDirect CScintillaCtrl::GetDirectStatusFunction()
 	return reinterpret_cast<FunctionDirect>(SendMessage(static_cast<UINT>(Message::GetDirectStatusFunction), 0, 0));
 }
 
-Status CScintillaCtrl::GetLastStatus() noexcept
+Status CScintillaCtrl::GetLastStatus() const noexcept
 {
 	return m_LastStatus;
 }

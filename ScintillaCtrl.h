@@ -90,6 +90,9 @@ namespace Scintilla
 
 		//Misc
 		void SetupDirectAccess();
+#ifdef _AFX
+		void PreSubclassWindow() override;
+#endif //#ifdef _AFX
 
 #pragma warning(suppress: 26440)
 		inline LRESULT Call(_In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
@@ -98,7 +101,7 @@ namespace Scintilla
 #pragma warning(suppress: 26477)
 			ATLASSERT(::IsWindow(m_hWnd)); //Window must be valid
 
-			if (m_bCallDirect)
+			if (::GetCurrentThreadId() == m_dwOwnerThreadID)
 			{
 				int nLastStatus{ 0 };
 				const auto nReturn = Call(message, wParam, lParam, &nLastStatus);
@@ -122,10 +125,8 @@ namespace Scintilla
 		}
 
 		[[nodiscard]] sptr_t GetDirectPointer();
-		[[nodiscard]] BOOL GetCallDirect() const noexcept;
-		void SetCallDirect(_In_ BOOL bDirect) noexcept;
 		[[nodiscard]] FunctionDirect GetDirectStatusFunction();
-		[[nodiscard]] Status GetLastStatus() noexcept;
+		[[nodiscard]] Status GetLastStatus() const noexcept;
 
 		//Unicode support
 #ifdef _UNICODE
@@ -1013,10 +1014,10 @@ namespace Scintilla
 #endif //#ifdef _AFX
 
 		//Member variables
-		BOOL m_bCallDirect;
 		FunctionDirect m_DirectStatusFunction;
 		sptr_t m_DirectPointer;
 		Status m_LastStatus;
+		DWORD m_dwOwnerThreadID;
 	};
 
 

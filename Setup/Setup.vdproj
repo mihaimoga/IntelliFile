@@ -722,15 +722,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:IntelliFile"
-        "ProductCode" = "8:{4712FCB2-24C6-4333-B78C-A2F33E2448CC}"
-        "PackageCode" = "8:{D0F1FC62-C086-49DE-B99A-D183575D44F6}"
+        "ProductCode" = "8:{F7DA8D80-5356-4487-AE26-D8F9941DA9B4}"
+        "PackageCode" = "8:{DCAF7881-7658-4974-B1D9-2679F653FDF2}"
         "UpgradeCode" = "8:{C73D3F5F-8D57-4947-AD1B-57B770138A7D}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.22"
+        "ProductVersion" = "8:1.23"
         "Manufacturer" = "8:Stefan-Mihai MOGA"
         "ARPHELPTELEPHONE" = "8:+40745497982"
         "ARPHELPLINK" = "8:https://www.moga.doctor/"
@@ -1272,7 +1272,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4EC0133FAD4141989B9246C943950B35"
             {
-            "SourcePath" = "8:..\\x64\\Debug\\Lexilla.dll"
+            "SourcePath" = "8:..\\x64\\Release\\Lexilla.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
@@ -1300,7 +1300,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_658A59D744C848AA84CA29835B04B972"
             {
-            "SourcePath" = "8:..\\x64\\Debug\\IntelliFile.exe"
+            "SourcePath" = "8:..\\x64\\Release\\IntelliFile.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
@@ -1328,7 +1328,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_993164C3311547498DBE36E9340CD9AC"
             {
-            "SourcePath" = "8:..\\x64\\Debug\\Scintilla.dll"
+            "SourcePath" = "8:..\\x64\\Release\\Scintilla.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"

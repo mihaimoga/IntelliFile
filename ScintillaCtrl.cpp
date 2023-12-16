@@ -358,7 +358,8 @@ IMPLEMENT_DYNAMIC(CScintillaCtrl, CWnd)
 CScintillaCtrl::CScintillaCtrl() noexcept : m_DirectStatusFunction{ nullptr },
 m_DirectPointer{ 0 },
 m_LastStatus(Status::Ok),
-m_dwOwnerThreadID(0)
+m_dwOwnerThreadID(0),
+m_bDoneInitialSetup(false)
 {
 }
 
@@ -373,22 +374,27 @@ BOOL CScintillaCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, U
 BOOL CScintillaCtrl::Create(_In_ HWND hWndParent, _In_ ATL::_U_RECT rect, _In_ DWORD dwStyle, _In_ UINT nID, _In_ DWORD dwExStyle, _In_opt_ LPVOID lpParam)
 {
 	//Call our base class implementation of ATL::CWindow::Create
-	if (!__super::Create(_T("scintilla"), hWndParent, rect, nullptr, dwStyle, dwExStyle, nID, lpParam))
+	if (!__super::Create(GetWndClassName(), hWndParent, rect, nullptr, dwStyle, dwExStyle, nID, lpParam))
 		return FALSE;
 #endif //#ifdef _AFX
 
 	//Setup the direct access data
-	SetupDirectAccess();
+	if (!m_bDoneInitialSetup)
+	{
+		m_bDoneInitialSetup = true;
 
-	//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
-	m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+		SetupDirectAccess();
 
-	//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
+		//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
 #ifdef _UNICODE
-	SetCodePage(CpUtf8);
+		SetCodePage(CpUtf8);
 #else
-	SetCodePage(0);
+		SetCodePage(0);
 #endif //#ifdef _UNICODE
+
+		//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
+		m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+	}
 
 	return TRUE;
 }
@@ -396,21 +402,28 @@ BOOL CScintillaCtrl::Create(_In_ HWND hWndParent, _In_ ATL::_U_RECT rect, _In_ D
 #ifdef _AFX
 void CScintillaCtrl::PreSubclassWindow()
 {
-	//Let the parent class do its thing
+	//Let the base class do its thing
 	__super::PreSubclassWindow();
 
 	//Setup the direct access data
-	SetupDirectAccess();
+	if (!m_bDoneInitialSetup)
+	{
+		SetupDirectAccess();
+		if ((m_DirectPointer == 0) || (m_DirectStatusFunction == nullptr))
+			return;
 
-	//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
-	m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+		m_bDoneInitialSetup = true;
 
-	//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
+		//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
 #ifdef _UNICODE
-	SetCodePage(CpUtf8);
+		SetCodePage(CpUtf8);
 #else
-	SetCodePage(0);
+		SetCodePage(0);
 #endif //#ifdef _UNICODE
+
+		//Cache the return value from GetWindowThreadProcessId in the m_dwOwnerThreadID member variable
+		m_dwOwnerThreadID = GetWindowThreadProcessId(m_hWnd, nullptr);
+	}
 }
 #endif //#ifdef _AFX
 

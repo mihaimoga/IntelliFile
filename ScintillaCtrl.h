@@ -89,10 +89,15 @@ namespace Scintilla
 #endif //#ifdef _AFX
 
 		//Misc
-		void SetupDirectAccess();
 #ifdef _AFX
 		void PreSubclassWindow() override;
-#endif //#ifdef _AFX
+#else
+		static LPCTSTR GetWndClassName() noexcept
+		{
+			return _T("scintilla");
+		}
+#endif //#idef _AFX
+		void SetupDirectAccess();
 
 #pragma warning(suppress: 26440)
 		inline LRESULT Call(_In_ UINT message, _In_ WPARAM wParam, _In_ LPARAM lParam)
@@ -1018,6 +1023,7 @@ namespace Scintilla
 		sptr_t m_DirectPointer;
 		Status m_LastStatus;
 		DWORD m_dwOwnerThreadID;
+		bool m_bDoneInitialSetup;
 	};
 
 

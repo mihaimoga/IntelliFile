@@ -44,6 +44,11 @@ to maintain a single distribution point for the source code.
 #include <ScintillaStructures.h>
 #endif //#ifndef SCINTILLASTRUCTURES_H
 
+#ifndef ILOADER_H
+#pragma message("To avoid this message, please put ILoader.h in your pre compiled header (normally stdafx.h)")
+#include <ILoader.h>
+#endif //#ifndef ILOADER_H
+
 #ifndef SCINTILLACTRL_EXT_CLASS
 #define SCINTILLACTRL_EXT_CLASS
 #endif //#ifndef SCINTILLACTRL_EXT_CLASS
@@ -698,8 +703,8 @@ namespace Scintilla
 		[[nodiscard]] Position BraceMatchNext(_In_ Position pos, _In_ Position startPos);
 		[[nodiscard]] BOOL GetViewEOL();
 		void SetViewEOL(_In_ BOOL visible);
-		[[nodiscard]] void* GetDocPointer();
-		void SetDocPointer(_In_opt_ void* doc);
+		[[nodiscard]] IDocumentEditable* GetDocPointer();
+		void SetDocPointer(_In_opt_ IDocumentEditable* doc);
 		void SetModEventMask(_In_ ModificationFlags eventMask);
 		[[nodiscard]] Position GetEdgeColumn();
 		void SetEdgeColumn(_In_ Position column);
@@ -718,9 +723,9 @@ namespace Scintilla
 		[[nodiscard]] BOOL SelectionIsRectangle();
 		void SetZoom(_In_ int zoomInPoints);
 		[[nodiscard]] int GetZoom();
-		[[nodiscard]] void* CreateDocument(_In_ Position bytes, _In_ DocumentOption documentOptions);
-		void AddRefDocument(_In_ void* doc);
-		void ReleaseDocument(_In_ void* doc);
+		[[nodiscard]] IDocumentEditable* CreateDocument(_In_ Position bytes, _In_ DocumentOption documentOptions);
+		void AddRefDocument(_In_ IDocumentEditable* doc);
+		void ReleaseDocument(_In_ IDocumentEditable* doc);
 		[[nodiscard]] DocumentOption GetDocumentOptions();
 		[[nodiscard]] ModificationFlags GetModEventMask();
 		void SetCommandEvents(_In_ BOOL commandEvents);
@@ -771,7 +776,9 @@ namespace Scintilla
 		void CopyRange(_In_ Position start, _In_ Position end);
 		void CopyText(_In_ Position length, _In_reads_bytes_(length) const char* text);
 		void SetSelectionMode(_In_ SelectionMode selectionMode);
+		void ChangeSelectionMode(_In_ SelectionMode selectionMode);
 		[[nodiscard]] SelectionMode GetSelectionMode();
+		void SetMoveExtendsSelection(_In_ BOOL moveExtendsSelection);
 		[[nodiscard]] BOOL GetMoveExtendsSelection();
 		[[nodiscard]] Position GetLineSelStartPosition(_In_ Line line);
 		[[nodiscard]] Position GetLineSelEndPosition(_In_ Line line);
@@ -891,6 +898,7 @@ namespace Scintilla
 		void ClearSelections();
 		void SetSelection(_In_ Position caret, _In_ Position anchor);
 		void AddSelection(_In_ Position caret, _In_ Position anchor);
+		[[nodiscard]] int SelectionFromPoint(_In_ int x, _In_ int y);
 		void DropSelectionN(_In_ int selection);
 		void SetMainSelection(_In_ int selection);
 		[[nodiscard]] int GetMainSelection();

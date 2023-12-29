@@ -312,6 +312,9 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           Nissl for reporting this issue.
          PJN / 21-03-2023 1. Updated modules to indicate that it needs to be compiled using /std:c++17. Thanks to Martin Richter for
                           reporting this issue.
+         PJN / 28-12-2023 1. Updated class to work with Scintilla v5.4.1. New messages wrapped include: SCI_CHANGESELECTIONMODE,
+                          SCI_SETMOVEEXTENDSSELECTION & SCI_SELECTIONFROMPOINT. Also updated the signatures of the following
+                          methods: GetDocPointer, SetDocPointer, CreateDocument, AddRefDocument and ReleaseDocument.
 
 Copyright (c) 2004 - 2023 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -3937,13 +3940,13 @@ void CScintillaCtrl::SetViewEOL(_In_ BOOL visible)
 	Call(static_cast<UINT>(Message::SetViewEOL), static_cast<WPARAM>(visible), 0);
 }
 
-void* CScintillaCtrl::GetDocPointer()
+IDocumentEditable* CScintillaCtrl::GetDocPointer()
 {
 #pragma warning(suppress: 26487)
-	return reinterpret_cast<void*>(Call(static_cast<UINT>(Message::GetDocPointer), 0, 0));
+	return reinterpret_cast<IDocumentEditable*>(Call(static_cast<UINT>(Message::GetDocPointer), 0, 0));
 }
 
-void CScintillaCtrl::SetDocPointer(_In_opt_ void* doc)
+void CScintillaCtrl::SetDocPointer(_In_opt_ IDocumentEditable * doc)
 {
 	Call(static_cast<UINT>(Message::SetDocPointer), 0, reinterpret_cast<LPARAM>(doc));
 }
@@ -4038,18 +4041,18 @@ int CScintillaCtrl::GetZoom()
 	return static_cast<int>(Call(static_cast<UINT>(Message::GetZoom), 0, 0));
 }
 
-void* CScintillaCtrl::CreateDocument(_In_ Position bytes, _In_ DocumentOption documentOptions)
+IDocumentEditable* CScintillaCtrl::CreateDocument(_In_ Position bytes, _In_ DocumentOption documentOptions)
 {
 #pragma warning(suppress: 26487)
-	return reinterpret_cast<void*>(Call(static_cast<UINT>(Message::CreateDocument), static_cast<WPARAM>(bytes), static_cast<LPARAM>(documentOptions)));
+	return reinterpret_cast<IDocumentEditable*>(Call(static_cast<UINT>(Message::CreateDocument), static_cast<WPARAM>(bytes), static_cast<LPARAM>(documentOptions)));
 }
 
-void CScintillaCtrl::AddRefDocument(_In_ void* doc)
+void CScintillaCtrl::AddRefDocument(_In_ IDocumentEditable * doc)
 {
 	Call(static_cast<UINT>(Message::AddRefDocument), 0, reinterpret_cast<LPARAM>(doc));
 }
 
-void CScintillaCtrl::ReleaseDocument(_In_ void* doc)
+void CScintillaCtrl::ReleaseDocument(_In_ IDocumentEditable * doc)
 {
 	Call(static_cast<UINT>(Message::ReleaseDocument), 0, reinterpret_cast<LPARAM>(doc));
 }
@@ -4304,9 +4307,19 @@ void CScintillaCtrl::SetSelectionMode(_In_ SelectionMode selectionMode)
 	Call(static_cast<UINT>(Message::SetSelectionMode), static_cast<WPARAM>(selectionMode), 0);
 }
 
+void CScintillaCtrl::ChangeSelectionMode(_In_ SelectionMode selectionMode)
+{
+	Call(static_cast<UINT>(Message::ChangeSelectionMode), static_cast<WPARAM>(selectionMode), 0);
+}
+
 SelectionMode CScintillaCtrl::GetSelectionMode()
 {
 	return static_cast<SelectionMode>(Call(static_cast<UINT>(Message::GetSelectionMode), 0, 0));
+}
+
+void CScintillaCtrl::SetMoveExtendsSelection(_In_ BOOL moveExtendsSelection)
+{
+	Call(static_cast<UINT>(Message::SetMoveExtendsSelection), static_cast<WPARAM>(moveExtendsSelection), 0);
 }
 
 BOOL CScintillaCtrl::GetMoveExtendsSelection()
@@ -4904,6 +4917,11 @@ void CScintillaCtrl::SetSelection(_In_ Position caret, _In_ Position anchor)
 void CScintillaCtrl::AddSelection(_In_ Position caret, _In_ Position anchor)
 {
 	Call(static_cast<UINT>(Message::AddSelection), static_cast<WPARAM>(caret), static_cast<LPARAM>(anchor));
+}
+
+int CScintillaCtrl::SelectionFromPoint(_In_ int x, _In_ int y)
+{
+	return static_cast<int>(Call(static_cast<UINT>(Message::SelectionFromPoint), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }
 
 void CScintillaCtrl::DropSelectionN(_In_ int selection)

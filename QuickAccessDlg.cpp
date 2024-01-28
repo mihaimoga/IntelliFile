@@ -17,7 +17,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "stdafx.h"
 #include "IntelliFile.h"
 #include "QuickAccessDlg.h"
-#include "FileDialogST.h"
+#include "FolderDlg.h"
 
 // CQuickAccessDlg dialog
 
@@ -138,10 +138,10 @@ void CQuickAccessDlg::OnBnClickedAccess()
 void CQuickAccessDlg::OnBnClickedAdd()
 {
 	const UINT nFolderFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS | BIF_USENEWUI | BIF_VALIDATE;
-	CFileDialogST dlgFileDialog;
-	if (dlgFileDialog.SelectFolder(NULL, m_strSelectedFolder, nFolderFlags, this) == IDOK)
+	CFolderDialog dlgFileDialog(nullptr, m_strSelectedFolder, this, nFolderFlags);
+	if (dlgFileDialog.DoModal() == IDOK)
 	{
-		m_strSelectedFolder = dlgFileDialog.GetSelectedFolder();
+		m_strSelectedFolder = dlgFileDialog.GetFolderPath();
 		const int nRootFolder = m_strSelectedFolder.GetLength();
 		if (nRootFolder > 0)
 		{

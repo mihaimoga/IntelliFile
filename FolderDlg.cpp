@@ -42,12 +42,12 @@ VERSION HISTORY:
 
 IMPLEMENT_DYNAMIC(CFolderDialog, CDialog)
 
-CFolderDialog::CFolderDialog(IN LPCTSTR pszTitle	 /*nullptr*/,
-	IN LPCTSTR pszSelPath	 /*nullptr*/,
-	IN CWnd*	 pWndParent	 /*nullptr*/,
+CFolderDialog::CFolderDialog(IN LPCTSTR pszTitle	 /*NULL*/,
+	IN LPCTSTR pszSelPath	 /*NULL*/,
+	IN CWnd* pWndParent	 /*NULL*/,
 	IN UINT	 uFlags		 /*BIF_RETURNONLYFSDIRS*/)
 	: CCommonDialog(pWndParent)
-	, m_hWnd(nullptr)
+	, m_hWnd(NULL)
 {
 	::ZeroMemory(&m_bi, sizeof(BROWSEINFO));
 	::ZeroMemory(m_szFolPath, MAX_PATH);
@@ -56,7 +56,7 @@ CFolderDialog::CFolderDialog(IN LPCTSTR pszTitle	 /*nullptr*/,
 	// Fill data
 
 	m_bi.hwndOwner = pWndParent->GetSafeHwnd();
-	m_bi.pidlRoot = nullptr;
+	m_bi.pidlRoot = NULL;
 	m_bi.lpszTitle = pszTitle;
 	m_bi.ulFlags = uFlags;
 	m_bi.lpfn = (BFFCALLBACK)&BrowseCallbackProc;
@@ -65,7 +65,7 @@ CFolderDialog::CFolderDialog(IN LPCTSTR pszTitle	 /*nullptr*/,
 	// The size of this buffer is assumed to be MAX_PATH bytes:
 
 	m_bi.pszDisplayName = new TCHAR[MAX_PATH];
-	ASSERT(m_bi.pszDisplayName != nullptr);
+	ASSERT(m_bi.pszDisplayName != NULL);
 
 	SAFE_ZEROMEMORY(
 		m_bi.pszDisplayName, (MAX_PATH * sizeof(TCHAR))
@@ -93,25 +93,25 @@ END_MESSAGE_MAP()
 // Microsoft knowledge Base Article
 // ID Q132750: Convert a File Path to an ITEMIDLIST
 
-bool CFolderDialog::SetRootFolder(IN LPCTSTR pszPath)
+BOOL CFolderDialog::SetRootFolder(IN LPCTSTR pszPath)
 {
 	ASSERT_VALID(this);
 
 	if (!pszPath)
 	{
 		SAFE_COTASKMEMFREE(m_bi.pidlRoot);
-		return true;
+		return TRUE;
 	}
 
 	ASSERT(AfxIsValidString(pszPath, MAX_PATH));
 
 	HRESULT		  hResult = S_FALSE;
-	IShellFolder* pDeskFolder = nullptr;
+	IShellFolder* pDeskFolder = NULL;
 
 	hResult = ::SHGetDesktopFolder(&pDeskFolder);
 	if (hResult == S_OK)
 	{
-		LPITEMIDLIST pidlRoot = nullptr;
+		LPITEMIDLIST pidlRoot = NULL;
 		LPTSTR       pszRoot = const_cast<LPTSTR>(pszPath);
 
 		// Convert the path to an ITEMIDLIST:
@@ -119,7 +119,7 @@ bool CFolderDialog::SetRootFolder(IN LPCTSTR pszPath)
 		USES_CONVERSION;
 
 		hResult = pDeskFolder->ParseDisplayName(
-			nullptr, nullptr, T2W(pszRoot), nullptr, &pidlRoot, nullptr
+			NULL, NULL, T2W(pszRoot), NULL, &pidlRoot, NULL
 		);
 
 		if (hResult == S_OK)
@@ -137,7 +137,7 @@ bool CFolderDialog::SetRootFolder(IN LPCTSTR pszPath)
 // NOTE: pszPath buffer must be at least
 // MAX_PATH characters in size:
 
-bool CFolderDialog::GetRootFolder(IN OUT LPTSTR pszPath)
+BOOL CFolderDialog::GetRootFolder(IN OUT LPTSTR pszPath)
 {
 	ASSERT_VALID(this);
 	ASSERT(AfxIsValidString(pszPath, MAX_PATH));
@@ -145,7 +145,7 @@ bool CFolderDialog::GetRootFolder(IN OUT LPTSTR pszPath)
 	return ::SHGetPathFromIDList(m_bi.pidlRoot, pszPath);
 }
 
-bool CFolderDialog::SetSelectedFolder(IN LPCTSTR pszPath)
+BOOL CFolderDialog::SetSelectedFolder(IN LPCTSTR pszPath)
 {
 	ASSERT(AfxIsValidString(pszPath, MAX_PATH));
 	return (::lstrcpy(m_szSelPath, pszPath) != nullptr);
@@ -160,7 +160,7 @@ INT		CFolderDialog::DoModal(VOID)
 #endif
 {
 	ASSERT_VALID(this);
-	ASSERT(m_bi.lpfn != nullptr);
+	ASSERT(m_bi.lpfn != NULL);
 
 	INT_PTR nRet = -1;
 	m_bi.hwndOwner = PreModal();
@@ -219,7 +219,7 @@ INT CALLBACK CFolderDialog::BrowseCallbackProc(IN HWND   hWnd,
 	IN LPARAM lpData)
 {
 	CFolderDialog* pThis = (CFolderDialog*)lpData;
-	ASSERT(pThis != nullptr);
+	ASSERT(pThis != NULL);
 
 	INT nRet = 0;
 	pThis->m_hWnd = hWnd;
@@ -243,7 +243,7 @@ INT CALLBACK CFolderDialog::BrowseCallbackProc(IN HWND   hWnd,
 			break;
 	}
 
-	pThis->m_hWnd = nullptr;
+	pThis->m_hWnd = NULL;
 	return nRet;
 }
 
@@ -254,7 +254,7 @@ VOID CFolderDialog::SetExpanded(IN LPCTSTR pszPath)
 {
 	USES_CONVERSION;
 
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 	ASSERT(AfxIsValidString(pszPath, MAX_PATH));
 
 	::SendMessage(
@@ -267,7 +267,7 @@ VOID CFolderDialog::SetOKText(IN LPCTSTR pszText)
 {
 	USES_CONVERSION;
 
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 
 	::SendMessage(
 		m_hWnd, BFFM_SETOKTEXT,
@@ -277,7 +277,7 @@ VOID CFolderDialog::SetOKText(IN LPCTSTR pszText)
 
 VOID CFolderDialog::EnableOK(IN BOOL bEnable /*TRUE*/)
 {
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 
 	::SendMessage(
 		m_hWnd, BFFM_ENABLEOK, (WPARAM)bEnable, 0L
@@ -286,7 +286,7 @@ VOID CFolderDialog::EnableOK(IN BOOL bEnable /*TRUE*/)
 
 VOID CFolderDialog::SetSelection(IN LPITEMIDLIST pItemIDList)
 {
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 
 	::SendMessage(
 		m_hWnd, BFFM_SETSELECTION,
@@ -296,7 +296,7 @@ VOID CFolderDialog::SetSelection(IN LPITEMIDLIST pItemIDList)
 
 VOID CFolderDialog::SetSelection(IN LPCTSTR pszPath)
 {
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 	ASSERT(AfxIsValidString(pszPath, MAX_PATH));
 
 	::SendMessage(
@@ -307,7 +307,7 @@ VOID CFolderDialog::SetSelection(IN LPCTSTR pszPath)
 
 VOID CFolderDialog::SetStatusText(IN LPCTSTR pszText)
 {
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 
 	::SendMessage(
 		m_hWnd, BFFM_SETSTATUSTEXT,
@@ -319,7 +319,7 @@ VOID CFolderDialog::SetStatusText(IN LPCTSTR pszText)
 
 VOID CFolderDialog::SetExpanded(IN LPITEMIDLIST pItemIDList)
 {
-	ASSERT(m_hWnd != nullptr);
+	ASSERT(m_hWnd != NULL);
 
 	::SendMessage(
 		m_hWnd, BFFM_SETEXPANDED,

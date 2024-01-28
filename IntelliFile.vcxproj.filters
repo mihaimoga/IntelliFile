@@ -335,9 +335,6 @@
     <ClInclude Include="Base64Dlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileDialogST.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="QuickAccessDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -345,6 +342,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScintillaCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FilteredFolderDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -406,9 +406,6 @@
     <ClCompile Include="Base64Dlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileDialogST.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="QuickAccessDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -416,6 +413,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScintillaCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FilteredFolderDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,7 +17,6 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "stdafx.h"
 #include "IntelliFile.h"
 #include "Base64Dlg.h"
-#include "FileDialogST.h"
 
 #include "base64.h"
 
@@ -65,7 +64,7 @@ BOOL CBase64Dlg::OnInitDialog()
 
 void CBase64Dlg::OnBnClickedBrowseInput()
 {
-	CFileDialogST pFileDialog(TRUE, NULL, NULL,
+	CFileDialog pFileDialog(TRUE, NULL, NULL,
 		OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_LONGNAMES,
 		_T("All files\0*.*\0"), this);
 	if (pFileDialog.DoModal() == IDOK)
@@ -79,7 +78,7 @@ void CBase64Dlg::OnBnClickedBrowseInput()
 
 void CBase64Dlg::OnBnClickedBrowseOutput()
 {
-	CFileDialogST pFileDialog(FALSE, NULL, NULL,
+	CFileDialog pFileDialog(FALSE, NULL, NULL,
 		OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_LONGNAMES | OFN_PATHMUSTEXIST,
 		_T("All files\0*.*\0"), this);
 	if (pFileDialog.DoModal() == IDOK)

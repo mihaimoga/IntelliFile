@@ -462,9 +462,9 @@ echo.
     <ClInclude Include="base64.h" />
     <ClInclude Include="Base64Dlg.h" />
     <ClInclude Include="ChangeDriveDlg.h" />
-    <ClInclude Include="FileDialogST.h" />
     <ClInclude Include="FileList.h" />
     <ClInclude Include="FileView.h" />
+    <ClInclude Include="FilteredFolderDlg.h" />
     <ClInclude Include="FolderDlg.h" />
     <ClInclude Include="HLinkCtrl.h" />
     <ClInclude Include="HTMLCtrl.h" />
@@ -566,9 +566,9 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="Base64Dlg.cpp" />
     <ClCompile Include="ChangeDriveDlg.cpp" />
-    <ClCompile Include="FileDialogST.cpp" />
     <ClCompile Include="FileList.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="FilteredFolderDlg.cpp" />
     <ClCompile Include="FolderDlg.cpp" />
     <ClCompile Include="HLinkCtrl.cpp" />
     <ClCompile Include="HTMLCtrl.cpp" />

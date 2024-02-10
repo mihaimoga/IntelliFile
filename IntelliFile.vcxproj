@@ -439,7 +439,9 @@ echo.
     <None Include="hlp\scrollbars.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
+    <None Include="LICENSE" />
     <None Include="ReadMe.txt" />
+    <None Include="ReleaseNotes.html" />
     <None Include="res\buttons.bmp" />
     <None Include="res\filelarge.bmp" />
     <None Include="res\filesmall.bmp" />
@@ -457,6 +459,7 @@ echo.
     <None Include="res\viewstack.ico" />
     <None Include="res\writelarge.bmp" />
     <None Include="res\writesmall.bmp" />
+    <None Include="SoftwareContextRegister.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base64.h" />

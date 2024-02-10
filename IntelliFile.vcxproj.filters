@@ -273,6 +273,9 @@
     <None Include="res\viewstack.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="LICENSE" />
+    <None Include="ReleaseNotes.html" />
+    <None Include="SoftwareContextRegister.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">

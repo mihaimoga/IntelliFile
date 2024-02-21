@@ -171,8 +171,8 @@ BOOL CIntelliFileApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	pFrame->ShowWindow(SW_SHOW);
 	pFrame->UpdateWindow();
-	// call DragAcceptFiles only if there's a suffix
-	//  In an SDI app, this should occur after ProcessShellCommand
+	// pFrame->MoveWindow(CRect(0, 0, 800, 600));
+	// pFrame->CenterWindow();
 
 	// If this is the first instance of our App then track it so any other instances can find us
 	m_pInstanceChecker.TrackFirstInstanceRunning(m_pMainWnd->GetSafeHwnd());

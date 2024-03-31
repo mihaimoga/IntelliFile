@@ -3,7 +3,7 @@ Module : ScintillaCtrl.h
 Purpose: Defines the interface for an MFC wrapper class for the Scintilla edit control (www.scintilla.org)
 Created: PJN / 19-03-2004
 
-Copyright (c) 2004 - 2023 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -170,6 +170,7 @@ namespace Scintilla
 		void SetSCIProperty(_In_z_ const wchar_t* key, _In_z_ const wchar_t* value);
 		void SetKeyWords(_In_ int keywordSet, _In_z_ const wchar_t* keyWords);
 		void SetIdentifiers(_In_ int style, _In_z_ const wchar_t* identifiers);
+		void ChangeLastUndoActionText(_In_z_ const wchar_t* text);
 		[[nodiscard]] StringW GetSCIProperty(_In_z_ const wchar_t* key);
 		[[nodiscard]] StringW GetPropertyExpanded(_In_z_ const wchar_t* key);
 		[[nodiscard]] int GetPropertyInt(_In_z_ const wchar_t* key, _In_ int defaultValue);
@@ -203,6 +204,7 @@ namespace Scintilla
 		[[nodiscard]] StringW AnnotationGetStyles(_In_ Line line);
 		[[nodiscard]] StringW GetSubStyleBases();
 		[[nodiscard]] StringW StyleGetInvisibleRepresentation(_In_ int style);
+		[[nodiscard]] StringW GetUndoActionText(_In_ int action);
 
 		[[nodiscard]] static StringW UTF82W(_In_NLS_string_(nLength) const char* pszText, _In_ int nLength);
 		[[nodiscard]] static StringA W2UTF8(_In_NLS_string_(nLength) const wchar_t* pszText, _In_ int nLength);
@@ -236,6 +238,7 @@ namespace Scintilla
 		[[nodiscard]] StringA AnnotationGetStyles(_In_ Line line);
 		[[nodiscard]] StringA GetSubStyleBases();
 		[[nodiscard]] StringA StyleGetInvisibleRepresentation(_In_ int style);
+		[[nodiscard]] StringA GetUndoActionText(_In_ int action);
 #endif //#ifdef _UNICODE
 
 		//Auto generated using the "ConvertScintillaiface.js" script
@@ -394,6 +397,21 @@ namespace Scintilla
 		[[nodiscard]] int GetCharacterCategoryOptimization();
 		void BeginUndoAction();
 		void EndUndoAction();
+		[[nodiscard]] int GetUndoActions();
+		void SetUndoSavePoint(_In_ int action);
+		[[nodiscard]] int GetUndoSavePoint();
+		void SetUndoDetach(_In_ int action);
+		[[nodiscard]] int GetUndoDetach();
+		void SetUndoTentative(_In_ int action);
+		[[nodiscard]] int GetUndoTentative();
+		void SetUndoCurrent(_In_ int action);
+		[[nodiscard]] int GetUndoCurrent();
+		void PushUndoActionType(_In_ int type, Position pos);
+		void ChangeLastUndoActionText(_In_z_ const char* text);
+		void ChangeLastUndoActionText(_In_ Position length, _In_reads_bytes_(length) const char* text);
+		[[nodiscard]] int GetUndoActionType(_In_ int action);
+		[[nodiscard]] Position GetUndoActionPosition(_In_ int action);
+		int GetUndoActionText(_In_ int action, _Inout_opt_z_ char* text);
 		void IndicSetStyle(_In_ int indicator, _In_ IndicatorStyle indicatorStyle);
 		[[nodiscard]] IndicatorStyle IndicGetStyle(_In_ int indicator);
 		void IndicSetFore(_In_ int indicator, _In_ COLORREF fore);

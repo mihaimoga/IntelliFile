@@ -315,8 +315,12 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 28-12-2023 1. Updated class to work with Scintilla v5.4.1. New messages wrapped include: SCI_CHANGESELECTIONMODE,
                           SCI_SETMOVEEXTENDSSELECTION & SCI_SELECTIONFROMPOINT. Also updated the signatures of the following
                           methods: GetDocPointer, SetDocPointer, CreateDocument, AddRefDocument and ReleaseDocument.
+         PJN / 29-03-2024 1. Updated copyright details.
+                          2. Updated class to work with Scintilla v5.4.3. New messages wrapped include: SCI_GETUNDOACTIONS,
+                          SCI_GETUNDOSAVEPOINT, SCI_SETUNDODETACH, SCI_SETUNDOTENTATIVE, SCI_SETUNDOCURRENT, SCI_PUSHUNDOACTIONTYPE,
+                          SCI_CHANGELASTUNDOACTIONTEXT, SCI_GETUNDOACTIONTYPE, SCI_GETUNDOACTIONPOSITION & SCI_GETUNDOACTIONTEXT.
 
-Copyright (c) 2004 - 2023 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -808,6 +812,15 @@ void CScintillaCtrl::SetIdentifiers(_In_ int style, _In_z_ const wchar_t* identi
 	SetIdentifiers(style, sUTF8);
 }
 
+void CScintillaCtrl::ChangeLastUndoActionText(_In_z_ const wchar_t* text)
+{
+	//Convert the unicode text to UTF8
+	StringA sUTF8{ W2UTF8(text, -1) };
+
+	//Call the native scintilla version of the function with the UTF8 text
+	ChangeLastUndoActionText(sUTF8.GetLength(), sUTF8);
+}
+
 CScintillaCtrl::StringW CScintillaCtrl::GetSCIProperty(_In_z_ const wchar_t* key)
 {
 	//Validate our parameters
@@ -1232,6 +1245,20 @@ CScintillaCtrl::StringW CScintillaCtrl::StyleGetInvisibleRepresentation(_In_ int
 	return UTF82W(sUTF8, -1);
 }
 
+CScintillaCtrl::StringW CScintillaCtrl::GetUndoActionText(_In_ int action)
+{
+	//Work out the length of string to allocate
+	const int nUTF8Length{ GetUndoActionText(action, nullptr) };
+
+	//Call the function which does the work
+	StringA sUTF8;
+	GetUndoActionText(action, sUTF8.GetBufferSetLength(nUTF8Length));
+	sUTF8.ReleaseBuffer();
+
+	//Now convert the UTF8 text back to Unicode
+	return UTF82W(sUTF8, -1);
+}
+
 #else
 
 CScintillaCtrl::StringA CScintillaCtrl::GetSelText()
@@ -1614,6 +1641,20 @@ CScintillaCtrl::StringA CScintillaCtrl::StyleGetInvisibleRepresentation(_In_ int
 
 	return sValue;
 }
+
+CScintillaCtrl::StringA CScintillaCtrl::GetUndoActionText(_In_ int action)
+{
+	//Work out the length of string to allocate
+	const int nValueLength{ GetUndoActionText(action, nullptr) };
+
+	//Call the function which does the work
+	StringA sValue;
+	GetUndoActionText(action, sValue.GetBufferSetLength(nValueLength));
+	sValue.ReleaseBuffer();
+
+	return sValue;
+}
+
 
 #endif //#ifdef _UNICODE
 
@@ -2393,6 +2434,81 @@ void CScintillaCtrl::BeginUndoAction()
 void CScintillaCtrl::EndUndoAction()
 {
 	Call(static_cast<UINT>(Message::EndUndoAction), 0, 0);
+}
+
+int CScintillaCtrl::GetUndoActions()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActions), 0, 0));
+}
+
+void CScintillaCtrl::SetUndoSavePoint(_In_ int action)
+{
+	Call(static_cast<UINT>(Scintilla::Message::SetUndoSavePoint), static_cast<WPARAM>(action), 0);
+}
+
+int CScintillaCtrl::GetUndoSavePoint()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoSavePoint), 0, 0));
+}
+
+void CScintillaCtrl::SetUndoDetach(_In_ int action)
+{
+	Call(static_cast<UINT>(Scintilla::Message::SetUndoDetach), static_cast<WPARAM>(action), 0);
+}
+
+int CScintillaCtrl::GetUndoDetach()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoDetach), 0, 0));
+}
+
+void CScintillaCtrl::SetUndoTentative(_In_ int action)
+{
+	Call(static_cast<UINT>(Scintilla::Message::SetUndoTentative), static_cast<WPARAM>(action), 0);
+}
+
+int CScintillaCtrl::GetUndoTentative()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoTentative), 0, 0));
+}
+
+void CScintillaCtrl::SetUndoCurrent(_In_ int action)
+{
+	Call(static_cast<UINT>(Scintilla::Message::SetUndoCurrent), static_cast<WPARAM>(action), 0);
+}
+
+int CScintillaCtrl::GetUndoCurrent()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoCurrent), 0, 0));
+}
+
+void CScintillaCtrl::PushUndoActionType(_In_ int type, Position pos)
+{
+	Call(static_cast<UINT>(Scintilla::Message::PushUndoActionType), static_cast<WPARAM>(type), static_cast<LPARAM>(pos));
+}
+
+void CScintillaCtrl::ChangeLastUndoActionText(_In_z_ const char* text)
+{
+	ChangeLastUndoActionText(strlen(text), text);
+}
+
+void CScintillaCtrl::ChangeLastUndoActionText(_In_ Position length, _In_reads_bytes_(length) const char* text)
+{
+	Call(static_cast<UINT>(Scintilla::Message::ChangeLastUndoActionText), static_cast<WPARAM>(length), reinterpret_cast<LPARAM>(text));
+}
+
+int CScintillaCtrl::GetUndoActionType(_In_ int action)
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActionType), static_cast<WPARAM>(action), 0));
+}
+
+Position CScintillaCtrl::GetUndoActionPosition(_In_ int action)
+{
+	return Call(static_cast<UINT>(Scintilla::Message::GetUndoActionPosition), static_cast<WPARAM>(action), 0);
+}
+
+int CScintillaCtrl::GetUndoActionText(_In_ int action, _Inout_opt_z_ char* text)
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActionText), static_cast<WPARAM>(action), reinterpret_cast<LPARAM>(text)));
 }
 
 void CScintillaCtrl::IndicSetStyle(_In_ int indicator, _In_ IndicatorStyle indicatorStyle)

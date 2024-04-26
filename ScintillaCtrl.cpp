@@ -319,6 +319,7 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           2. Updated class to work with Scintilla v5.4.3. New messages wrapped include: SCI_GETUNDOACTIONS,
                           SCI_GETUNDOSAVEPOINT, SCI_SETUNDODETACH, SCI_SETUNDOTENTATIVE, SCI_SETUNDOCURRENT, SCI_PUSHUNDOACTIONTYPE,
                           SCI_CHANGELASTUNDOACTIONTEXT, SCI_GETUNDOACTIONTYPE, SCI_GETUNDOACTIONPOSITION & SCI_GETUNDOACTIONTEXT.
+         PJN / 26-04-2024 1. Verified the code against Scintilla v5.5.0.
 
 Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 

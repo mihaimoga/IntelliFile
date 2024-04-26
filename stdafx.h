@@ -98,3 +98,4 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include <Lexilla.h>
 #include <SciLexer.h>
 #include <ILoader.h>
+#include <Scintilla.h>

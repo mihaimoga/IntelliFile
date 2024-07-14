@@ -35,8 +35,28 @@ const TCHAR* g_cppKeyWords
 		_T("virtual void volatile wchar_t while xor xor_eq")
 };
 
+bool IsCppFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+		return true;
+	return false;
+}
+
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_ViewTextFileDlg, pParent)
+	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pCLexer{ nullptr }
 {
 }
 
@@ -96,20 +116,29 @@ BOOL CViewTextFileDlg::OnInitDialog()
 
 	SetWindowText(m_strFilePath);
 
-	/* Create the C++ Lexer
+	if (IsCppFile(m_strFilePath))
+	{
+		// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-	theApp.m_pCLexer = theApp.m_pCreateLexer("cpp");
-	if (theApp.m_pCLexer == nullptr)
-		return FALSE;*/
+		m_pCLexer = theApp.m_pCreateLexer("cpp");
+		if (m_pCLexer == nullptr)
+			return FALSE;
 
-	m_ctrlTextFile.SetupDirectAccess();
+		m_ctrlTextFile.SetupDirectAccess();
 
-	// Setup the C++ Lexer
-	m_ctrlTextFile.SetILexer(theApp.m_pCLexer);
-	m_ctrlTextFile.SetKeyWords(0, g_cppKeyWords);
+		// Setup the C++ Lexer
+		m_ctrlTextFile.SetILexer(m_pCLexer);
+		m_ctrlTextFile.SetKeyWords(0, g_cppKeyWords);
+	}
+	else
+	{
+		m_ctrlTextFile.SetupDirectAccess();
+		// Setup the C++ Lexer
+		m_ctrlTextFile.SetILexer(m_pCLexer);
+	}
 
 	SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 10, "Consolas");
-	/* Setup styles
+	// Setup styles
 	m_ctrlTextFile.StyleClearAll();
 	SetAStyle(SCE_C_DEFAULT, RGB(0, 0, 0));
 	SetAStyle(SCE_C_COMMENT, RGB(0, 0x80, 0));
@@ -149,7 +178,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	m_ctrlTextFile.SetMouseDwellTime(1000);
 
 	// Enable Multiple selection
-	// m_ctrlTextFile.SetMultipleSelection(TRUE);*/
+	// m_ctrlTextFile.SetMultipleSelection(TRUE);
 
 	try
 	{

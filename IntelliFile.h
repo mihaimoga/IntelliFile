@@ -37,7 +37,6 @@ public:
 	Lexilla::CreateLexerFn m_pCreateLexer;
 	HINSTANCE m_hScintilla;
 	HINSTANCE m_hLexilla;
-	Scintilla::ILexer5* m_pCLexer;
 
 // Overrides
 public:

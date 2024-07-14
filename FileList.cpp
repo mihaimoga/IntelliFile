@@ -128,7 +128,11 @@ bool IsTextFile(CString strFilePath)
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 	if ((_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".log")) == 0))
+		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
 		return true;
 	return false;
 }

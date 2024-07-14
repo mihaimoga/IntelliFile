@@ -33,6 +33,7 @@ public:
 #endif
 
 public:
+	Scintilla::ILexer5* m_pCLexer;
 	CWndResizer m_pWindowResizer;
 	Scintilla::CScintillaCtrl m_ctrlTextFile;
 	CString m_strFilePath;

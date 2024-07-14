@@ -350,6 +350,12 @@
     <ClInclude Include="FilteredFolderDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SelectFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SearchFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -419,6 +425,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FilteredFolderDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectFileDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SearchFileDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -20,6 +20,8 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "FileView.h"
 #include "MainFrame.h"
 #include "ChangeDriveDlg.h"
+#include "SelectFileDlg.h"
+#include "SearchFileDlg.h"
 #include "QuickAccessDlg.h"
 #include "NewFolderDlg.h"
 #include "ViewMetaFileDlg.h"
@@ -558,7 +560,7 @@ bool CFileView::ViewFile()
 					}
 					else
 					{
-						MessageBox(_T("The selected file format cannot be viewed!\n Text, RichText or Metafile formats are supported"), _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
+						MessageBox(_T("The selected file format cannot be viewed!\nText, RichText or Metafile formats are supported"), _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
 						return false;
 					}
 
@@ -594,6 +596,75 @@ bool CFileView::EditFile()
 				m_pMainFrame->RecalcLayout();
 				return false;
 			}
+		}
+	}
+	return false;
+}
+
+bool CFileView::SelectFile()
+{
+	CSelectFileDlg dlgSelectFileDlg(this);
+	if (dlgSelectFileDlg.DoModal() == IDOK)
+	{
+		CStringArray pFileList;
+		if (m_pFileSystem.SelectFile(pFileList, dlgSelectFileDlg.m_strSearchFor,
+			dlgSelectFileDlg.m_bFileDateCheck, dlgSelectFileDlg.m_ftDateTimeFrom, dlgSelectFileDlg.m_ftDateTimeTo,
+			dlgSelectFileDlg.m_bFileSizeCheck, dlgSelectFileDlg.m_chFileSize, dlgSelectFileDlg.m_nFileSize,
+			dlgSelectFileDlg.m_bFileAttrCheck, dlgSelectFileDlg.m_dwFileAttrData, dlgSelectFileDlg.m_dwFileAttrMask))
+		{
+			if (pFileList.GetCount() > 0)
+			{
+				int nListItem = GetListCtrl().GetNextItem(-1, LVIS_SELECTED);
+				while (nListItem != -1)
+				{
+					GetListCtrl().SetItemState(nListItem, 0, LVIS_SELECTED | LVIS_FOCUSED);
+					nListItem = GetListCtrl().GetNextItem(nListItem, LVIS_SELECTED);
+				}
+				for (int nFileItem = 0; nFileItem < pFileList.GetCount(); nFileItem++)
+				{
+					const CString strFileName = pFileList.GetAt(nFileItem);
+					for (nListItem = 0; nListItem < GetListCtrl().GetItemCount(); nListItem++)
+					{
+						if (strFileName.CompareNoCase(GetListCtrl().GetItemText(nListItem, 0)) == 0)
+						{
+							GetListCtrl().SetItemState(nListItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
+							break;
+						}
+					}
+				}
+			}
+
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return true;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return false;
+		}
+	}
+	return false;
+}
+
+bool CFileView::SearchFile()
+{
+	CSearchFileDlg dlgSearchFile(this);
+	if (dlgSearchFile.DoModal() == IDOK)
+	{
+		CStringArray pFileList;
+		if (m_pFileSystem.SearchFile(pFileList, dlgSearchFile.m_strSearchFor))
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->HideMessageBar();
+			return true;
+		}
+		else
+		{
+			ASSERT_VALID(m_pMainFrame);
+			m_pMainFrame->RecalcLayout();
+			return false;
 		}
 	}
 	return false;

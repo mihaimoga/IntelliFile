@@ -64,6 +64,8 @@ public:
 	bool ChangeDrive();
 	bool ViewFile();
 	bool EditFile();
+	bool SelectFile();
+	bool SearchFile();
 	bool CopyFile(CFileView* pDestination);
 	bool MoveFile(CFileView* pDestination);
 	bool NewFolder(CFileView* pDestination);

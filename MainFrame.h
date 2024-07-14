@@ -78,6 +78,8 @@ protected:
 	afx_msg void OnSwitchViews();
 	afx_msg void OnViewFile();
 	afx_msg void OnEditFile();
+	afx_msg void OnSelectFile();
+	afx_msg void OnSearchFile();
 	afx_msg void OnCopyFile();
 	afx_msg void OnMoveFile();
 	afx_msg void OnNewFolder();

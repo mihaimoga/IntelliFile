@@ -17,6 +17,8 @@
 #define HID_RESET_VIEW                          0x1800E
 #define HID_QUICK_ACCESS                        0x1800F
 #define HID_COMMAND_PROMPT                      0x18010
+#define HID_SELECT_FILE                         0x18019
+#define HID_SEARCH_FILE                         0x1801A
  
 // Prompts (IDP_*) 
 #define HIDP_OLE_INIT_FAILED                    0x30064
@@ -42,6 +44,8 @@
 #define HIDD_ViewMetaFileDlg                    0x2013D
 #define HIDD_Base64Dlg                          0x2013E
 #define HIDD_QuickAccessDlg                     0x20140
+#define HIDD_SelectFileDlg                      0x20141
+#define HIDD_SearchFileDlg                      0x20142
  
 // Frame Controls (IDW_*) 
 // This is a part of the Microsoft Foundation Classes C++ library.

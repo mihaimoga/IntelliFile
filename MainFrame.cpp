@@ -48,6 +48,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(IDC_SWITCH_VIEWS, &CMainFrame::OnSwitchViews)
 	ON_COMMAND(ID_VIEW_FILE, &CMainFrame::OnViewFile)
 	ON_COMMAND(ID_EDIT_FILE, &CMainFrame::OnEditFile)
+	ON_COMMAND(ID_SELECT_FILE, &CMainFrame::OnSelectFile)
+	ON_COMMAND(ID_SEARCH_FILE, &CMainFrame::OnSearchFile)
 	ON_COMMAND(ID_COPY_FILE, &CMainFrame::OnCopyFile)
 	ON_COMMAND(ID_MOVE_FILE, &CMainFrame::OnMoveFile)
 	ON_COMMAND(ID_NEW_FOLDER, &CMainFrame::OnNewFolder)
@@ -500,6 +502,20 @@ void CMainFrame::OnEditFile()
 	CFileView* pActiveView = (CFileView*)GetActiveView();
 	ASSERT_VALID(pActiveView);
 	VERIFY(pActiveView->EditFile());
+}
+
+void CMainFrame::OnSelectFile()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->SelectFile());
+}
+
+void CMainFrame::OnSearchFile()
+{
+	CFileView* pActiveView = (CFileView*)GetActiveView();
+	ASSERT_VALID(pActiveView);
+	VERIFY(pActiveView->SearchFile());
 }
 
 void CMainFrame::OnCopyFile()

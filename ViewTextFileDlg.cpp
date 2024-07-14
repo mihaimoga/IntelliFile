@@ -26,13 +26,13 @@ IMPLEMENT_DYNAMIC(CViewTextFileDlg, CDialogEx)
 const TCHAR* g_cppKeyWords
 {
 	_T("alignas alignof and and_eq asm atomic_cancel atomic_commit atomic_noexcept auto bitand bitor bool break ")
-		_T("case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue ")
-		_T("co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for ")
-		_T("friend goto if inline int long mutable namespace new noexcept not not_eq nullptr ")
-		_T("operator or or_eq private protected public ")
-		_T("reflexpr register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch synchronized ")
-		_T("template this thread_local throw true try typedef typeid typename union unsigned using ")
-		_T("virtual void volatile wchar_t while xor xor_eq")
+	_T("case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue ")
+	_T("co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for ")
+	_T("friend goto if inline int long mutable namespace new noexcept not not_eq nullptr ")
+	_T("operator or or_eq private protected public ")
+	_T("reflexpr register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch synchronized ")
+	_T("template this thread_local throw true try typedef typeid typename union unsigned using ")
+	_T("virtual void volatile wchar_t while xor xor_eq")
 };
 
 bool IsCppFile(CString strFilePath)

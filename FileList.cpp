@@ -383,6 +383,13 @@ bool CFileSystem::Refresh()
 				return false;
 
 			hFindFile = FindFirstFile(_T("*.*"), &pFindData);
+			DWORD dwError = GetLastError();
+			if ((dwError != ERROR_FILE_NOT_FOUND) && (dwError != NO_ERROR))
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), dwError);
+				return false;
+			}
+
 			if (hFindFile != INVALID_HANDLE_VALUE)
 			{
 				do
@@ -405,22 +412,24 @@ bool CFileSystem::Refresh()
 				}
 				while (FindNextFile(hFindFile, &pFindData) != 0);
 
-				const DWORD dwError = GetLastError();
+				dwError = GetLastError();
 				if (dwError != ERROR_NO_MORE_FILES) 
 				{
 					DisplayErrorBox(m_wndCaptionBar, _T("FindNextFile"), dwError);
+					return false;
 				}
 
 				if (!FindClose(hFindFile))
 				{
 					DisplayErrorBox(m_wndCaptionBar, _T("FindClose"), GetLastError());
+					return false;
 				}
 			}
-			else
+			/* else
 			{
 				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), GetLastError());
 				return false;
-			}
+			}*/
 			return true;
 		}
 	}
@@ -535,6 +544,112 @@ bool CFileSystem::EditFile(CString strFilePath)
 	}
 
 	return false;
+}
+
+bool CFileSystem::SelectFile(CStringArray& arrFileList, const CString& strSearchFor,
+	const bool& bFileDateCheck, const COleDateTime& ftDateTimeFrom, const COleDateTime& ftDateTimeTo,
+	const bool& bFileSizeCheck, const TCHAR& chFileSize, const ULONGLONG& dwFileSize,
+	const bool& bFileAttrCheck, const DWORD& dwFileAttrData, const DWORD& dwFileAttrMask)
+{
+	HANDLE hFindFile = nullptr;
+	WIN32_FIND_DATA pFindData = { 0 };
+
+	arrFileList.RemoveAll();
+	switch (m_nSystemType)
+	{
+		case FILE_TYPE_FAT:
+		{
+			if (!SetCurrentFolder(m_strCurrentFolder))
+				return false;
+
+			hFindFile = FindFirstFile(strSearchFor, &pFindData);
+			DWORD dwError = GetLastError();
+			if ((dwError != ERROR_FILE_NOT_FOUND) && (dwError != NO_ERROR))
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), dwError);
+				return false;
+			}
+
+			if (hFindFile != INVALID_HANDLE_VALUE)
+			{
+				do
+				{
+					if ((CString(pFindData.cFileName).CompareNoCase(_T(".")) != 0) &&
+						((CString(pFindData.cFileName).CompareNoCase(_T("..")) != 0) || (m_strCurrentFolder.GetLength() > 3)))
+					{
+						if (bFileDateCheck)
+						{
+							if (COleDateTime(pFindData.ftLastWriteTime) < ftDateTimeFrom)
+								continue;
+							if (COleDateTime(pFindData.ftLastWriteTime) > ftDateTimeTo)
+								continue;
+						}
+
+						if (bFileSizeCheck)
+						{
+							const ULONGLONG nFileSize = (ULONGLONG)(pFindData.nFileSizeLow) +
+								((ULONGLONG)(pFindData.nFileSizeHigh) << 32);
+							if (_T('=') == chFileSize)
+							{
+								if (nFileSize != dwFileSize)
+									continue;
+							}
+							else
+							{
+								if (_T('<') == chFileSize)
+								{
+									if (nFileSize > dwFileSize)
+										continue;
+								}
+								else
+								{
+									if (_T('>') == chFileSize)
+									{
+										if (nFileSize < dwFileSize)
+											continue;
+									}
+								}
+							}
+						}
+
+						if (bFileAttrCheck)
+						{
+							if ((pFindData.dwFileAttributes & dwFileAttrMask) != dwFileAttrData)
+								continue;
+						}
+
+						arrFileList.Add(pFindData.cFileName);
+					}
+				} while (FindNextFile(hFindFile, &pFindData) != 0);
+
+				dwError = GetLastError();
+				if (dwError != ERROR_NO_MORE_FILES)
+				{
+					DisplayErrorBox(m_wndCaptionBar, _T("FindNextFile"), dwError);
+					return false;
+				}
+
+				if (!FindClose(hFindFile))
+				{
+					DisplayErrorBox(m_wndCaptionBar, _T("FindClose"), GetLastError());
+					return false;
+				}
+			}
+			/* else
+			{
+				DisplayErrorBox(m_wndCaptionBar, _T("FindFirstFile"), GetLastError());
+				return false;
+			}*/
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool CFileSystem::SearchFile(CStringArray& arrFileList, const CString& strSearchFor)
+{
+	return true;
 }
 
 bool CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)

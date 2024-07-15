@@ -120,11 +120,20 @@ public:
 	bool ViewFile(CString strFilePath);
 	bool EditFile(CString strFilePath);
 
-	bool SelectFile(CStringArray& arrFileList, const CString& strSearchFor,
+	bool FindText(const std::wstring& strFilePath, const std::wstring& strFindText);
+	bool ReplaceText(const std::wstring& strFilePath, const std::wstring& strFindText, const std::wstring& strReplaceText);
+
+	bool SelectFile(
+		CStringArray& arrFileList, const CString& strSearchFor,
 		const bool& bFileDateCheck, const COleDateTime& ftDateTimeFrom, const COleDateTime& ftDateTimeTo,
 		const bool& bFileSizeCheck, const TCHAR& chFileSize, const ULONGLONG& dwFileSize,
 		const bool& bFileAttrCheck, const DWORD& dwFileAttrData, const DWORD& dwFileAttrMask);
-	bool SearchFile(CStringArray& arrFileList, const CString& strSearchFor);
+	bool SearchFile(
+		CMFCListCtrl& pListCtrl, const CString& strSearchFor, const CString& strCurrentFolder,
+		const bool& bFileDateCheck, const COleDateTime& ftDateTimeFrom, const COleDateTime& ftDateTimeTo,
+		const bool& bFileSizeCheck, const TCHAR& chFileSize, const ULONGLONG& dwFileSize,
+		const bool& bFileAttrCheck, const DWORD& dwFileAttrData, const DWORD& dwFileAttrMask,
+		const bool& bFindTextCheck, const CString& strFindText, const bool& bReplaceTextCheck, const CString& strReplaceText);
 
 	bool CopyFile(CFileSystem* pDestination, CFileList* arrSelection);
 	bool MoveFile(CFileSystem* pDestination, CFileList* arrSelection);

@@ -56,10 +56,11 @@ protected:  // control bar embedded members
 	CSplitterWndEx m_wndSplitter;
 	CFileView*    m_wndLeftFileView;
 	CFileView*    m_wndRightFileView;
-	CImageList m_pImageList;
 	bool m_bShiftPressed;
 	bool m_bCtrlPressed;
 	bool m_bMenuPressed;
+public:
+	CImageList m_pImageList;
 
 // Generated message map functions
 protected:

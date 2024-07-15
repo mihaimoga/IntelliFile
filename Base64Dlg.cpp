@@ -103,7 +103,7 @@ void CBase64Dlg::OnBnClickedEncode()
 		{
 			pInputFile.seekg(0, std::ios::end);
 			std::streampos size = pInputFile.tellg();
-			char* memblock = new char[(long long)size + 1];
+			char* memblock = new char[(unsigned long long)size + 1];
 			if (memblock)
 			{
 				pInputFile.seekg(0, std::ios::beg);
@@ -115,13 +115,12 @@ void CBase64Dlg::OnBnClickedEncode()
 
 				delete[] memblock;
 				memblock = nullptr;
-
-				CDialogEx::EndDialog(IDOK);
 			}
 			pOutputFile.close();
 		}
 		pInputFile.close();
 	}
+	CDialogEx::EndDialog(IDOK);
 }
 
 void CBase64Dlg::OnBnClickedDecode()
@@ -148,11 +147,10 @@ void CBase64Dlg::OnBnClickedDecode()
 
 				delete[] memblock;
 				memblock = nullptr;
-
-				CDialogEx::EndDialog(IDOK);
 			}
 			pOutputFile.close();
 		}
 		pInputFile.close();
 	}
+	CDialogEx::EndDialog(IDOK);
 }

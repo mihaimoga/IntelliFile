@@ -26,6 +26,18 @@ IMPLEMENT_DYNAMIC(CSelectFileDlg, CDialogEx)
 CSelectFileDlg::CSelectFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SelectFileDlg, pParent)
 {
+	m_bHideDirectoryFlag = false;
+	m_strSearchFor = _T("*.*");
+	m_bFileDateCheck = false;
+	m_bFileSizeCheck = false;
+	m_chFileSize = _T('='); // sign
+	m_nFileSize = 0ULL; // amount
+	m_bFileAttrCheck = false;
+	m_dwFileAttrData = 0;
+	m_dwFileAttrMask = 0;
+
+	m_nFileSizeSign = 0;
+	m_nFileSizeType = 0;
 }
 
 CSelectFileDlg::~CSelectFileDlg()
@@ -56,10 +68,10 @@ void CSelectFileDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CSelectFileDlg, CDialogEx)
 	ON_WM_DESTROY()
+	ON_EN_CHANGE(IDC_SEARCH_FOR, &CSelectFileDlg::OnChangeSearchFor)
 	ON_BN_CLICKED(IDC_DATE_BETWEEN, &CSelectFileDlg::OnClickedDateBetween)
 	ON_BN_CLICKED(IDC_FILE_SIZE_CHECK, &CSelectFileDlg::OnClickedFileSizeCheck)
 	ON_BN_CLICKED(IDC_FILE_ATTR_CHECK, &CSelectFileDlg::OnClickedFileAttrCheck)
-	ON_EN_CHANGE(IDC_SEARCH_FOR, &CSelectFileDlg::OnChangeSearchFor)
 END_MESSAGE_MAP()
 
 // CSelectFileDlg message handlers
@@ -68,18 +80,50 @@ BOOL CSelectFileDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	m_ctrlSearchFor.SetWindowText(_T("*.*"));
-	
+	m_ctrlSearchFor.SetWindowText(m_strSearchFor);
+
+	m_ctrlFileDateCheck.SetCheck(m_bFileDateCheck);
+	m_ctrlFileDateFrom.SetTime(m_ftDateTimeFrom);
+	m_ctrlFileTimeFrom.SetTime(m_ftDateTimeFrom);
+	m_ctrlFileDateTo.SetTime(m_ftDateTimeTo);
+	m_ctrlFileTimeTo.SetTime(m_ftDateTimeTo);
+
+	m_ctrlFileSizeCheck.SetCheck(m_bFileSizeCheck);
 	m_ctrlFileSizeSign.AddString(_T("="));
 	m_ctrlFileSizeSign.AddString(_T("<"));
 	m_ctrlFileSizeSign.AddString(_T(">"));
-	m_ctrlFileSizeSign.SetCurSel(0);
+	m_ctrlFileSizeSign.SetCurSel(m_nFileSizeSign);
+
+	m_ctrlFileSizeAmount.SetWindowText(m_strFileSize);
 
 	m_ctrlFileSizeType.AddString(_T("bytes"));
 	m_ctrlFileSizeType.AddString(_T("KB"));
 	m_ctrlFileSizeType.AddString(_T("MB"));
 	m_ctrlFileSizeType.AddString(_T("GB"));
-	m_ctrlFileSizeType.SetCurSel(0);
+	m_ctrlFileSizeType.SetCurSel(m_nFileSizeType);
+
+	m_ctrlFileAttrCheck.SetCheck(m_bFileAttrCheck);
+	m_ctrlFileAttrReadOnly.SetCheck(
+		((m_dwFileAttrMask & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY) ?
+		(((m_dwFileAttrData & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY) ?
+			BST_CHECKED : BST_UNCHECKED) : BST_INDETERMINATE);
+	m_ctrlFileAttrHidden.SetCheck(
+		((m_dwFileAttrMask & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN) ?
+		(((m_dwFileAttrData & FILE_ATTRIBUTE_HIDDEN) == FILE_ATTRIBUTE_HIDDEN) ?
+			BST_CHECKED : BST_UNCHECKED) : BST_INDETERMINATE);
+	m_ctrlFileAttrSystem.SetCheck(
+		((m_dwFileAttrMask & FILE_ATTRIBUTE_SYSTEM) == FILE_ATTRIBUTE_SYSTEM) ?
+		(((m_dwFileAttrData & FILE_ATTRIBUTE_SYSTEM) == FILE_ATTRIBUTE_SYSTEM) ?
+			BST_CHECKED : BST_UNCHECKED) : BST_INDETERMINATE);
+	m_ctrlFileAttrArchive.SetCheck(
+		((m_dwFileAttrMask & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE) ?
+		(((m_dwFileAttrData & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE) ?
+			BST_CHECKED : BST_UNCHECKED) : BST_INDETERMINATE);
+	m_ctrlFileAttrDirectory.SetCheck(
+		((m_dwFileAttrMask & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) ?
+		(((m_dwFileAttrData & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) ?
+			BST_CHECKED : BST_UNCHECKED) : BST_INDETERMINATE);
+	m_ctrlFileAttrDirectory.EnableWindow(!m_bHideDirectoryFlag);
 
 	OnClickedDateBetween();
 	OnClickedFileSizeCheck();
@@ -95,7 +139,6 @@ void CSelectFileDlg::OnDestroy()
 	COleDateTime ftTimeFrom;
 	COleDateTime ftDateTo;
 	COleDateTime ftTimeTo;
-	CString strBuffer;
 
 	m_ctrlSearchFor.GetWindowText(m_strSearchFor);
 
@@ -122,7 +165,8 @@ void CSelectFileDlg::OnDestroy()
 	TRACE(_T("m_ftDateTimeTo = %s\n"), static_cast<LPCWSTR>(m_ftDateTimeTo.Format()));
 
 	m_bFileSizeCheck = ((m_ctrlFileSizeCheck.GetState() & BST_CHECKED) == BST_CHECKED);
-	switch (m_ctrlFileSizeSign.GetCurSel())
+	m_nFileSizeSign = m_ctrlFileSizeSign.GetCurSel();
+	switch (m_nFileSizeSign)
 	{
 		case 1:
 			m_chFileSize = _T('<');
@@ -135,14 +179,15 @@ void CSelectFileDlg::OnDestroy()
 			m_chFileSize = _T('=');
 			break;
 	}
-	m_ctrlFileSizeAmount.GetWindowText(strBuffer);
+	m_ctrlFileSizeAmount.GetWindowText(m_strFileSize);
 	m_nFileSize = 0;
-	if (strBuffer.GetLength() > 0)
+	if (m_strFileSize.GetLength() > 0)
 	{
-		m_nFileSize = std::stoull(strBuffer.GetBuffer());
-		strBuffer.ReleaseBuffer();
+		m_nFileSize = std::stoull(m_strFileSize.GetBuffer());
+		m_strFileSize.ReleaseBuffer();
 	}
-	switch (m_ctrlFileSizeType.GetCurSel())
+	m_nFileSizeType = m_ctrlFileSizeType.GetCurSel();
+	switch (m_nFileSizeType)
 	{
 		case 1:
 			m_nFileSize *= 1024ULL;
@@ -164,7 +209,7 @@ void CSelectFileDlg::OnDestroy()
 	}
 	else
 	{
-		if (((m_ctrlFileAttrReadOnly.GetState() & BST_UNCHECKED) == BST_UNCHECKED))
+		if (!((m_ctrlFileAttrReadOnly.GetState() & BST_INDETERMINATE) == BST_INDETERMINATE))
 		{
 			m_dwFileAttrMask |= FILE_ATTRIBUTE_READONLY;
 		}
@@ -176,7 +221,7 @@ void CSelectFileDlg::OnDestroy()
 	}
 	else
 	{
-		if (((m_ctrlFileAttrHidden.GetState() & BST_UNCHECKED) == BST_UNCHECKED))
+		if (!((m_ctrlFileAttrHidden.GetState() & BST_INDETERMINATE) == BST_INDETERMINATE))
 		{
 			m_dwFileAttrMask |= FILE_ATTRIBUTE_HIDDEN;
 		}
@@ -188,7 +233,7 @@ void CSelectFileDlg::OnDestroy()
 	}
 	else
 	{
-		if (((m_ctrlFileAttrSystem.GetState() & BST_UNCHECKED) == BST_UNCHECKED))
+		if (!((m_ctrlFileAttrSystem.GetState() & BST_INDETERMINATE) == BST_INDETERMINATE))
 		{
 			m_dwFileAttrMask |= FILE_ATTRIBUTE_SYSTEM;
 		}
@@ -200,7 +245,7 @@ void CSelectFileDlg::OnDestroy()
 	}
 	else
 	{
-		if (((m_ctrlFileAttrArchive.GetState() & BST_UNCHECKED) == BST_UNCHECKED))
+		if (!((m_ctrlFileAttrArchive.GetState() & BST_INDETERMINATE) == BST_INDETERMINATE))
 		{
 			m_dwFileAttrMask |= FILE_ATTRIBUTE_ARCHIVE;
 		}
@@ -212,7 +257,7 @@ void CSelectFileDlg::OnDestroy()
 	}
 	else
 	{
-		if (((m_ctrlFileAttrDirectory.GetState() & BST_UNCHECKED) == BST_UNCHECKED))
+		if (!((m_ctrlFileAttrDirectory.GetState() & BST_INDETERMINATE) == BST_INDETERMINATE))
 		{
 			m_dwFileAttrMask |= FILE_ATTRIBUTE_DIRECTORY;
 		}
@@ -237,7 +282,7 @@ void CSelectFileDlg::OnChangeSearchFor()
 
 void CSelectFileDlg::OnClickedDateBetween()
 {
-	bool bIsChecked = ((m_ctrlFileDateCheck.GetState() & BST_CHECKED) == BST_CHECKED);
+	const bool bIsChecked = ((m_ctrlFileDateCheck.GetState() & BST_CHECKED) == BST_CHECKED);
 	m_ctrlFileDateFrom.EnableWindow(bIsChecked);
 	m_ctrlFileTimeFrom.EnableWindow(bIsChecked);
 	m_ctrlFileDateTo.EnableWindow(bIsChecked);
@@ -246,7 +291,7 @@ void CSelectFileDlg::OnClickedDateBetween()
 
 void CSelectFileDlg::OnClickedFileSizeCheck()
 {
-	bool bIsChecked = ((m_ctrlFileSizeCheck.GetState() & BST_CHECKED) == BST_CHECKED);
+	const bool bIsChecked = ((m_ctrlFileSizeCheck.GetState() & BST_CHECKED) == BST_CHECKED);
 	m_ctrlFileSizeSign.EnableWindow(bIsChecked);
 	m_ctrlFileSizeAmount.EnableWindow(bIsChecked);
 	m_ctrlFileSizeType.EnableWindow(bIsChecked);
@@ -254,10 +299,10 @@ void CSelectFileDlg::OnClickedFileSizeCheck()
 
 void CSelectFileDlg::OnClickedFileAttrCheck()
 {
-	bool bIsChecked = ((m_ctrlFileAttrCheck.GetState() & BST_CHECKED) == BST_CHECKED);
+	const bool bIsChecked = ((m_ctrlFileAttrCheck.GetState() & BST_CHECKED) == BST_CHECKED);
 	m_ctrlFileAttrReadOnly.EnableWindow(bIsChecked);
 	m_ctrlFileAttrHidden.EnableWindow(bIsChecked);
 	m_ctrlFileAttrSystem.EnableWindow(bIsChecked);
 	m_ctrlFileAttrArchive.EnableWindow(bIsChecked);
-	m_ctrlFileAttrDirectory.EnableWindow(bIsChecked);
+	m_ctrlFileAttrDirectory.EnableWindow(bIsChecked && !m_bHideDirectoryFlag);
 }

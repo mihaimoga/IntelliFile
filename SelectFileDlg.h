@@ -48,6 +48,7 @@ protected:
 	CButton m_ctrlFileAttrDirectory;
 	CButton m_ctrlOkButton;
 public:
+	bool m_bHideDirectoryFlag;
 	CString m_strSearchFor;
 	bool m_bFileDateCheck;
 	COleDateTime m_ftDateTimeFrom;
@@ -58,6 +59,10 @@ public:
 	bool m_bFileAttrCheck;
 	DWORD m_dwFileAttrData;
 	DWORD m_dwFileAttrMask;
+public:
+	int m_nFileSizeSign;
+	CString m_strFileSize;
+	int m_nFileSizeType;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

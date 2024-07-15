@@ -166,7 +166,7 @@ void CFileView::OnInitialUpdate()
 		m_pFileSystem.SetParent(this->m_hWnd);
 
 		GetListCtrl().SetExtendedStyle(GetListCtrl().GetExtendedStyle()
-			| LVS_EX_DOUBLEBUFFER |LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+			| LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 		CRect rectClient;
 		GetListCtrl().GetClientRect(&rectClient);
@@ -376,8 +376,6 @@ void CFileView::DoubleClickEntry(int nIndex)
 			{
 				ASSERT_VALID(m_pMainFrame);
 				m_pMainFrame->HideMessageBar();
-				// call function to add strFilePath to the MRU file list
-				theApp.AddToRecentFileList(strFilePath);
 			}
 			else
 			{
@@ -438,7 +436,6 @@ bool CFileView::Refresh(CString* strNewFolderName)
 		GetListCtrl().SetItemText(nListItem, 2, pFileData->FormatDate());
 		GetListCtrl().SetItemText(nListItem, 3, pFileData->FormatAttr());
 		GetListCtrl().SetItemData(nListItem, nIndex);
-
 		SHFILEINFO pshFileInfo = { 0 };
 		SHGetFileInfo(
 			(LPCTSTR)pFileData->GetFileName(),
@@ -472,6 +469,7 @@ bool CFileView::Refresh(CString* strNewFolderName)
 	}
 	GetListCtrl().SetItemState(nListItem, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	GetListCtrl().SetRedraw(TRUE);
+	// GetListCtrl().Invalidate();
 	GetListCtrl().UpdateWindow();
 	ResizeListCtrl();
 	ASSERT_VALID(m_pMainFrame);
@@ -532,8 +530,6 @@ bool CFileView::ViewFile()
 				CViewTextFileDlg dlgViewTextFile(this);
 				dlgViewTextFile.m_strFilePath = strFilePath;
 				dlgViewTextFile.DoModal();
-				// call function to add strFilePath to the MRU file list
-				theApp.AddToRecentFileList(strFilePath);
 				return true;
 			}
 			else
@@ -543,8 +539,6 @@ bool CFileView::ViewFile()
 					CViewRichFileDlg dlgViewRichFile(this);
 					dlgViewRichFile.m_strFilePath = strFilePath;
 					dlgViewRichFile.DoModal();
-					// call function to add strFilePath to the MRU file list
-					theApp.AddToRecentFileList(strFilePath);
 					return true;
 				}
 				else
@@ -554,8 +548,6 @@ bool CFileView::ViewFile()
 						CViewMetaFileDlg dlgViewMetaFile(this);
 						dlgViewMetaFile.m_strFilePath = strFilePath;
 						dlgViewMetaFile.DoModal();
-						// call function to add strFilePath to the MRU file list
-						theApp.AddToRecentFileList(strFilePath);
 						return true;
 					}
 					else
@@ -586,8 +578,6 @@ bool CFileView::EditFile()
 			{
 				ASSERT_VALID(m_pMainFrame);
 				m_pMainFrame->HideMessageBar();
-				// call function to add strFilePath to the MRU file list
-				theApp.AddToRecentFileList(strFilePath);
 				return true;
 			}
 			else
@@ -651,23 +641,11 @@ bool CFileView::SelectFile()
 bool CFileView::SearchFile()
 {
 	CSearchFileDlg dlgSearchFile(this);
-	if (dlgSearchFile.DoModal() == IDOK)
-	{
-		CStringArray pFileList;
-		if (m_pFileSystem.SearchFile(pFileList, dlgSearchFile.m_strSearchFor))
-		{
-			ASSERT_VALID(m_pMainFrame);
-			m_pMainFrame->HideMessageBar();
-			return true;
-		}
-		else
-		{
-			ASSERT_VALID(m_pMainFrame);
-			m_pMainFrame->RecalcLayout();
-			return false;
-		}
-	}
-	return false;
+	dlgSearchFile.m_pMainFrame = m_pMainFrame;
+	dlgSearchFile.m_pFileSystem = &m_pFileSystem;
+	dlgSearchFile.m_strCurrentFolder = m_pFileSystem.GetCurrentFolder();
+	dlgSearchFile.DoModal();
+	return true;
 }
 
 bool CFileView::CopyFile(CFileView* pDestination)

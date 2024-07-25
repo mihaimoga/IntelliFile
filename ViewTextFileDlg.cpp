@@ -23,7 +23,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 
 IMPLEMENT_DYNAMIC(CViewTextFileDlg, CDialogEx)
 
-const TCHAR* g_cppKeyWords
+const TCHAR* g_cppKeywords
 {
 	_T("alignas alignof and and_eq asm atomic_cancel atomic_commit atomic_noexcept auto bitand bitor bool break ")
 	_T("case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue ")
@@ -35,7 +35,18 @@ const TCHAR* g_cppKeyWords
 	_T("virtual void volatile wchar_t while xor xor_eq")
 };
 
-const TCHAR* g_pyKeyWords
+const TCHAR* g_javaKeywords
+{
+	/* https://www.w3schools.com/java/java_ref_keywords.asp */
+	_T("abstract assert boolean break byte case catch char class continue const ")
+	_T("default do double else enum exports extends final finally float for goto ")
+	_T("if implements import instanceof int interface long module native new ")
+	_T("package private protected public requires return short static strictfp ")
+	_T("super switch synchronized this throw throws transient try var void ")
+	_T("volatile while")
+};
+
+const TCHAR* g_pyKeywords
 {
 	/* https://www.w3schools.com/python/python_ref_keywords.asp */
 	_T("and as assert break class continue def del elif else except False finally ")
@@ -57,8 +68,27 @@ bool IsCppFile(CString strFilePath)
 		lpszExtension, _MAX_EXT);
 	if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+		return true;
+	return false;
+}
+
+bool IsJavaFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".java")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".js")) == 0))
 		return true;
 	return false;
 }
@@ -153,30 +183,47 @@ BOOL CViewTextFileDlg::OnInitDialog()
 
 		// Setup the C++ Lexer
 		m_ctrlTextFile.SetILexer(m_pCLexer);
-		m_ctrlTextFile.SetKeyWords(0, g_cppKeyWords);
+		m_ctrlTextFile.SetKeyWords(0, g_cppKeywords);
 	}
 	else
 	{
-		if (IsPythonFile(m_strFilePath))
+		if (IsJavaFile(m_strFilePath))
 		{
-			// Create the Python Lexer
+			// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-			m_pCLexer = theApp.m_pCreateLexer("python");
+			m_pCLexer = theApp.m_pCreateLexer("cpp");
 			if (m_pCLexer == nullptr)
 				return FALSE;
 
 			m_ctrlTextFile.SetupDirectAccess();
 
-			// Setup the Python Lexer
+			// Setup the C++ Lexer
 			m_ctrlTextFile.SetILexer(m_pCLexer);
-			m_ctrlTextFile.SetKeyWords(0, g_pyKeyWords);
+			m_ctrlTextFile.SetKeyWords(0, g_javaKeywords);
 		}
 		else
 		{
-			m_ctrlTextFile.SetupDirectAccess();
-			// Setup the C++ Lexer
-			m_ctrlTextFile.SetILexer(m_pCLexer);
+			if (IsPythonFile(m_strFilePath))
+			{
+				// Create the Python Lexer
+#pragma warning(suppress: 26429)
+				m_pCLexer = theApp.m_pCreateLexer("python");
+				if (m_pCLexer == nullptr)
+					return FALSE;
 
+				m_ctrlTextFile.SetupDirectAccess();
+
+				// Setup the Python Lexer
+				m_ctrlTextFile.SetILexer(m_pCLexer);
+				m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
+			}
+			else
+			{
+				m_ctrlTextFile.SetupDirectAccess();
+				// Setup the C++ Lexer
+				m_ctrlTextFile.SetILexer(m_pCLexer);
+
+			}
 		}
 	}
 

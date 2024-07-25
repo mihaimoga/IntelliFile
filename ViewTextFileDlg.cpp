@@ -25,14 +25,21 @@ IMPLEMENT_DYNAMIC(CViewTextFileDlg, CDialogEx)
 
 const TCHAR* g_cppKeywords
 {
-	_T("alignas alignof and and_eq asm atomic_cancel atomic_commit atomic_noexcept auto bitand bitor bool break ")
+	/* _T("alignas alignof and and_eq asm atomic_cancel atomic_commit atomic_noexcept auto bitand bitor bool break ")
 	_T("case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue ")
 	_T("co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for ")
 	_T("friend goto if inline int long mutable namespace new noexcept not not_eq nullptr ")
 	_T("operator or or_eq private protected public ")
 	_T("reflexpr register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch synchronized ")
 	_T("template this thread_local throw true try typedef typeid typename union unsigned using ")
-	_T("virtual void volatile wchar_t while xor xor_eq")
+	_T("virtual void volatile wchar_t while xor xor_eq") */
+
+	/* https://www.w3schools.com/cpp/cpp_ref_keywords.asp */
+	_T("and and_eq bitand bitor bool break case catch char class compl const ")
+	_T("continue default delete do double else enum false float for friend goto ")
+	_T("if int long namespace new not not_eq or or_eq private protected public ")
+	_T("return short signed sizeof static struct switch template this throw true ")
+	_T("try typedef unsigned using virtual void while xor xor_eq")
 };
 
 const TCHAR* g_javaKeywords

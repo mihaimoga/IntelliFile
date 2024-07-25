@@ -132,7 +132,8 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".py")) == 0))
 		return true;
 	return false;
 }

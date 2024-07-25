@@ -35,6 +35,14 @@ const TCHAR* g_cppKeyWords
 	_T("virtual void volatile wchar_t while xor xor_eq")
 };
 
+const TCHAR* g_pyKeyWords
+{
+	/* https://www.w3schools.com/python/python_ref_keywords.asp */
+	_T("and as assert break class continue def del elif else except False finally ")
+	_T("for from global if import in is lambda None nonlocal not or pass raise ")
+	_T("return True try while with yield")
+};
+
 bool IsCppFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
@@ -51,6 +59,23 @@ bool IsCppFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+		return true;
+	return false;
+}
+
+bool IsPythonFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if (_tcsicmp(lpszExtension, _T(".py")) == 0)
 		return true;
 	return false;
 }
@@ -132,9 +157,27 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	}
 	else
 	{
-		m_ctrlTextFile.SetupDirectAccess();
-		// Setup the C++ Lexer
-		m_ctrlTextFile.SetILexer(m_pCLexer);
+		if (IsPythonFile(m_strFilePath))
+		{
+			// Create the Python Lexer
+#pragma warning(suppress: 26429)
+			m_pCLexer = theApp.m_pCreateLexer("python");
+			if (m_pCLexer == nullptr)
+				return FALSE;
+
+			m_ctrlTextFile.SetupDirectAccess();
+
+			// Setup the Python Lexer
+			m_ctrlTextFile.SetILexer(m_pCLexer);
+			m_ctrlTextFile.SetKeyWords(0, g_pyKeyWords);
+		}
+		else
+		{
+			m_ctrlTextFile.SetupDirectAccess();
+			// Setup the C++ Lexer
+			m_ctrlTextFile.SetILexer(m_pCLexer);
+
+		}
 	}
 
 	SetAStyle(static_cast<int>(Scintilla::StylesCommon::Default), RGB(0, 0, 0), RGB(0xff, 0xff, 0xff), 10, "Consolas");

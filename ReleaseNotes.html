@@ -35,98 +35,107 @@
         </nav>
 
         <div class="container">
-            <h1>Release Notes</h1>
-                <p><strong>IntelliFile</strong> is an alternative Windows version to the famous Total Commander!</p>
-                <p>Download: <a href="https://www.moga.doctor/freeware/IntelliFileSetup.msi">https://www.moga.doctor/freeware/IntelliFileSetup.msi</a></p>
-                <p>GitHub repo: <a href="https://github.com/mihaimoga/IntelliFile" target="_blank">https://github.com/mihaimoga/IntelliFile</a></p>
-                <p>Article: <a href="https://www.codeproject.com/Articles/5331868/IntelliFile-An-Alternative-Windows-Version-to-the" target="_blank">https://www.codeproject.com/Articles/5331868/IntelliFile-An-Alternative-Windows-Version-to-the</a></p>
-            <h2>Social Media</h2>
-            <p>Please feel free to contact me if you need any further information.</p>
-            <ul>
-                <li><img class="img-responsive" src="https://www.moga.doctor/img/twitter.png" alt="Twitter">&nbsp;<a href="https://x.com/stefanmihaimoga" target="_blank">X/Twitter</a></li>
-                <li><img class="img-responsive" src="https://www.moga.doctor/img/linkedin.png" alt="LinkedIn">&nbsp;<a href="https://www.linkedin.com/in/stefanmihaimoga/" target="_blank">LinkedIn</a></li>
-                <li><img class="img-responsive" src="https://www.moga.doctor/img/facebook.png" alt="Facebook">&nbsp;<a href="https://www.facebook.com/stefanmihaimoga" target="_blank">Facebook</a></li>
-                <li><img class="img-responsive" src="https://www.moga.doctor/img/instagram.png" alt="Instagram">&nbsp;<a href="https://www.instagram.com/stefanmihaimoga/" target="_blank">Instagram</a></li>
-            </ul>
+            <div class="row divide-md">
+                <div class="col-md-12 col-sm-12 divide-md text-justify" style="text-align: justify;">
+                    <h1>Release Notes</h1>
+                        <p><strong>IntelliFile</strong> is an alternative Windows version to the famous Total Commander!</p>
+                        <p>Download: <a href="https://www.moga.doctor/freeware/IntelliFileSetup.msi">https://www.moga.doctor/freeware/IntelliFileSetup.msi</a></p>
+                        <p>GitHub repo: <a href="https://github.com/mihaimoga/IntelliFile" target="_blank">https://github.com/mihaimoga/IntelliFile</a></p>
+                        <p>Article: <a href="https://www.codeproject.com/Articles/5331868/IntelliFile-An-Alternative-Windows-Version-to-the" target="_blank">https://www.codeproject.com/Articles/5331868/IntelliFile-An-Alternative-Windows-Version-to-the</a></p>
+                    <h2>Social Media</h2>
+                    <p>Please feel free to contact me if you need any further information.</p>
+                    <ul>
+                        <li><img class="img-responsive" src="https://www.moga.doctor/img/twitter.png" alt="Twitter">&nbsp;<a href="https://x.com/stefanmihaimoga" target="_blank">X/Twitter</a></li>
+                        <li><img class="img-responsive" src="https://www.moga.doctor/img/linkedin.png" alt="LinkedIn">&nbsp;<a href="https://www.linkedin.com/in/stefanmihaimoga/" target="_blank">LinkedIn</a></li>
+                        <li><img class="img-responsive" src="https://www.moga.doctor/img/facebook.png" alt="Facebook">&nbsp;<a href="https://www.facebook.com/stefanmihaimoga" target="_blank">Facebook</a></li>
+                        <li><img class="img-responsive" src="https://www.moga.doctor/img/instagram.png" alt="Instagram">&nbsp;<a href="https://www.instagram.com/stefanmihaimoga/" target="_blank">Instagram</a></li>
+                    </ul>
 
-            <h2>History</h2>
-            <ul>
-                <li>Version 1.01 (May 13<sup>th</sup>, 2022): Initial release.</li>
-                <li>Version 1.02 (May 20<sup>th</sup>, 2022): Implemented "New folder" functionality.</li>
-                <li>Version 1.03 (May 23<sup>rd</sup>, 2022): Implemented "Change drive" functionality.</li>
-                <li>Version 1.04 (May 24<sup>th</sup>, 2022): Implemented "View text file" functionality.</li>
-                <li>Version 1.05 (May 27<sup>th</sup>, 2022):
+                    <h2>History</h2>
                     <ul>
-                        <li>Implemented "View RTF file" functionality;</li>
-                        <li>Implemented "View XML file" functionality;</li>
-                        <li>Implemented "Context menu" functionality.</li>
+                        <li>Version 1.01 (May 13<sup>th</sup>, 2022): Initial release.</li>
+                        <li>Version 1.02 (May 20<sup>th</sup>, 2022): Implemented "New folder" functionality.</li>
+                        <li>Version 1.03 (May 23<sup>rd</sup>, 2022): Implemented "Change drive" functionality.</li>
+                        <li>Version 1.04 (May 24<sup>th</sup>, 2022): Implemented "View text file" functionality.</li>
+                        <li>Version 1.05 (May 27<sup>th</sup>, 2022):
+                            <ul>
+                                <li>Implemented "View RTF file" functionality;</li>
+                                <li>Implemented "View XML file" functionality;</li>
+                                <li>Implemented "Context menu" functionality.</li>
+                            </ul>
+                        </li>
+                        <li>Version 1.06 (August 21<sup>st</sup>, 2022): Added "Change drive..." icon.</li>
+                        <li>Version 1.07 (September 9<sup>th</sup>, 2022): Added Contributors hyperlink to AboutBox dialog.</li>
+                        <li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+                        <li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+                        <li>Replaced <code>NULL</code> throughout the codebase with <code>nullptr</code>.<br>
+                            Replaced <code>BOOL</code> throughout the codebase with <code>bool</code>.<br>
+                            This means that the minimum requirement for the application is now Microsoft Visual C++ 2010.</li>
+                        <li>Version 1.10 (April 25<sup>th</sup>, 2023): Added base64 encode/decode functions.</li>
+                        <li>Version 1.11 (May 13<sup>th</sup>, 2023): Added new changes suggested by Rick Dishman: Reset View, and save last folder.</li>
+                        <li>Version 1.12 (May 15<sup>th</sup>, 2023): Added rename of file name on clicking its label in MFC ListView.</li>
+                        <li>Version 1.13 (May 18<sup>th</sup>, 2023): Fixed an issue regarding editing image files reported by Rick Dishman.</li>
+                        <li>Version 1.14 (May 19<sup>th</sup>, 2023): Fixed an issue regarding statusbar reported by Rick Dishman.</li>
+                        <li>Version 1.15 (May 21<sup>st</sup>, 2023): Changed the double click implementation to open a file in EDIT mode.</li>
+                        <li>Version 1.16 (May 27<sup>th</sup>, 2023): Updated About dialog with GPLv3 notice.</li>
+                        <li>Version 1.17 (June 17<sup>th</sup>, 2023): Added quick access dialog for favorite folders.</li>
+                        <li>Version 1.18 (June 25<sup>th</sup>, 2023):
+                            <ul>
+                                <li>Implemented "Command prompt" functionality;</li>
+                                <li>Replaced old <code>CHyperlinkStatic</code> class with PJ Naughter's <code>CHLinkCtrl</code> library.</li>
+                            </ul>
+                            </li>
+                        <li>Version 1.19 (August 17<sup>th</sup>, 2023):
+                            <ul>
+                                <li>Implemented "Switch views" functionality (Switches source view with target view);</li>
+                                <li>Added social media links: Twitter, LinkedIn, Facebook, and Instagram;</li>
+                                <li>Added shortcuts to GitHub repository's Issues, Discussions, and Wiki.</li>
+                            </ul>
+                        </li>
+                        <li>Version 1.20 (August 26<sup>th</sup>, 2023):
+                            <ul>
+                                <li>Refactored CopyFile, MoveFile and DeleteFile functions.</li>
+                                <li>Changed article's download link. Updated the About dialog (email &amp; website).</li>
+                            </ul>
+                        </li>
+                        <li>Version 1.21 (September 22<sup>nd</sup>, 2023): Switched to Visual Studio Enterprise 2022 (some changes were made in source code of the project).</li>
+                        <li>Version 1.22 (September 30<sup>th</sup>, 2023): Added SCINTILLA control to view source code with syntax highlighting.</li>
+                        <li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
+                        <li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
+                        <li>Version 1.25 (January 28<sup>th</sup>, 2024):
+                            <ul>
+                                <li>Added ReleaseNotes.html and SoftwareContentRegister.html to GitHub repo;</li>
+                                <li>Replaced old <code>CFileDialogST</code> class with Armen Hakobyan's <code>CFolderDialog</code> library.</li>
+                            </ul>
+                        </li>
+                        <li>Version 1.26 (February 21<sup>st</sup>, 2024): Switched MFC application' theme back to native Windows.</li>
+                        <li>Version 1.27 (March 31<sup>st</sup>, 2024):
+                            <ul>
+                                <li>Updated <code>LEXILLA</code> library to version 5.3.1 and <code>SCINTILLA</code> library to version 5.4.3.</li>
+                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
+                            </ul>
+                        </li>
+                        <li>Version 1.28 (April 26<sup>th</sup>, 2024):
+                            <ul>
+                                <li>Updated <code>LEXILLA</code> library to version 5.3.2 and <code>SCINTILLA</code> library to version 5.5.0.</li>
+                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.</li>
+        					</ul>
+                        </li>
+                        <li>Version 1.29 (July 21<sup>st</sup>, 2024):
+                            <ul>
+                                <li>Implemented &quot;View text file&quot; functionality for C++ programming language.</li>
+                                <li>Implemented selection of files with specific search pattern, size, date or contents.</li>
+                                <li>Implemented enhanced search function with full text search &amp; replace.</li>
+                            </ul>
+                        </li>
+                        <li>Version 1.30 (July 28<sup>th</sup>, 2024):
+                            <ul>
+                                <li>Implemented &quot;View text file&quot; functionality for Python programming language.</li>
+                            </ul>
+                        </li>
                     </ul>
-                </li>
-                <li>Version 1.06 (August 21<sup>st</sup>, 2022): Added "Change drive..." icon.</li>
-                <li>Version 1.07 (September 9<sup>th</sup>, 2022): Added Contributors hyperlink to AboutBox dialog.</li>
-                <li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
-                <li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
-                <li>Replaced <code>NULL</code> throughout the codebase with <code>nullptr</code>.<br>
-                    Replaced <code>BOOL</code> throughout the codebase with <code>bool</code>.<br>
-                    This means that the minimum requirement for the application is now Microsoft Visual C++ 2010.</li>
-                <li>Version 1.10 (April 25<sup>th</sup>, 2023): Added base64 encode/decode functions.</li>
-                <li>Version 1.11 (May 13<sup>th</sup>, 2023): Added new changes suggested by Rick Dishman: Reset View, and save last folder.</li>
-                <li>Version 1.12 (May 15<sup>th</sup>, 2023): Added rename of file name on clicking its label in MFC ListView.</li>
-                <li>Version 1.13 (May 18<sup>th</sup>, 2023): Fixed an issue regarding editing image files reported by Rick Dishman.</li>
-                <li>Version 1.14 (May 19<sup>th</sup>, 2023): Fixed an issue regarding statusbar reported by Rick Dishman.</li>
-                <li>Version 1.15 (May 21<sup>st</sup>, 2023): Changed the double click implementation to open a file in EDIT mode.</li>
-                <li>Version 1.16 (May 27<sup>th</sup>, 2023): Updated About dialog with GPLv3 notice.</li>
-                <li>Version 1.17 (June 17<sup>th</sup>, 2023): Added quick access dialog for favorite folders.</li>
-                <li>Version 1.18 (June 25<sup>th</sup>, 2023):
-                    <ul>
-                        <li>Implemented "Command prompt" functionality;</li>
-                        <li>Replaced old <code>CHyperlinkStatic</code> class with PJ Naughter's <code>CHLinkCtrl</code> library.</li>
-                    </ul>
-                    </li>
-                <li>Version 1.19 (August 17<sup>th</sup>, 2023):
-                    <ul>
-                        <li>Implemented "Switch views" functionality (Switches source view with target view);</li>
-                        <li>Added social media links: Twitter, LinkedIn, Facebook, and Instagram;</li>
-                        <li>Added shortcuts to GitHub repository's Issues, Discussions, and Wiki.</li>
-                    </ul>
-                </li>
-                <li>Version 1.20 (August 26<sup>th</sup>, 2023):
-                    <ul>
-                        <li>Refactored CopyFile, MoveFile and DeleteFile functions.</li>
-                        <li>Changed article's download link. Updated the About dialog (email &amp; website).</li>
-                    </ul>
-                </li>
-                <li>Version 1.21 (September 22<sup>nd</sup>, 2023): Switched to Visual Studio Enterprise 2022 (some changes were made in source code of the project).</li>
-                <li>Version 1.22 (September 30<sup>th</sup>, 2023): Added SCINTILLA control to view source code with syntax highlighting.</li>
-                <li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
-                <li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
-                <li>Version 1.25 (January 28<sup>th</sup>, 2024):
-                    <ul>
-                        <li>Added ReleaseNotes.html and SoftwareContentRegister.html to GitHub repo;</li>
-                        <li>Replaced old <code>CFileDialogST</code> class with Armen Hakobyan's <code>CFolderDialog</code> library.</li>
-                    </ul>
-                </li>
-                <li>Version 1.26 (February 21<sup>st</sup>, 2024): Switched MFC application' theme back to native Windows.</li>
-                <li>Version 1.27 (March 31<sup>st</sup>, 2024):
-                    <ul>
-                        <li>Updated <code>LEXILLA</code> library to version 5.3.1 and <code>SCINTILLA</code> library to version 5.4.3.</li>
-                        <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
-                    </ul>
-                </li>
-                <li>Version 1.28 (April 26<sup>th</sup>, 2024):
-                    <ul>
-                        <li>Updated <code>LEXILLA</code> library to version 5.3.2 and <code>SCINTILLA</code> library to version 5.5.0.</li>
-                        <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.</li>
-					</ul>
-                </li>
-                <li>Version 1.29 (July 21<sup>st</sup>, 2024):
-                    <ul>
-                        <li>Implemented &quot;View text file&quot; functionality for C++ programming language.</li>
-                        <li>Implemented selection of files with specific search pattern, size, date or contents.</li>
-                        <li>Implemented enhanced search function with full text search &amp; replace.</li>
-                    </ul>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
     </body>

@@ -117,6 +117,58 @@ bool IsPythonFile(CString strFilePath)
 	return false;
 }
 
+bool IsHtmlFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".html")) == 0))
+		return true;
+	return false;
+}
+
+bool IsCssFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if (_tcsicmp(lpszExtension, _T(".css")) == 0)
+		return true;
+	return false;
+}
+
+bool IsXmlFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+		return true;
+	return false;
+}
+
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pCLexer{ nullptr }
 {
@@ -226,10 +278,57 @@ BOOL CViewTextFileDlg::OnInitDialog()
 			}
 			else
 			{
-				m_ctrlTextFile.SetupDirectAccess();
-				// Setup the C++ Lexer
-				m_ctrlTextFile.SetILexer(m_pCLexer);
+				if (IsHtmlFile(m_strFilePath))
+				{
+					// Create the HTML Lexer
+#pragma warning(suppress: 26429)
+					m_pCLexer = theApp.m_pCreateLexer("cpp");
+					if (m_pCLexer == nullptr)
+						return FALSE;
 
+					m_ctrlTextFile.SetupDirectAccess();
+
+					// Setup the HTML Lexer
+					m_ctrlTextFile.SetILexer(m_pCLexer);
+				}
+				else
+				{
+					if (IsCssFile(m_strFilePath))
+					{
+						// Create the CSS Lexer
+#pragma warning(suppress: 26429)
+						m_pCLexer = theApp.m_pCreateLexer("css");
+						if (m_pCLexer == nullptr)
+							return FALSE;
+
+						m_ctrlTextFile.SetupDirectAccess();
+
+						// Setup the CSS Lexer
+						m_ctrlTextFile.SetILexer(m_pCLexer);
+					}
+					else
+					{
+						if (IsXmlFile(m_strFilePath))
+						{
+							// Create the XML Lexer
+#pragma warning(suppress: 26429)
+							m_pCLexer = theApp.m_pCreateLexer("xml");
+							if (m_pCLexer == nullptr)
+								return FALSE;
+
+							m_ctrlTextFile.SetupDirectAccess();
+
+							// Setup the XML Lexer
+							m_ctrlTextFile.SetILexer(m_pCLexer);
+						}
+						else
+						{
+							m_ctrlTextFile.SetupDirectAccess();
+							// Setup the C++ Lexer
+							m_ctrlTextFile.SetILexer(m_pCLexer);
+						}
+					}
+				}
 			}
 		}
 	}

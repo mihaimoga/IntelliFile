@@ -129,15 +129,26 @@ bool IsTextFile(CString strFilePath)
 		lpszExtension, _MAX_EXT);
 	if ((_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
+		// C++ Programming Language
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".py")) == 0))
+		// Java Programming Language
+		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
+		// JavaScript
+		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
+		// Python Programming Language
+		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
+		// HTML / CCS / XML
+		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".xml")) == 0))
+	{
 		return true;
+	}
 	return false;
 }
 

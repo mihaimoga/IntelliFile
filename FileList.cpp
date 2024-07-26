@@ -145,7 +145,8 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".xml")) == 0))
+		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".md")) == 0))
 	{
 		return true;
 	}

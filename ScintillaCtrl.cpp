@@ -320,6 +320,8 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           SCI_GETUNDOSAVEPOINT, SCI_SETUNDODETACH, SCI_SETUNDOTENTATIVE, SCI_SETUNDOCURRENT, SCI_PUSHUNDOACTIONTYPE,
                           SCI_CHANGELASTUNDOACTIONTEXT, SCI_GETUNDOACTIONTYPE, SCI_GETUNDOACTIONPOSITION & SCI_GETUNDOACTIONTEXT.
          PJN / 26-04-2024 1. Verified the code against Scintilla v5.5.0.
+         PJN / 22-07-2024 1. Updated class to work with Scintilla v5.5.1. New messages wrapped include: SCI_AUTOCSETSTYLE,
+                          SCI_AUTOCGETSTYLE & SCI_CUTALLOWLINE.
 
 Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -460,7 +462,6 @@ Status CScintillaCtrl::GetLastStatus() const noexcept
 	return m_LastStatus;
 }
 
-#ifdef _UNICODE
 CScintillaCtrl::StringA CScintillaCtrl::W2UTF8(_In_NLS_string_(nLength) const wchar_t* pszText, _In_ int nLength)
 {
 	//First call the function to determine how much space we need to allocate
@@ -517,6 +518,7 @@ CScintillaCtrl::StringW CScintillaCtrl::UTF82W(_In_NLS_string_(nLength) const ch
 	return sWideString;
 }
 
+#ifdef _UNICODE
 void CScintillaCtrl::AddText(_In_ int length, _In_ const wchar_t* text)
 {
 	//Convert the unicode text to UTF8
@@ -2807,6 +2809,16 @@ int CScintillaCtrl::AutoCGetMaxHeight()
 	return static_cast<int>(Call(static_cast<UINT>(Message::AutoCGetMaxHeight), 0, 0));
 }
 
+void CScintillaCtrl::AutoCSetStyle(_In_ int style)
+{
+	Call(static_cast<UINT>(Message::AutoCSetStyle), static_cast<WPARAM>(style), 0);
+}
+
+int CScintillaCtrl::AutoCGetStyle()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Message::AutoCGetStyle), 0, 0));
+}
+
 void CScintillaCtrl::SetIndent(_In_ int indentSize)
 {
 	Call(static_cast<UINT>(Message::SetIndent), static_cast<WPARAM>(indentSize), 0);
@@ -4757,6 +4769,11 @@ int CScintillaCtrl::GetLayoutThreads()
 void CScintillaCtrl::CopyAllowLine()
 {
 	Call(static_cast<UINT>(Message::CopyAllowLine), 0, 0);
+}
+
+void CScintillaCtrl::CutAllowLine()
+{
+	Call(static_cast<UINT>(Message::CutAllowLine), 0, 0);
 }
 
 const char* CScintillaCtrl::GetCharacterPointer()

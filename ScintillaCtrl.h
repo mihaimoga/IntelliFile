@@ -139,6 +139,8 @@ namespace Scintilla
 		[[nodiscard]] Status GetLastStatus() const noexcept;
 
 		//Unicode support
+		[[nodiscard]] static StringA W2UTF8(_In_NLS_string_(nLength) const wchar_t* pszText, _In_ int nLength);
+		[[nodiscard]] static StringW UTF82W(_In_NLS_string_(nLength) const char* pszText, _In_ int nLength);
 #ifdef _UNICODE
 		void AddText(_In_ int length, _In_ const wchar_t* text);
 		void InsertText(_In_ Position pos, _In_z_ const wchar_t* text);
@@ -205,9 +207,6 @@ namespace Scintilla
 		[[nodiscard]] StringW GetSubStyleBases();
 		[[nodiscard]] StringW StyleGetInvisibleRepresentation(_In_ int style);
 		[[nodiscard]] StringW GetUndoActionText(_In_ int action);
-
-		[[nodiscard]] static StringW UTF82W(_In_NLS_string_(nLength) const char* pszText, _In_ int nLength);
-		[[nodiscard]] static StringA W2UTF8(_In_NLS_string_(nLength) const wchar_t* pszText, _In_ int nLength);
 #else
 		[[nodiscard]] StringA GetSelText();
 		[[nodiscard]] StringA GetCurLine();
@@ -471,6 +470,8 @@ namespace Scintilla
 		[[nodiscard]] int AutoCGetMaxWidth();
 		void AutoCSetMaxHeight(_In_ int rowCount);
 		[[nodiscard]] int AutoCGetMaxHeight();
+		void AutoCSetStyle(_In_ int style);
+		[[nodiscard]] int AutoCGetStyle();
 		void SetIndent(_In_ int indentSize);
 		[[nodiscard]] int GetIndent();
 		void SetUseTabs(_In_ BOOL useTabs);
@@ -861,6 +862,7 @@ namespace Scintilla
 		void SetLayoutThreads(_In_ int threads);
 		[[nodiscard]] int GetLayoutThreads();
 		void CopyAllowLine();
+		void CutAllowLine();
 		[[nodiscard]] const char* GetCharacterPointer();
 		[[nodiscard]] void* GetRangePointer(_In_ Position start, _In_ Position lengthRange);
 		[[nodiscard]] Position GetGapPosition();

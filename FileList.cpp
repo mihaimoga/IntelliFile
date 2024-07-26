@@ -135,6 +135,8 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
+		// C# Programming Language
+		(_tcsicmp(lpszExtension, _T(".cs")) == 0) ||
 		// Java Programming Language
 		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
 		// JavaScript

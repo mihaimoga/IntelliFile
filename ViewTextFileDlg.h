@@ -34,7 +34,7 @@ public:
 
 public:
 	CWndResizer m_pWindowResizer;
-	Scintilla::ILexer5* m_pCLexer;
+	Scintilla::ILexer5* m_pLexer;
 	Scintilla::CScintillaCtrl m_ctrlTextFile;
 	CString m_strFilePath;
 	UINT_PTR m_nTimerID;

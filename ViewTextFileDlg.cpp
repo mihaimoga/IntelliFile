@@ -42,6 +42,18 @@ const TCHAR* g_cppKeywords
 	_T("try typedef unsigned using virtual void while xor xor_eq")
 };
 
+const TCHAR* g_csKeywords
+{
+	_T("abstract as base bool break byte case catch char checked class const ")
+	_T("continue decimal default delegate do double else enum event explicit ")
+	_T("extern false finally fixed float for foreach goto if implicit in int ")
+	_T("interface internal is lock long namespace new null object operator ")
+	_T("out override params private protected public readonly ref return sbyte ")
+	_T("sealed short sizeof stackalloc static string struct switch this throw ")
+	_T("true try typeof uint ulong unchecked unsafe ushort using virtual void ")
+	_T("volatile while")
+};
+
 const TCHAR* g_javaKeywords
 {
 	/* https://www.w3schools.com/java/java_ref_keywords.asp */
@@ -61,133 +73,8 @@ const TCHAR* g_pyKeywords
 	_T("return True try while with yield")
 };
 
-bool IsCppFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
-		return true;
-	return false;
-}
-
-bool IsJavaFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if ((_tcsicmp(lpszExtension, _T(".java")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".js")) == 0))
-		return true;
-	return false;
-}
-
-bool IsPythonFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if (_tcsicmp(lpszExtension, _T(".py")) == 0)
-		return true;
-	return false;
-}
-
-bool IsHtmlFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".html")) == 0))
-		return true;
-	return false;
-}
-
-bool IsCssFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if (_tcsicmp(lpszExtension, _T(".css")) == 0)
-		return true;
-	return false;
-}
-
-bool IsXmlFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
-		return true;
-	return false;
-}
-
-bool IsMdFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if (_tcsicmp(lpszExtension, _T(".md")) == 0)
-		return true;
-	return false;
-}
-
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pCLexer{ nullptr }
+	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pLexer{ nullptr }
 {
 }
 
@@ -243,107 +130,140 @@ void CViewTextFileDlg::DefineMarker(int marker, Scintilla::MarkerSymbol markerTy
 
 BOOL CViewTextFileDlg::OnInitDialog()
 {
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+
 	CDialogEx::OnInitDialog();
 
 	SetWindowText(m_strFilePath);
 
-	if (IsCppFile(m_strFilePath))
+	CString strTempPath = m_strFilePath;
+	strTempPath.MakeLower();
+	_tsplitpath_s(strTempPath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+
+	if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
 	{
 		// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-		m_pCLexer = theApp.m_pCreateLexer("cpp");
-		if (m_pCLexer == nullptr)
+		m_pLexer = theApp.m_pCreateLexer("cpp");
+		if (m_pLexer == nullptr)
 			return FALSE;
 
 		// Setup the C++ Lexer
-		m_ctrlTextFile.SetILexer(m_pCLexer);
+		m_ctrlTextFile.SetILexer(m_pLexer);
 		m_ctrlTextFile.SetKeyWords(0, g_cppKeywords);
 	}
 	else
 	{
-		if (IsJavaFile(m_strFilePath))
+		if (_tcsicmp(lpszExtension, _T(".cs")) == 0)
 		{
 			// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-			m_pCLexer = theApp.m_pCreateLexer("cpp");
-			if (m_pCLexer == nullptr)
+			m_pLexer = theApp.m_pCreateLexer("cpp");
+			if (m_pLexer == nullptr)
 				return FALSE;
 
 			// Setup the C++ Lexer
-			m_ctrlTextFile.SetILexer(m_pCLexer);
-			m_ctrlTextFile.SetKeyWords(0, g_javaKeywords);
+			m_ctrlTextFile.SetILexer(m_pLexer);
+			m_ctrlTextFile.SetKeyWords(0, g_csKeywords);
 		}
 		else
 		{
-			if (IsPythonFile(m_strFilePath))
+			if (_tcsicmp(lpszExtension, _T(".css")) == 0)
 			{
-				// Create the Python Lexer
+				// Create the CSS Lexer
 #pragma warning(suppress: 26429)
-				m_pCLexer = theApp.m_pCreateLexer("python");
-				if (m_pCLexer == nullptr)
+				m_pLexer = theApp.m_pCreateLexer("css");
+				if (m_pLexer == nullptr)
 					return FALSE;
 
-				// Setup the Python Lexer
-				m_ctrlTextFile.SetILexer(m_pCLexer);
-				m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
+				// Setup the CSS Lexer
+				m_ctrlTextFile.SetILexer(m_pLexer);
 			}
 			else
 			{
-				if (IsHtmlFile(m_strFilePath))
+				if (_tcsicmp(lpszExtension, _T(".java")) == 0)
 				{
-					// Create the HTML Lexer
+					// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-					m_pCLexer = theApp.m_pCreateLexer("cpp");
-					if (m_pCLexer == nullptr)
+					m_pLexer = theApp.m_pCreateLexer("cpp");
+					if (m_pLexer == nullptr)
 						return FALSE;
 
-					// Setup the HTML Lexer
-					m_ctrlTextFile.SetILexer(m_pCLexer);
+					// Setup the C++ Lexer
+					m_ctrlTextFile.SetILexer(m_pLexer);
+					m_ctrlTextFile.SetKeyWords(0, g_javaKeywords);
 				}
 				else
 				{
-					if (IsCssFile(m_strFilePath))
+					if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
+						(_tcsicmp(lpszExtension, _T(".html")) == 0))
 					{
-						// Create the CSS Lexer
+						// Create the HTML Lexer
 #pragma warning(suppress: 26429)
-						m_pCLexer = theApp.m_pCreateLexer("css");
-						if (m_pCLexer == nullptr)
+						m_pLexer = theApp.m_pCreateLexer("cpp");
+						if (m_pLexer == nullptr)
 							return FALSE;
 
-						// Setup the CSS Lexer
-						m_ctrlTextFile.SetILexer(m_pCLexer);
+						// Setup the HTML Lexer
+						m_ctrlTextFile.SetILexer(m_pLexer);
 					}
 					else
 					{
-						if (IsXmlFile(m_strFilePath))
+						if (_tcsicmp(lpszExtension, _T(".md")) == 0)
 						{
-							// Create the XML Lexer
+							// Create the MD Lexer
 #pragma warning(suppress: 26429)
-							m_pCLexer = theApp.m_pCreateLexer("xml");
-							if (m_pCLexer == nullptr)
+							m_pLexer = theApp.m_pCreateLexer("markdown");
+							if (m_pLexer == nullptr)
 								return FALSE;
 
-							// Setup the XML Lexer
-							m_ctrlTextFile.SetILexer(m_pCLexer);
+							// Setup the MD Lexer
+							m_ctrlTextFile.SetILexer(m_pLexer);
 						}
 						else
 						{
-							if (IsMdFile(m_strFilePath))
+							if (_tcsicmp(lpszExtension, _T(".py")) == 0)
 							{
-								// Create the MD Lexer
+								// Create the Python Lexer
 #pragma warning(suppress: 26429)
-								m_pCLexer = theApp.m_pCreateLexer("markdown");
-								if (m_pCLexer == nullptr)
+								m_pLexer = theApp.m_pCreateLexer("python");
+								if (m_pLexer == nullptr)
 									return FALSE;
 
-								// Setup the MD Lexer
-								m_ctrlTextFile.SetILexer(m_pCLexer);
+								// Setup the Python Lexer
+								m_ctrlTextFile.SetILexer(m_pLexer);
+								m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
 							}
 							else
 							{
-								m_ctrlTextFile.SetupDirectAccess();
-								// Setup the C++ Lexer
-								m_ctrlTextFile.SetILexer(m_pCLexer);
+								if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+								{
+									// Create the XML Lexer
+#pragma warning(suppress: 26429)
+									m_pLexer = theApp.m_pCreateLexer("xml");
+									if (m_pLexer == nullptr)
+										return FALSE;
+
+									// Setup the XML Lexer
+									m_ctrlTextFile.SetILexer(m_pLexer);
+								}
+								else
+								{
+									m_ctrlTextFile.SetupDirectAccess();
+									// Setup the C++ Lexer
+									m_ctrlTextFile.SetILexer(m_pLexer);
+								}
 							}
 						}
 					}

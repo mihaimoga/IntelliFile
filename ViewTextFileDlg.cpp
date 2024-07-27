@@ -73,6 +73,40 @@ const TCHAR* g_pyKeywords
 	_T("return True try while with yield")
 };
 
+const TCHAR* g_sqlKeywords
+{
+	/* https://www.w3schools.com/sql/sql_ref_keywords.asp */
+	_T("add constraint all alter all and any as asc backup between by case check ")
+	_T("column constraint create database default delete desc distinct drop exec ")
+	_T("exists foreign from full group having if in into index inner insert is join ")
+	_T("left like limit not null or order outer primary key procedure replace right ")
+	_T("rownum select set table top truncate union unique update values view where ")
+	/* MySQL Data Types */
+	_T("char varchar binary varbinary tinyblob tinytext text blob mediumtext ")
+	_T("mediumblob longtext longblob enum set bit tinyint bool boolean smallin ")
+	_T("mediumint int integer bigint float double precision decimal dec date ")
+	_T("datetime timestamp time year references ")
+	/* MySQL String Functions */
+	_T("ascii char_length character_length concat concat_ws field find_in_set ")
+	_T("format instr lcase left length locate lower lpad ltrim mid position ")
+	_T("repeat replace reverse right rpad rtrim space strcmp substr substring ")
+	_T("substring_index trim ucase upper ")
+	/* MySQL Numeric Functions */
+	_T("abs acos asin atan atan2 avg ceil ceiling cos cot count degrees div exp ")
+	_T("floor greatest least ln log log10 log2 max min mod pi pow power radians ")
+	_T("rand round sign sin sqrt sum tan truncate ")
+	/* MySQL Date Functions */
+	_T("adddate addtime curdate current_date current_time current_timestamp curtime ")
+	_T("date datediff date_add date_format date_sub day dayname dayofmonth dayofweek ")
+	_T("dayofyear extract from_days hour last_day localtime localtimestamp makedate ")
+	_T("maketime microsecond minute month monthname now period_add period_diff quarter ")
+	_T("second sec_to_time str_to_date subdate subtime sysdate time time_format ")
+	_T("time_to_sec timediff timestamp to_days week weekday weekofyear year yearweek ")
+	/* MySQL Advanced Functions */
+	_T("bin case cast coalesce connection_id conv convert current_user database ifnull ")
+	_T("isnull last_insert_id nullif session_user system_user user version")
+};
+
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pLexer{ nullptr }
 {
@@ -207,11 +241,14 @@ BOOL CViewTextFileDlg::OnInitDialog()
 				else
 				{
 					if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
-						(_tcsicmp(lpszExtension, _T(".html")) == 0))
+						(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
+						(_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
+						(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
+						(_tcsicmp(lpszExtension, _T(".php")) == 0))
 					{
 						// Create the HTML Lexer
 #pragma warning(suppress: 26429)
-						m_pLexer = theApp.m_pCreateLexer("cpp");
+						m_pLexer = theApp.m_pCreateLexer("hypertext");
 						if (m_pLexer == nullptr)
 							return FALSE;
 
@@ -247,22 +284,36 @@ BOOL CViewTextFileDlg::OnInitDialog()
 							}
 							else
 							{
-								if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+								if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
 								{
-									// Create the XML Lexer
+									// Create the SQL Lexer
 #pragma warning(suppress: 26429)
-									m_pLexer = theApp.m_pCreateLexer("xml");
+									m_pLexer = theApp.m_pCreateLexer("sql");
 									if (m_pLexer == nullptr)
 										return FALSE;
 
-									// Setup the XML Lexer
+									// Setup the SQL Lexer
 									m_ctrlTextFile.SetILexer(m_pLexer);
+									m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
 								}
 								else
 								{
-									m_ctrlTextFile.SetupDirectAccess();
-									// Setup the C++ Lexer
-									m_ctrlTextFile.SetILexer(m_pLexer);
+									if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+									{
+										// Create the XML Lexer
+#pragma warning(suppress: 26429)
+										m_pLexer = theApp.m_pCreateLexer("xml");
+										if (m_pLexer == nullptr)
+											return FALSE;
+
+										// Setup the XML Lexer
+										m_ctrlTextFile.SetILexer(m_pLexer);
+									}
+									else
+									{
+										m_ctrlTextFile.SetupDirectAccess();
+										m_ctrlTextFile.SetILexer(nullptr);
+									}
 								}
 							}
 						}
@@ -363,7 +414,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		UpdateWindow();
 	}
 
-	m_nTimerID = SetTimer(0x1234, 0x100, nullptr);
+	m_nTimerID = SetTimer(0x1234, 100, nullptr);
 	// const int nMarginWidth{ m_ctrlTextFile.GetMarginWidthN(0) };
 	m_ctrlTextFile.SetMarginWidthN(0, 32);
 

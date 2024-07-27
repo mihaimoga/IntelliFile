@@ -143,9 +143,14 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
 		// Python Programming Language
 		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
+		// SQL Programming Language
+		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
 		// HTML / CCS / XML
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".md")) == 0))

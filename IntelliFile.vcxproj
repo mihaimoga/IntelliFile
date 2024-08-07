@@ -186,6 +186,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="CODE_OF_CONDUCT.md" />
+    <None Include="CONTRIBUTING.md" />
     <None Include="hlp\afx_hidd_color.htm">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -440,6 +442,7 @@ echo.
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="LICENSE" />
+    <None Include="README.md" />
     <None Include="ReadMe.txt" />
     <None Include="ReleaseNotes.html" />
     <None Include="res\buttons.bmp" />

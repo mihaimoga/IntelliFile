@@ -1,6 +1,6 @@
 ![IntelliFile.png](IntelliFile.png)
 
-[IntelliFile](https://www.moga.doctor/) is an alternative Windows version to the famous Total Commander!
+[IntelliFile](https://www.moga.doctor/#intellifile-top) is an alternative Windows version to the famous Total Commander!
 
 This application is developed in Microsoft Visual C++, and it is licensed under GNU General Public License v3.0.
 

@@ -276,6 +276,9 @@
     <None Include="LICENSE" />
     <None Include="ReleaseNotes.html" />
     <None Include="SoftwareContextRegister.html" />
+    <None Include="CODE_OF_CONDUCT.md" />
+    <None Include="CONTRIBUTING.md" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">

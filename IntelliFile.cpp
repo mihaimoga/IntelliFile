@@ -16,8 +16,6 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 //
 
 #include "stdafx.h"
-#include "afxwinappex.h"
-#include "afxdialogex.h"
 #include "IntelliFile.h"
 #include "MainFrame.h"
 

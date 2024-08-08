@@ -171,15 +171,16 @@ void CFileView::OnInitialUpdate()
 		CRect rectClient;
 		GetListCtrl().GetClientRect(&rectClient);
 
-		const int nSize = theApp.GetInt(_T("Size"), SIZE_COLUMN_LENGTH);
-		const int nDate = theApp.GetInt(_T("Date"), DATE_COLUMN_LENGTH);
-		const int nAttr = theApp.GetInt(_T("Attr"), ATTR_COLUMN_LENGTH);
-		const int nName = rectClient.Width() - (nSize + nDate + nAttr);
+		// const int nSize = theApp.GetInt(_T("Size"), SIZE_COLUMN_LENGTH);
+		// const int nDate = theApp.GetInt(_T("Date"), DATE_COLUMN_LENGTH);
+		// const int nAttr = theApp.GetInt(_T("Attr"), ATTR_COLUMN_LENGTH);
+		// const int nName = rectClient.Width() - (nSize + nDate + nAttr);
+		const int nName = rectClient.Width() - (SIZE_COLUMN_LENGTH + DATE_COLUMN_LENGTH + ATTR_COLUMN_LENGTH);
 
 		GetListCtrl().InsertColumn(0, _T("Name"), LVCFMT_LEFT, nName);
-		GetListCtrl().InsertColumn(1, _T("Size"), LVCFMT_CENTER, nSize);
-		GetListCtrl().InsertColumn(2, _T("Date"), LVCFMT_CENTER, nDate);
-		GetListCtrl().InsertColumn(3, _T("Attr"), LVCFMT_CENTER, nAttr);
+		GetListCtrl().InsertColumn(1, _T("Size"), LVCFMT_CENTER, SIZE_COLUMN_LENGTH);
+		GetListCtrl().InsertColumn(2, _T("Date"), LVCFMT_CENTER, DATE_COLUMN_LENGTH);
+		GetListCtrl().InsertColumn(3, _T("Attr"), LVCFMT_CENTER, ATTR_COLUMN_LENGTH);
 	}
 }
 
@@ -302,12 +303,12 @@ void CFileView::ResizeListCtrl()
 			if (pHeaderCtrl.GetItem(2, &hdItem))
 			{
 				const int nDate = hdItem.cxy;
-				theApp.WriteInt(_T("Date"), nSize);
+				theApp.WriteInt(_T("Date"), nDate);
 				hdItem.mask = HDI_WIDTH;
 				if (pHeaderCtrl.GetItem(3, &hdItem))
 				{
 					const int nAttr = hdItem.cxy;
-					theApp.WriteInt(_T("Attr"), nSize);
+					theApp.WriteInt(_T("Attr"), nAttr);
 
 					const int nName = rectClient.Width() - (nSize + nDate + nAttr);
 					if (pHeaderCtrl.GetItem(0, &hdItem))

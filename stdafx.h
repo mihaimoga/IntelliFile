@@ -83,7 +83,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #define ID_MFCLISTCTRL (WM_USER+0x1234)
 
 #define SIZE_COLUMN_LENGTH 60
-#define DATE_COLUMN_LENGTH 140
+#define DATE_COLUMN_LENGTH 120
 #define ATTR_COLUMN_LENGTH 40
 
 //Pull in support for Scintilla \ Lexilla

@@ -187,6 +187,7 @@ namespace Scintilla
 		void SetDefaultFoldDisplayText(_In_z_ const wchar_t* text);
 		void EOLAnnotationSetText(_In_ Line line, _In_ const wchar_t* text);
 		void StyleSetInvisibleRepresentation(_In_ int style, _In_z_ const wchar_t* representation);
+		void SetCopySeparator(_In_z_ const wchar_t* separator);
 		[[nodiscard]] StringW EOLAnnotationGetText(_In_ Line line);
 		[[nodiscard]] StringW DescribeProperty(_In_z_ const wchar_t* name);
 		[[nodiscard]] StringW DescribeKeyWordSets();
@@ -207,6 +208,7 @@ namespace Scintilla
 		[[nodiscard]] StringW GetSubStyleBases();
 		[[nodiscard]] StringW StyleGetInvisibleRepresentation(_In_ int style);
 		[[nodiscard]] StringW GetUndoActionText(_In_ int action);
+		[[nodiscard]] StringW GetCopySeparator();
 #else
 		[[nodiscard]] StringA GetSelText();
 		[[nodiscard]] StringA GetCurLine();
@@ -238,6 +240,7 @@ namespace Scintilla
 		[[nodiscard]] StringA GetSubStyleBases();
 		[[nodiscard]] StringA StyleGetInvisibleRepresentation(_In_ int style);
 		[[nodiscard]] StringA GetUndoActionText(_In_ int action);
+		[[nodiscard]] StringA GetCopySeparator();
 #endif //#ifdef _UNICODE
 
 		//Auto generated using the "ConvertScintillaiface.js" script
@@ -362,6 +365,8 @@ namespace Scintilla
 		void StyleSetHotSpot(_In_ int style, _In_ BOOL hotspot);
 		void StyleSetCheckMonospaced(_In_ int style, _In_ BOOL checkMonospaced);
 		[[nodiscard]] BOOL StyleGetCheckMonospaced(_In_ int style);
+		void StyleSetStretch(_In_ int style, _In_ FontStretch stretch);
+		FontStretch StyleGetStretch(_In_ int style);
 		void StyleSetInvisibleRepresentation(_In_ int style, _In_z_ const char* representation);
 		int StyleGetInvisibleRepresentation(_In_ int style, _Inout_opt_z_ char* representation);
 		void SetElementColour(_In_ Element element, _In_ int colourElement);
@@ -396,6 +401,7 @@ namespace Scintilla
 		[[nodiscard]] int GetCharacterCategoryOptimization();
 		void BeginUndoAction();
 		void EndUndoAction();
+		[[nodiscard]] int GetUndoSequence();
 		[[nodiscard]] int GetUndoActions();
 		void SetUndoSavePoint(_In_ int action);
 		[[nodiscard]] int GetUndoSavePoint();
@@ -681,7 +687,9 @@ namespace Scintilla
 		void Cancel();
 		void DeleteBack();
 		void Tab();
+		void LineIndent();
 		void BackTab();
+		void LineDedent();
 		void NewLine();
 		void FormFeed();
 		void VCHome();
@@ -863,6 +871,8 @@ namespace Scintilla
 		[[nodiscard]] int GetLayoutThreads();
 		void CopyAllowLine();
 		void CutAllowLine();
+		void SetCopySeparator(_In_z_ const char* separator);
+		int GetCopySeparator(_Inout_opt_z_ char* separator);
 		[[nodiscard]] const char* GetCharacterPointer();
 		[[nodiscard]] void* GetRangePointer(_In_ Position start, _In_ Position lengthRange);
 		[[nodiscard]] Position GetGapPosition();

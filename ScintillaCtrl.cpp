@@ -322,6 +322,9 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 26-04-2024 1. Verified the code against Scintilla v5.5.0.
          PJN / 22-07-2024 1. Updated class to work with Scintilla v5.5.1. New messages wrapped include: SCI_AUTOCSETSTYLE,
                           SCI_AUTOCGETSTYLE & SCI_CUTALLOWLINE.
+         PJN / 24-08-2024 1. Updated class to work with Scintilla v5.5.2. New messages wrapped include: SCI_STYLESETSTRETCH,
+                          SCI_STYLEGETSTRETCH, SCI_GETUNDOSEQUENCE, SCI_LineIndent, SCI_LINEDEDENT, SCI_SETCOPYSEPARATOR & 
+                          SCI_GETCOPYSEPARATOR.
 
 Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -990,6 +993,15 @@ void CScintillaCtrl::StyleSetInvisibleRepresentation(_In_ int style, _In_z_ cons
 	StyleSetInvisibleRepresentation(style, sUTF8);
 }
 
+void CScintillaCtrl::SetCopySeparator(_In_z_ const wchar_t* separator)
+{
+	//Convert the unicode text to UTF8
+	StringA sUTF8{ W2UTF8(separator, -1) };
+
+	//Call the native scintilla version of the function with the UTF8 text
+	SetCopySeparator(sUTF8);
+}
+
 CScintillaCtrl::StringW CScintillaCtrl::EOLAnnotationGetText(_In_ Line line)
 {
 	//Work out the length of string to allocate
@@ -1256,6 +1268,21 @@ CScintillaCtrl::StringW CScintillaCtrl::GetUndoActionText(_In_ int action)
 	//Call the function which does the work
 	StringA sUTF8;
 	GetUndoActionText(action, sUTF8.GetBufferSetLength(nUTF8Length));
+	sUTF8.ReleaseBuffer();
+
+	//Now convert the UTF8 text back to Unicode
+	return UTF82W(sUTF8, -1);
+}
+
+CScintillaCtrl::StringW CScintillaCtrl::GetCopySeparator()
+{
+	//Work out the length of string to allocate
+	const int nUTF8Length{ GetCopySeparator(nullptr) };
+
+	//Call the function which does the work
+	StringA sUTF8;
+#pragma warning(suppress: 26472)
+	GetCopySeparator(sUTF8.GetBufferSetLength(static_cast<int>(nUTF8Length)));
 	sUTF8.ReleaseBuffer();
 
 	//Now convert the UTF8 text back to Unicode
@@ -1658,6 +1685,18 @@ CScintillaCtrl::StringA CScintillaCtrl::GetUndoActionText(_In_ int action)
 	return sValue;
 }
 
+CScintillaCtrl::StringA CScintillaCtrl::GetCopySeparator()
+{
+	//Work out the length of string to allocate
+	const int nValueLength{ GetCopySeparator(nullptr) };
+
+	//Call the function which does the work
+	StringA sValue;
+	GetCopySeparator(sValue.GetBufferSetLength(nValueLength));
+	sValue.ReleaseBuffer();
+
+	return sValue;
+}
 
 #endif //#ifdef _UNICODE
 
@@ -2269,6 +2308,16 @@ BOOL CScintillaCtrl::StyleGetCheckMonospaced(_In_ int style)
 	return static_cast<BOOL>(Call(static_cast<UINT>(Message::StyleGetCheckMonospaced), static_cast<WPARAM>(style), 0));
 }
 
+void CScintillaCtrl::StyleSetStretch(_In_ int style, _In_ FontStretch stretch)
+{
+	Call(static_cast<UINT>(Scintilla::Message::StyleSetStretch), static_cast<WPARAM>(style), static_cast<LPARAM>(stretch));
+}
+
+FontStretch CScintillaCtrl::StyleGetStretch(_In_ int style)
+{
+	return static_cast<FontStretch>(Call(static_cast<UINT>(Scintilla::Message::StyleGetStretch), static_cast<WPARAM>(style), 0));
+}
+
 void CScintillaCtrl::StyleSetInvisibleRepresentation(_In_ int style, _In_z_ const char* representation)
 {
 	Call(static_cast<UINT>(Message::StyleSetInvisibleRepresentation), static_cast<WPARAM>(style), reinterpret_cast<LPARAM>(representation));
@@ -2437,6 +2486,11 @@ void CScintillaCtrl::BeginUndoAction()
 void CScintillaCtrl::EndUndoAction()
 {
 	Call(static_cast<UINT>(Message::EndUndoAction), 0, 0);
+}
+
+int CScintillaCtrl::GetUndoSequence()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoSequence), 0, 0));
 }
 
 int CScintillaCtrl::GetUndoActions()
@@ -3864,9 +3918,19 @@ void CScintillaCtrl::Tab()
 	Call(static_cast<UINT>(Message::Tab), 0, 0);
 }
 
+void CScintillaCtrl::LineIndent()
+{
+	Call(static_cast<UINT>(Scintilla::Message::LineIndent), 0, 0);
+}
+
 void CScintillaCtrl::BackTab()
 {
 	Call(static_cast<UINT>(Message::BackTab), 0, 0);
+}
+
+void CScintillaCtrl::LineDedent()
+{
+	Call(static_cast<UINT>(Scintilla::Message::LineDedent), 0, 0);
 }
 
 void CScintillaCtrl::NewLine()
@@ -4774,6 +4838,16 @@ void CScintillaCtrl::CopyAllowLine()
 void CScintillaCtrl::CutAllowLine()
 {
 	Call(static_cast<UINT>(Message::CutAllowLine), 0, 0);
+}
+
+void CScintillaCtrl::SetCopySeparator(_In_z_ const char* separator)
+{
+	Call(static_cast<UINT>(Scintilla::Message::SetCopySeparator), 0, reinterpret_cast<LPARAM>(separator));
+}
+
+int CScintillaCtrl::GetCopySeparator(_Inout_opt_z_ char* separator)
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetCopySeparator), 0, reinterpret_cast<LPARAM>(separator)));
 }
 
 const char* CScintillaCtrl::GetCharacterPointer()

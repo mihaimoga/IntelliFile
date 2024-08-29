@@ -128,33 +128,27 @@ bool IsTextFile(CString strFilePath)
 		lpszFolder, _MAX_DIR,
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
-	if ((_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
-		// C++ Programming Language
+	if ( (_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cs")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
-		// C# Programming Language
-		(_tcsicmp(lpszExtension, _T(".cs")) == 0) ||
-		// Java Programming Language
-		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
-		// JavaScript
-		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
-		// Python Programming Language
-		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
-		// SQL Programming Language
-		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
-		// HTML / CCS / XML
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".m")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".md")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".md")) == 0))
+		(_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".xml")) == 0) )
 	{
 		return true;
 	}

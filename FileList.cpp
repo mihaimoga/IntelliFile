@@ -130,6 +130,7 @@ bool IsTextFile(CString strFilePath)
 		lpszExtension, _MAX_EXT);
 	if ( (_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".bat")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cs")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||

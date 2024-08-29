@@ -188,25 +188,24 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
 
-	if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
+	if (_tcsicmp(lpszExtension, _T(".bat")) == 0)
 	{
-		// Create the C++ Lexer
+		// Create the Batch Lexer
 #pragma warning(suppress: 26429)
-		m_pLexer = theApp.m_pCreateLexer("cpp");
+		m_pLexer = theApp.m_pCreateLexer("batch");
 		if (m_pLexer == nullptr)
 			return FALSE;
 
-		// Setup the C++ Lexer
+		// Setup the Batch Lexer
 		m_ctrlTextFile.SetILexer(m_pLexer);
-		m_ctrlTextFile.SetKeyWords(0, g_cppKeywords);
 	}
 	else
 	{
-		if (_tcsicmp(lpszExtension, _T(".cs")) == 0)
+		if ((_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+			(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
+			(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
+			(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
+			(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
 		{
 			// Create the C++ Lexer
 #pragma warning(suppress: 26429)
@@ -216,70 +215,71 @@ BOOL CViewTextFileDlg::OnInitDialog()
 
 			// Setup the C++ Lexer
 			m_ctrlTextFile.SetILexer(m_pLexer);
-			m_ctrlTextFile.SetKeyWords(0, g_csKeywords);
+			m_ctrlTextFile.SetKeyWords(0, g_cppKeywords);
 		}
 		else
 		{
-			if (_tcsicmp(lpszExtension, _T(".css")) == 0)
+			if (_tcsicmp(lpszExtension, _T(".cs")) == 0)
 			{
-				// Create the CSS Lexer
+				// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-				m_pLexer = theApp.m_pCreateLexer("css");
+				m_pLexer = theApp.m_pCreateLexer("cpp");
 				if (m_pLexer == nullptr)
 					return FALSE;
 
-				// Setup the CSS Lexer
+				// Setup the C++ Lexer
 				m_ctrlTextFile.SetILexer(m_pLexer);
+				m_ctrlTextFile.SetKeyWords(0, g_csKeywords);
 			}
 			else
 			{
-				if (_tcsicmp(lpszExtension, _T(".java")) == 0)
+				if (_tcsicmp(lpszExtension, _T(".css")) == 0)
 				{
-					// Create the C++ Lexer
+					// Create the CSS Lexer
 #pragma warning(suppress: 26429)
-					m_pLexer = theApp.m_pCreateLexer("cpp");
+					m_pLexer = theApp.m_pCreateLexer("css");
 					if (m_pLexer == nullptr)
 						return FALSE;
 
-					// Setup the C++ Lexer
+					// Setup the CSS Lexer
 					m_ctrlTextFile.SetILexer(m_pLexer);
-					m_ctrlTextFile.SetKeyWords(0, g_javaKeywords);
 				}
 				else
 				{
-					if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
-						(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
-						(_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
-						(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
-						(_tcsicmp(lpszExtension, _T(".php")) == 0))
+					if (_tcsicmp(lpszExtension, _T(".java")) == 0)
 					{
-						// Create the HTML Lexer
+						// Create the C++ Lexer
 #pragma warning(suppress: 26429)
-						m_pLexer = theApp.m_pCreateLexer("hypertext");
+						m_pLexer = theApp.m_pCreateLexer("cpp");
 						if (m_pLexer == nullptr)
 							return FALSE;
 
-						// Setup the HTML Lexer
+						// Setup the C++ Lexer
 						m_ctrlTextFile.SetILexer(m_pLexer);
+						m_ctrlTextFile.SetKeyWords(0, g_javaKeywords);
 					}
 					else
 					{
-						if (_tcsicmp(lpszExtension, _T(".md")) == 0)
+						if ((_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
+							(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
+							(_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
+							(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
+							(_tcsicmp(lpszExtension, _T(".php")) == 0))
 						{
-							// Create the MD Lexer
+							// Create the HTML Lexer
 #pragma warning(suppress: 26429)
-							m_pLexer = theApp.m_pCreateLexer("markdown");
+							m_pLexer = theApp.m_pCreateLexer("hypertext");
 							if (m_pLexer == nullptr)
 								return FALSE;
 
-							// Setup the MD Lexer
+							// Setup the HTML Lexer
 							m_ctrlTextFile.SetILexer(m_pLexer);
 						}
 						else
 						{
 							if (_tcsicmp(lpszExtension, _T(".m")) == 0)
 							{
-								// Create the MD Lexer
+								// Create the Matlab Lexer
 #pragma warning(suppress: 26429)
 								m_pLexer = theApp.m_pCreateLexer("matlab");
 								if (m_pLexer == nullptr)
@@ -291,49 +291,63 @@ BOOL CViewTextFileDlg::OnInitDialog()
 							}
 							else
 							{
-								if (_tcsicmp(lpszExtension, _T(".py")) == 0)
+								if (_tcsicmp(lpszExtension, _T(".md")) == 0)
 								{
-									// Create the Python Lexer
+									// Create the MD Lexer
 #pragma warning(suppress: 26429)
-									m_pLexer = theApp.m_pCreateLexer("python");
+									m_pLexer = theApp.m_pCreateLexer("markdown");
 									if (m_pLexer == nullptr)
 										return FALSE;
 
-									// Setup the Python Lexer
+									// Setup the MD Lexer
 									m_ctrlTextFile.SetILexer(m_pLexer);
-									m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
 								}
 								else
 								{
-									if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
+									if (_tcsicmp(lpszExtension, _T(".py")) == 0)
 									{
-										// Create the SQL Lexer
+										// Create the Python Lexer
 #pragma warning(suppress: 26429)
-										m_pLexer = theApp.m_pCreateLexer("sql");
+										m_pLexer = theApp.m_pCreateLexer("python");
 										if (m_pLexer == nullptr)
 											return FALSE;
 
-										// Setup the SQL Lexer
+										// Setup the Python Lexer
 										m_ctrlTextFile.SetILexer(m_pLexer);
-										m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
+										m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
 									}
 									else
 									{
-										if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+										if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
 										{
-											// Create the XML Lexer
+											// Create the SQL Lexer
 #pragma warning(suppress: 26429)
-											m_pLexer = theApp.m_pCreateLexer("xml");
+											m_pLexer = theApp.m_pCreateLexer("sql");
 											if (m_pLexer == nullptr)
 												return FALSE;
 
-											// Setup the XML Lexer
+											// Setup the SQL Lexer
 											m_ctrlTextFile.SetILexer(m_pLexer);
+											m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
 										}
 										else
 										{
-											m_ctrlTextFile.SetupDirectAccess();
-											m_ctrlTextFile.SetILexer(nullptr);
+											if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+											{
+												// Create the XML Lexer
+#pragma warning(suppress: 26429)
+												m_pLexer = theApp.m_pCreateLexer("xml");
+												if (m_pLexer == nullptr)
+													return FALSE;
+
+												// Setup the XML Lexer
+												m_ctrlTextFile.SetILexer(m_pLexer);
+											}
+											else
+											{
+												m_ctrlTextFile.SetupDirectAccess();
+												m_ctrlTextFile.SetILexer(nullptr);
+											}
 										}
 									}
 								}

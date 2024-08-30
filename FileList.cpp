@@ -147,6 +147,7 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".m")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".md")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".rs")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".sh")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||

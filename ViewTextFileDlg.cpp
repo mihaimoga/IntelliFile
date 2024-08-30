@@ -91,6 +91,16 @@ const TCHAR* g_pyKeywords
 	_T("return True try while with yield")
 };
 
+const TCHAR* g_rsKeywords
+{
+	/* https://doc.rust-lang.org/reference/keywords.html */
+	_T("as break const continue crate else enum extern false fn for if impl in ")
+	_T("let loop match mod move mut pub ref return self static struct super trait ")
+	_T("true type unsafe use where while async await dyn abstract become box do ")
+	_T("final macro override priv typeof unsized virtual yield try macro_rules ")
+	_T("union dyn")
+};
+
 const TCHAR* g_sqlKeywords
 {
 	/* https://www.w3schools.com/sql/sql_ref_keywords.asp */
@@ -356,48 +366,63 @@ BOOL CViewTextFileDlg::OnInitDialog()
 											}
 											else
 											{
-												if (_tcsicmp(lpszExtension, _T(".sh")) == 0)
+												if (_tcsicmp(lpszExtension, _T(".rs")) == 0)
 												{
-													// Create the Shell Lexer
+													// Create the Rust Lexer
 #pragma warning(suppress: 26429)
-													m_pLexer = theApp.m_pCreateLexer("bash");
+													m_pLexer = theApp.m_pCreateLexer("rust");
 													if (m_pLexer == nullptr)
 														return FALSE;
 
-													// Setup the Shell Lexer
+													// Setup the Rust Lexer
 													m_ctrlTextFile.SetILexer(m_pLexer);
+													m_ctrlTextFile.SetKeyWords(0, g_rsKeywords);
 												}
 												else
 												{
-													if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
+													if (_tcsicmp(lpszExtension, _T(".sh")) == 0)
 													{
-														// Create the SQL Lexer
+														// Create the Shell Lexer
 #pragma warning(suppress: 26429)
-														m_pLexer = theApp.m_pCreateLexer("sql");
+														m_pLexer = theApp.m_pCreateLexer("bash");
 														if (m_pLexer == nullptr)
 															return FALSE;
 
-														// Setup the SQL Lexer
+														// Setup the Shell Lexer
 														m_ctrlTextFile.SetILexer(m_pLexer);
-														m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
 													}
 													else
 													{
-														if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+														if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
 														{
-															// Create the XML Lexer
+															// Create the SQL Lexer
 #pragma warning(suppress: 26429)
-															m_pLexer = theApp.m_pCreateLexer("xml");
+															m_pLexer = theApp.m_pCreateLexer("sql");
 															if (m_pLexer == nullptr)
 																return FALSE;
 
-															// Setup the XML Lexer
+															// Setup the SQL Lexer
 															m_ctrlTextFile.SetILexer(m_pLexer);
+															m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
 														}
 														else
 														{
-															m_ctrlTextFile.SetupDirectAccess();
-															m_ctrlTextFile.SetILexer(nullptr);
+															if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+															{
+																// Create the XML Lexer
+#pragma warning(suppress: 26429)
+																m_pLexer = theApp.m_pCreateLexer("xml");
+																if (m_pLexer == nullptr)
+																	return FALSE;
+
+																// Setup the XML Lexer
+																m_ctrlTextFile.SetILexer(m_pLexer);
+															}
+															else
+															{
+																m_ctrlTextFile.SetupDirectAccess();
+																m_ctrlTextFile.SetILexer(nullptr);
+															}
 														}
 													}
 												}

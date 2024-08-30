@@ -142,6 +142,7 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".json")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".m")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".md")) == 0) ||

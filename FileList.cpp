@@ -128,7 +128,7 @@ bool IsTextFile(CString strFilePath)
 		lpszFolder, _MAX_DIR,
 		lpszFileName, _MAX_FNAME,
 		lpszExtension, _MAX_EXT);
-	if ( (_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
+	if ((_tcsicmp(lpszExtension, _T(".asp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".bat")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
@@ -140,19 +140,23 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".ini")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".java")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".js")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".json")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".log")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".m")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".mak")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".md")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".py")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".r")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".rs")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".sh")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".xml")) == 0) )
+		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
+		(_tcsicmp(lpszExtension, _T("")) == 0))
 	{
 		return true;
 	}

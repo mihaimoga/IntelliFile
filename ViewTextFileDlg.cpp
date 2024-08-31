@@ -91,6 +91,12 @@ const TCHAR* g_pyKeywords
 	_T("return True try while with yield")
 };
 
+const TCHAR* g_rKeywords
+{
+	_T("if else repeat while function for next break TRUE FALSE NULL Inf NaN NA ")
+	_T("NA_integer_ NA_real_ NA_complex_ NA_character_")
+};
+
 const TCHAR* g_rsKeywords
 {
 	/* https://doc.rust-lang.org/reference/keywords.html */
@@ -339,89 +345,118 @@ BOOL CViewTextFileDlg::OnInitDialog()
 									}
 									else
 									{
-										if (_tcsicmp(lpszExtension, _T(".md")) == 0)
+										if (_tcsicmp(lpszExtension, _T(".mak")) == 0)
 										{
-											// Create the MD Lexer
+											// Create the Makefile Lexer
 #pragma warning(suppress: 26429)
-											m_pLexer = theApp.m_pCreateLexer("markdown");
+											m_pLexer = theApp.m_pCreateLexer("makefile");
 											if (m_pLexer == nullptr)
 												return FALSE;
 
-											// Setup the MD Lexer
+											// Setup the Makefile Lexer
 											m_ctrlTextFile.SetILexer(m_pLexer);
 										}
 										else
 										{
-											if (_tcsicmp(lpszExtension, _T(".py")) == 0)
+											if (_tcsicmp(lpszExtension, _T(".md")) == 0)
 											{
-												// Create the Python Lexer
+												// Create the MD Lexer
 #pragma warning(suppress: 26429)
-												m_pLexer = theApp.m_pCreateLexer("python");
+												m_pLexer = theApp.m_pCreateLexer("markdown");
 												if (m_pLexer == nullptr)
 													return FALSE;
 
-												// Setup the Python Lexer
+												// Setup the MD Lexer
 												m_ctrlTextFile.SetILexer(m_pLexer);
-												m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
 											}
 											else
 											{
-												if (_tcsicmp(lpszExtension, _T(".rs")) == 0)
+												if (_tcsicmp(lpszExtension, _T(".py")) == 0)
 												{
-													// Create the Rust Lexer
+													// Create the Python Lexer
 #pragma warning(suppress: 26429)
-													m_pLexer = theApp.m_pCreateLexer("rust");
+													m_pLexer = theApp.m_pCreateLexer("python");
 													if (m_pLexer == nullptr)
 														return FALSE;
 
-													// Setup the Rust Lexer
+													// Setup the Python Lexer
 													m_ctrlTextFile.SetILexer(m_pLexer);
-													m_ctrlTextFile.SetKeyWords(0, g_rsKeywords);
+													m_ctrlTextFile.SetKeyWords(0, g_pyKeywords);
 												}
 												else
 												{
-													if (_tcsicmp(lpszExtension, _T(".sh")) == 0)
+													if (_tcsicmp(lpszExtension, _T(".r")) == 0)
 													{
-														// Create the Shell Lexer
+														// Create the R Lexer
 #pragma warning(suppress: 26429)
-														m_pLexer = theApp.m_pCreateLexer("bash");
+														m_pLexer = theApp.m_pCreateLexer("r");
 														if (m_pLexer == nullptr)
 															return FALSE;
 
-														// Setup the Shell Lexer
+														// Setup the R Lexer
 														m_ctrlTextFile.SetILexer(m_pLexer);
+														m_ctrlTextFile.SetKeyWords(0, g_rKeywords);
 													}
 													else
 													{
-														if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
+														if (_tcsicmp(lpszExtension, _T(".rs")) == 0)
 														{
-															// Create the SQL Lexer
+															// Create the Rust Lexer
 #pragma warning(suppress: 26429)
-															m_pLexer = theApp.m_pCreateLexer("sql");
+															m_pLexer = theApp.m_pCreateLexer("rust");
 															if (m_pLexer == nullptr)
 																return FALSE;
 
-															// Setup the SQL Lexer
+															// Setup the Rust Lexer
 															m_ctrlTextFile.SetILexer(m_pLexer);
-															m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
+															m_ctrlTextFile.SetKeyWords(0, g_rsKeywords);
 														}
 														else
 														{
-															if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+															if (_tcsicmp(lpszExtension, _T(".sh")) == 0)
 															{
-																// Create the XML Lexer
+																// Create the Shell Lexer
 #pragma warning(suppress: 26429)
-																m_pLexer = theApp.m_pCreateLexer("xml");
+																m_pLexer = theApp.m_pCreateLexer("bash");
 																if (m_pLexer == nullptr)
 																	return FALSE;
 
-																// Setup the XML Lexer
+																// Setup the Shell Lexer
 																m_ctrlTextFile.SetILexer(m_pLexer);
 															}
 															else
 															{
-																m_ctrlTextFile.SetupDirectAccess();
-																m_ctrlTextFile.SetILexer(nullptr);
+																if (_tcsicmp(lpszExtension, _T(".sql")) == 0)
+																{
+																	// Create the SQL Lexer
+#pragma warning(suppress: 26429)
+																	m_pLexer = theApp.m_pCreateLexer("sql");
+																	if (m_pLexer == nullptr)
+																		return FALSE;
+
+																	// Setup the SQL Lexer
+																	m_ctrlTextFile.SetILexer(m_pLexer);
+																	m_ctrlTextFile.SetKeyWords(0, g_sqlKeywords);
+																}
+																else
+																{
+																	if (_tcsicmp(lpszExtension, _T(".xml")) == 0)
+																	{
+																		// Create the XML Lexer
+#pragma warning(suppress: 26429)
+																		m_pLexer = theApp.m_pCreateLexer("xml");
+																		if (m_pLexer == nullptr)
+																			return FALSE;
+
+																		// Setup the XML Lexer
+																		m_ctrlTextFile.SetILexer(m_pLexer);
+																	}
+																	else
+																	{
+																		m_ctrlTextFile.SetupDirectAccess();
+																		m_ctrlTextFile.SetILexer(nullptr);
+																	}
+																}
 															}
 														}
 													}

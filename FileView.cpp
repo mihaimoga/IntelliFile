@@ -25,7 +25,6 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "SearchFileDlg.h"
 #include "QuickAccessDlg.h"
 #include "NewFolderDlg.h"
-#include "ViewMetaFileDlg.h"
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
 
@@ -545,19 +544,10 @@ bool CFileView::ViewFile()
 				}
 				else
 				{
-					if (IsMetaFile(strFilePath))
-					{
-						CViewMetaFileDlg dlgViewMetaFile(this);
-						dlgViewMetaFile.m_strFilePath = strFilePath;
-						dlgViewMetaFile.DoModal();
-						return true;
-					}
-					else
-					{
-						MessageBox(_T("The selected file format cannot be viewed!\nText, RichText or Metafile formats are supported"), _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
-						return false;
-					}
-
+					CString strWarningPreview;
+					VERIFY(strWarningPreview.LoadString(IDS_WARNING_PREVIEW));
+					MessageBox(strWarningPreview, _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
+					return false;
 				}
 			}
 		}

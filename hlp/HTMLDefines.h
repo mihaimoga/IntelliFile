@@ -41,7 +41,6 @@
 #define HIDD_ChangeDriveDlg                     0x2013A
 #define HIDD_ViewTextFileDlg                    0x2013B
 #define HIDD_ViewRichFileDlg                    0x2013C
-#define HIDD_ViewMetaFileDlg                    0x2013D
 #define HIDD_Base64Dlg                          0x2013E
 #define HIDD_QuickAccessDlg                     0x20140
 #define HIDD_SelectFileDlg                      0x20141

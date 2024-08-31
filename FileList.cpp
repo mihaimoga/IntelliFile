@@ -132,6 +132,7 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".aspx")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".bat")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".cmake")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cs")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
@@ -157,6 +158,8 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
+		((_tcsicmp(lpszFileName, _T("cmakelists")) == 0) && (_tcsicmp(lpszExtension, _T(".txt")) == 0)) ||
+		(_tcsicmp(lpszFileName, _T("makefile")) == 0) ||
 		(_tcsicmp(lpszExtension, _T("")) == 0))
 	{
 		return true;

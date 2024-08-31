@@ -136,6 +136,7 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".css")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".cxx")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".groovy")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".hpp")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||

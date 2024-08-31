@@ -48,8 +48,8 @@ const TCHAR* g_cmakeKeywords
 	_T("target_compile_options target_include_directories target_link_directories ")
 	_T("target_link_libraries target_link_options target_precompile_headers ")
 	_T("target_sources try_compile try_run ctest_build ctest_configure ctest_coverage ")
-	_T("ctest_empty_binary_directory ctest_memcheck ctest_read_custom_files ")
-	_T("ctest_run_script ctest_sleep ctest_start ctest_submit ctest_test ctest_update ctest_upload")
+	_T("ctest_empty_binary_directory ctest_memcheck ctest_read_custom_files ctest_run_script ")
+	_T("ctest_sleep ctest_start ctest_submit ctest_test ctest_update ctest_upload")
 };
 
 const TCHAR* g_cppKeywords

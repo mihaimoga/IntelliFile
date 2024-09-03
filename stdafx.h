@@ -100,3 +100,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include <SciLexer.h>
 #include <ILoader.h>
 #include <Scintilla.h>
+
+#define INSTALLER_URL _T("https://www.moga.doctor/freeware/IntelliFileSetup.msi")
+#define APPLICATION_URL _T("https://www.moga.doctor/freeware/IntelliFile.xml")
+#define USER_MANUAL_URL _T("https://www.moga.doctor/freeware/IntelliFile.html")

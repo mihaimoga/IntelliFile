@@ -45,6 +45,8 @@
 #define HIDD_QuickAccessDlg                     0x20140
 #define HIDD_SelectFileDlg                      0x20141
 #define HIDD_SearchFileDlg                      0x20142
+#define HIDD_WebBrowserDlg                      0x20143
+#define HIDD_CheckForUpdatesDlg                 0x20144
  
 // Frame Controls (IDW_*) 
 // This is a part of the Microsoft Foundation Classes C++ library.

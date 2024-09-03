@@ -442,6 +442,7 @@ echo.
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="LICENSE" />
+    <None Include="packages.config" />
     <None Include="README.md" />
     <None Include="ReadMe.txt" />
     <None Include="ReleaseNotes.html" />
@@ -468,6 +469,8 @@ echo.
     <ClInclude Include="base64.h" />
     <ClInclude Include="Base64Dlg.h" />
     <ClInclude Include="ChangeDriveDlg.h" />
+    <ClInclude Include="CheckForUpdatesDlg.h" />
+    <ClInclude Include="EdgeWebBrowser.h" />
     <ClInclude Include="FileList.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="FilteredFolderDlg.h" />
@@ -475,6 +478,7 @@ echo.
     <ClInclude Include="HLinkCtrl.h" />
     <ClInclude Include="IntelliFile.h" />
     <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="Messages.h" />
     <ClInclude Include="MFCListView.h" />
     <ClInclude Include="NewFolderDlg.h" />
     <ClInclude Include="QuickAccessDlg.h" />
@@ -486,6 +490,7 @@ echo.
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="ViewRichFileDlg.h" />
     <ClInclude Include="ViewTextFileDlg.h" />
+    <ClInclude Include="WebBrowserDlg.h" />
     <ClInclude Include="WndResizer.h" />
     <CustomBuild Include="Resource.h">
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">hlp\HTMLDefines.h;%(Outputs)</Outputs>
@@ -572,6 +577,8 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="base64.cpp" />
     <ClCompile Include="Base64Dlg.cpp" />
     <ClCompile Include="ChangeDriveDlg.cpp" />
+    <ClCompile Include="CheckForUpdatesDlg.cpp" />
+    <ClCompile Include="EdgeWebBrowser.cpp" />
     <ClCompile Include="FileList.cpp" />
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="FilteredFolderDlg.cpp" />
@@ -596,6 +603,7 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="ViewRichFileDlg.cpp" />
     <ClCompile Include="ViewTextFileDlg.cpp" />
+    <ClCompile Include="WebBrowserDlg.cpp" />
     <ClCompile Include="WndResizer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -606,10 +614,19 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\Microsoft.Web.WebView2.1.0.2739.15\build\native\Microsoft.Web.WebView2.targets" Condition="Exists('packages\Microsoft.Web.WebView2.1.0.2739.15\build\native\Microsoft.Web.WebView2.targets')" />
+    <Import Project="packages\Microsoft.Windows.ImplementationLibrary.1.0.240803.1\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('packages\Microsoft.Windows.ImplementationLibrary.1.0.240803.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties RESOURCE_FILE="IntelliFile.rc" />
     </VisualStudio>
   </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.2739.15\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.2739.15\build\native\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('packages\Microsoft.Windows.ImplementationLibrary.1.0.240803.1\build\native\Microsoft.Windows.ImplementationLibrary.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.ImplementationLibrary.1.0.240803.1\build\native\Microsoft.Windows.ImplementationLibrary.targets'))" />
+  </Target>
 </Project>

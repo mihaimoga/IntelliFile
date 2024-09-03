@@ -20,6 +20,8 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "IntelliFile.h"
 #include "MainFrame.h"
 #include "Base64Dlg.h"
+#include "WebBrowserDlg.h"
+#include "CheckForUpdatesDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,6 +67,8 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_COMMAND(IDC_ISSUES, &CMainFrame::OnIssues)
 	ON_COMMAND(IDC_DISCUSSIONS, &CMainFrame::OnDiscussions)
 	ON_COMMAND(IDC_WIKI, &CMainFrame::OnWiki)
+	ON_COMMAND(IDC_USER_MANUAL, &CMainFrame::OnUserManual)
+	ON_COMMAND(IDC_CHECK_FOR_UPDATES, &CMainFrame::OnCheckForUpdates)
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -600,4 +604,16 @@ void CMainFrame::OnDiscussions()
 void CMainFrame::OnWiki()
 {
 	::ShellExecute(GetSafeHwnd(), _T("open"), _T("https://github.com/mihaimoga/IntelliFile/wiki"), nullptr, nullptr, SW_SHOW);
+}
+
+void CMainFrame::OnUserManual()
+{
+	CWebBrowserDlg dlgWebBrowser(this);
+	dlgWebBrowser.DoModal();
+}
+
+void CMainFrame::OnCheckForUpdates()
+{
+	CCheckForUpdatesDlg dlgCheckForUpdates(this);
+	dlgCheckForUpdates.DoModal();
 }

@@ -294,7 +294,7 @@ void CSearchFileDlg::OnClickedBrowse()
 	}
 }
 
-bool g_bThreadRunning = false;
+extern bool g_bThreadRunning; 
 DWORD WINAPI SearchThreadProc(LPVOID lpParam)
 {
 	CSearchFileDlg* dlgSearchFile = (CSearchFileDlg*)lpParam;

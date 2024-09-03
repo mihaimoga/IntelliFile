@@ -96,6 +96,8 @@ protected:
 	afx_msg void OnIssues();
 	afx_msg void OnDiscussions();
 	afx_msg void OnWiki();
+	afx_msg void OnUserManual();
+	afx_msg void OnCheckForUpdates();
 
 public:
 	bool CreateCaptionBar();

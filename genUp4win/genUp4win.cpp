@@ -21,6 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. */
 
 #include "pch.h"
+#include "resource.h"
 #include "genUp4win.h"
 #include "AppSettings.h"
 #include "VersionInfo.h"
@@ -70,7 +71,12 @@ bool WriteConfigFile(const std::wstring& strFilePath, const std::wstring& strDow
 		try {
 			const HRESULT hr{ CoInitialize(nullptr) };
 			if (FAILED(hr))
+			{
+				_com_error pError(hr);
+				LPCTSTR lpszErrorMessage = pError.ErrorMessage();
+				ParentCallback(GENUP4WIN_ERROR, lpszErrorMessage);
 				return false;
+			}
 
 			CXMLAppSettings pAppSettings(GetAppSettingsFilePath(strFilePath, strProductName), true, true);
 			pAppSettings.WriteString(strProductName.c_str(), VERSION_ENTRY_ID, pVersionInfo.GetProductVersionAsString().c_str());
@@ -90,6 +96,7 @@ bool WriteConfigFile(const std::wstring& strFilePath, const std::wstring& strDow
 
 bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strProductName, std::wstring& strLatestVersion, std::wstring& strDownloadURL, fnCallback ParentCallback)
 {
+	CString strStatusMessage;
 	HRESULT hResult = S_OK;
 	bool retVal = false;
 	TCHAR lpszTempPath[_MAX_PATH] = { 0 };
@@ -102,13 +109,21 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 		{
 			CString strFileName = lpszFilePath;
 			strFileName.Replace(_T(".tmp"), _T(".xml"));
-			ParentCallback(GENUP4WIN_INPROGRESS, _T("Connecting..."));
+			if (strStatusMessage.LoadString(IDS_CONNECTING))
+			{
+				ParentCallback(GENUP4WIN_INPROGRESS, std::wstring(strStatusMessage));
+			}
 			if ((hResult = URLDownloadToFile(nullptr, strConfigURL.c_str(), strFileName, 0, nullptr)) == S_OK)
 			{
 				try {
 					const HRESULT hr{ CoInitialize(nullptr) };
 					if (FAILED(hr))
+					{
+						_com_error pError(hr);
+						LPCTSTR lpszErrorMessage = pError.ErrorMessage();
+						ParentCallback(GENUP4WIN_ERROR, lpszErrorMessage);
 						return false;
+					}
 
 					CXMLAppSettings pAppSettings(std::wstring(strFileName), true, true);
 					strLatestVersion = pAppSettings.GetString(strProductName.c_str(), VERSION_ENTRY_ID);
@@ -136,6 +151,7 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 
 bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strConfigURL, fnCallback ParentCallback)
 {
+	CString strStatusMessage;
 	HRESULT hResult = S_OK;
 	bool retVal = false;
 	CVersionInfo pVersionInfo;
@@ -160,7 +176,10 @@ bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strCon
 					{
 						CString strFileName = lpszFilePath;
 						strFileName.Replace(_T(".tmp"), DEFAULT_EXTENSION);
-						ParentCallback(GENUP4WIN_INPROGRESS, _T("Downloading..."));
+						if (strStatusMessage.LoadString(IDS_DOWNLOADING))
+						{
+							ParentCallback(GENUP4WIN_INPROGRESS, std::wstring(strStatusMessage));
+						}
 						if ((hResult = URLDownloadToFile(nullptr, strDownloadURL.c_str(), strFileName, 0, nullptr)) == S_OK)
 						{
 							SHELLEXECUTEINFO pShellExecuteInfo;
@@ -173,7 +192,10 @@ bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strCon
 							pShellExecuteInfo.lpDirectory = nullptr;
 							pShellExecuteInfo.nShow = SW_SHOWNORMAL;
 							const bool bLauched = ShellExecuteEx(&pShellExecuteInfo);
-							ParentCallback(GENUP4WIN_INPROGRESS, bLauched ? _T("The installation started successfully") : _T("Installation failed"));
+							if (strStatusMessage.LoadString(bLauched ? IDS_SUCCESS : IDS_FAILED))
+							{
+								ParentCallback(GENUP4WIN_INPROGRESS, std::wstring(strStatusMessage));
+							}
 							retVal = true; // Download was successful
 						}
 						else

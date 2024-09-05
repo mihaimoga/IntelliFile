@@ -1,9 +1,62 @@
 ![IntelliFile.png](IntelliFile.png)
 
-[IntelliFile](https://www.moga.doctor/#intellifile-top) is an alternative Windows version to the famous Total Commander!
+Download:
+- [IntelliFileSetup.msi](https://www.moga.doctor/freeware/IntelliFileSetup.msi)
+- [IntelliFile.zip](https://www.moga.doctor/freeware/IntelliFile.zip)
 
-This application is developed in Microsoft Visual C++, and it is licensed under GNU General Public License v3.0.
+## Introduction
 
-This open source application has a Setup project to be deployed on Microsoft Windows 10+ machines.
+_IntelliFile_ is a free (as in “free speech” and also as in “free beer”) file manager. Running in the MS Windows environment, its use is governed by [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). _IntelliFile_ is written in C++ and uses pure Win32 API and STL which ensures a higher execution speed and smaller program size. By optimizing as many routines as possible without losing user friendliness, _IntelliFile_ is trying to reduce the world carbon dioxide emissions. When using less CPU power, the PC can throttle down and reduce power consumption, resulting in a greener environment. I hope you enjoy _IntelliFile_ as much as I enjoy coding it!
 
-Contributions are welcome. Be mindful of our [Contribution Rules](CONTRIBUTING.md) to increase the likelihood of your contribution getting accepted.
+## Getting started
+
+### Install IntelliFile using the installer
+
+- Download the installer
+- Run the executable binary and follow the installation flow
+
+The installer will likely require Administrative privileges in order to install _IntelliFile_ (and later, to update _IntelliFile_ or install or update plugins, or anything else that requires writing to the installation directory). If you do not have Administrative privileges, you either need to tell the installer to use a location where you do have write permission (though that may still ask for Administrator privileges), or you may choose not use the installer and instead run a portable edition from a directory where you have write permission.
+
+### Install IntelliFile from zip
+
+These instructions will allow you to run a portable or mini-portable (also called “minimalist”), without requiring administrative privileges.
+
+- Create a new folder somewhere that you have write-permission
+- Unzip the content into the new folder
+- Run _IntelliFile_ from the new folder
+
+For all the portable editions, everything (the application, settings, and plugins) is stored in one folder hierarchy. And by default, the portable editions do not mess with operating system settings (so no file associations or Edit with _IntelliFile_ context-menu entries) – if you want such with a portable edition, you will have to set it up manually.
+
+The portable zip edition contain all the themes, user defined languages, auto-completions, localizations, and default plugins and Plugins Admin tool that come with the installed version of _IntelliFile_.
+
+The portable zip edition of _IntelliFile_ can be removed by deleting the directory they came in. If you manually set up file associations or context-menu entries in the OS, it is your responsibility to remove them yourself.
+
+## Supported Programming Languages
+
+The following Programming Languages are supported by _IntelliFile_:
+
+- ASP
+- Bash
+- Batch
+- C/C++
+- C#
+- CMake
+- CSS
+- Groovy
+- HTML
+- Java
+- JavaScript
+- JSON
+- Makefile
+- Markdown
+- MATLAB
+- PHP
+- Python
+- R
+- Rust
+- SQL
+- XML
+
+## Create and Submit your Pull Request
+
+As noted in the [Contributing Rules](https://github.com/mihaimoga/IntelliFile/blob/main/CONTRIBUTING.md) for _IntelliFile_, all Pull Requests need to be attached to a issue on GitHub. So the first step is to create an issue which requests that the functionality be improved (if it was already there) or added (if it was not yet there); in your issue, be sure to explain that you have the functionality definition ready, and will be submitting a Pull Request. The second step is to use the GitHub interface to create the Pull Request from your fork into the main repository. The final step is to wait for and respond to feedback from the developers as needed, until such time as your PR is accepted or rejected.

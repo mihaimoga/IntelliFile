@@ -6,7 +6,30 @@ Download:
 
 ## Introduction
 
-_IntelliFile_ is a free (as in “free speech” and also as in “free beer”) file manager. Running in the MS Windows environment, its use is governed by [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). _IntelliFile_ is written in C++ and uses pure Win32 API and STL which ensures a higher execution speed and smaller program size. By optimizing as many routines as possible without losing user friendliness, _IntelliFile_ is trying to reduce the world carbon dioxide emissions. When using less CPU power, the PC can throttle down and reduce power consumption, resulting in a greener environment. I hope you enjoy _IntelliFile_ as much as I enjoy coding it!
+_IntelliFile_ is a free (as in “free speech” and also as in “free beer”) file manager. Running in the Microsoft Windows environment, its use is governed by [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). _IntelliFile_ is written in C++ and uses pure Win32 API and STL which ensures a higher execution speed and smaller program size. By optimizing as many routines as possible without losing user friendliness, _IntelliFile_ is trying to reduce the world carbon dioxide emissions. When using less CPU power, the PC can throttle down and reduce power consumption, resulting in a greener environment. I hope you enjoy _IntelliFile_ as much as I enjoy coding it!
+
+**File handling:**
+
+- Extended copying, moving, renaming and deleting of entire trees.
+- ~~Compare files by content, now with built-in text editor.~~
+- Encode/Decode files in Base64 format.
+- Show/select files with specific search pattern, size, date or contents.
+- Enhanced search function with full text search in any files across multiple drives, even inside archives.
+- ~~Supports Drag & Drop with Explorer/the Desktop.~~
+
+**FTP client:** 
+
+- ~~Built-in FTP client supports most public FTP servers.~~
+- ~~Secure FTP over SSL/TLS, enter the URL as follows: ftps://ftp.servername.com~~
+- ~~Download in the background (separate thread).~~
+
+**Archive handling:** 
+
+- ~~Archives are handled like subdirectories. You can easily copy files to and from archives.~~
+- ~~Built-in ZIP-compatible packer, supports long filenames! This packer is based on ZLIB by Info-Zip.~~
+- ~~Pack archives in the background (separate thread).~~
+
+**Some of the above features are still under development!**
 
 ## Getting started
 

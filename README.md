@@ -48,10 +48,6 @@ These instructions will allow you to run a portable or mini-portable (also calle
 - Unzip the content into the new folder
 - Run _IntelliFile_ from the new folder
 
-For all the portable editions, everything (the application, settings, and plugins) is stored in one folder hierarchy. And by default, the portable editions do not mess with operating system settings (so no file associations or Edit with _IntelliFile_ context-menu entries) – if you want such with a portable edition, you will have to set it up manually.
-
-The portable zip edition contain all the themes, user defined languages, auto-completions, localizations, and default plugins and Plugins Admin tool that come with the installed version of _IntelliFile_.
-
 The portable zip edition of _IntelliFile_ can be removed by deleting the directory they came in. If you manually set up file associations or context-menu entries in the OS, it is your responsibility to remove them yourself.
 
 ## Supported Programming Languages

@@ -27,6 +27,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "NewFolderDlg.h"
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
+#include "ViewBinaryFileDlg.h"
 
 #include <Shobjidl.h>
 #include <ShlObj.h>
@@ -531,7 +532,6 @@ bool CFileView::ViewFile()
 				CViewTextFileDlg dlgViewTextFile(this);
 				dlgViewTextFile.m_strFilePath = strFilePath;
 				dlgViewTextFile.DoModal();
-				return true;
 			}
 			else
 			{
@@ -540,19 +540,21 @@ bool CFileView::ViewFile()
 					CViewRichFileDlg dlgViewRichFile(this);
 					dlgViewRichFile.m_strFilePath = strFilePath;
 					dlgViewRichFile.DoModal();
-					return true;
 				}
 				else
 				{
-					CString strWarningPreview;
+					/*CString strWarningPreview;
 					VERIFY(strWarningPreview.LoadString(IDS_WARNING_PREVIEW));
 					MessageBox(strWarningPreview, _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
-					return false;
+					return false;*/
+					CViewBinaryFileDlg dlgViewBinaryFile(this);
+					dlgViewBinaryFile.m_strFilePath = strFilePath;
+					dlgViewBinaryFile.DoModal();
 				}
 			}
 		}
 	}
-	return false;
+	return true;
 }
 
 bool CFileView::EditFile()

@@ -14,7 +14,7 @@ _IntelliFile_ is a free (as in “free speech” and also as in “free beer”)
 - ~~Compare files by content, now with built-in text editor.~~
 - Encode/Decode files in Base64 format.
 - Show/select files with specific search pattern, size, date or contents.
-- Enhanced search function with full text search in any files across multiple drives, even inside archives.
+- Enhanced search function with full text search in any files across multiple drives, ~~even inside archives.~~
 - ~~Supports Drag & Drop with Explorer/the Desktop.~~
 
 **FTP client:** 

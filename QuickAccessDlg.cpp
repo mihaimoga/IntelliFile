@@ -84,7 +84,8 @@ BOOL CQuickAccessDlg::OnInitDialog()
 
 	CString strItemText;
 	const UINT nTextFileFlags = CFile::modeRead | CFile::typeText;
-	try {
+	try
+	{
 		CStdioFile pTextFile(GetQuickAcessFilePath(), nTextFileFlags);
 		while (pTextFile.ReadString(strItemText))
 		{
@@ -109,7 +110,8 @@ void CQuickAccessDlg::OnDestroy()
 	CString strFileLine;
 	CString strItemText;
 	const UINT nTextFileFlags = CFile::modeCreate | CFile::modeWrite | CFile::typeText;
-	try {
+	try
+	{
 		CStdioFile pTextFile(GetQuickAcessFilePath(), nTextFileFlags);
 		const int nListSize = m_listFavoriteFolders.GetCount();
 		for (int nListItem = 0; nListItem < nListSize; nListItem++)

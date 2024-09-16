@@ -978,7 +978,7 @@ bool CFileSystem::CopyFile(CFileSystem* pDestination, CFileList* arrSelection)
 			{
 				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
 			}
-			delete arrItemIDList;
+			delete[] arrItemIDList;
 			arrItemIDList = nullptr;
 		}
 	}
@@ -1081,7 +1081,7 @@ bool CFileSystem::MoveFile(CFileSystem* pDestination, CFileList* arrSelection)
 			{
 				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
 			}
-			delete arrItemIDList;
+			delete[] arrItemIDList;
 			arrItemIDList = nullptr;
 		}
 	}
@@ -1210,7 +1210,7 @@ bool CFileSystem::DeleteFile(CFileSystem* pDestination, CFileList* arrSelection)
 			{
 				ILFree((LPITEMIDLIST)arrItemIDList[nIndex]);
 			}
-			delete arrItemIDList;
+			delete[] arrItemIDList;
 			arrItemIDList = nullptr;
 		}
 	}

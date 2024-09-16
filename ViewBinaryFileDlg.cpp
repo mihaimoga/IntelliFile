@@ -37,11 +37,12 @@ BOOL CViewBinaryFileDlg::OnInitDialog()
 
 	SetWindowText(m_strFilePath);
 
-	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+	// CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
 	m_pHexDlg->CreateDialogCtrl(IDC_BINARY_FILE, m_hWnd);
 	m_pHexDlg->SetScrollRatio(2, true); //Two lines scroll with mouse-wheel.
 	m_pHexDlg->SetPageSize(64);
+	m_pHexDlg->SetMutable(false);
 
 	try
 	{
@@ -55,7 +56,7 @@ BOOL CViewBinaryFileDlg::OnInitDialog()
 			char* pFileBuffer = new char[(UINT)nFileLength + 1];
 			if (nullptr != pFileBuffer)
 			{
-				memset(pFileBuffer, 0, sizeof(pFileBuffer));
+				ZeroMemory(pFileBuffer, sizeof(pFileBuffer));
 				// read file's content
 				const UINT nActualLength = pBinaryFile.Read(pFileBuffer, (UINT)nFileLength);
 				pFileBuffer[nActualLength] = 0;
@@ -63,8 +64,8 @@ BOOL CViewBinaryFileDlg::OnInitDialog()
 				HEXDATA hds;
 				hds.spnData = { reinterpret_cast<std::byte*>(pFileBuffer), nFileLength };
 				m_pHexDlg->SetData(hds);
-				/* delete buffer
-				delete pFileBuffer;
+				/* delete the buffer
+				delete[] pFileBuffer;
 				pFileBuffer = nullptr;*/
 			}
 		}

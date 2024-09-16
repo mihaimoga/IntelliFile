@@ -600,7 +600,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 			char* pFileBuffer = new char[(UINT)nFileLength + 1];
 			if (nullptr != pFileBuffer)
 			{
-				memset(pFileBuffer, 0, sizeof(pFileBuffer));
+				ZeroMemory(pFileBuffer, sizeof(pFileBuffer));
 				// read file's content
 				const UINT nActualLength = pTextFile.Read(pFileBuffer, (UINT)nFileLength);
 				pFileBuffer[nActualLength] = 0;
@@ -608,8 +608,8 @@ BOOL CViewTextFileDlg::OnInitDialog()
 				CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
 				// actual show the content of file
 				m_ctrlTextFile.SetText(strConvertedText);
-				// delete buffer
-				delete pFileBuffer;
+				// delete the buffer
+				delete[] pFileBuffer;
 				pFileBuffer = nullptr;
 			}
 		}

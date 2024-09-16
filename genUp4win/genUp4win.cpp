@@ -68,7 +68,8 @@ bool WriteConfigFile(const std::wstring& strFilePath, const std::wstring& strDow
 	if (pVersionInfo.Load(strFilePath.c_str()))
 	{
 		const std::wstring& strProductName = pVersionInfo.GetProductName();
-		try {
+		try
+		{
 			const HRESULT hr{ CoInitialize(nullptr) };
 			if (FAILED(hr))
 			{
@@ -115,7 +116,8 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 			}
 			if ((hResult = URLDownloadToFile(nullptr, strConfigURL.c_str(), strFileName, 0, nullptr)) == S_OK)
 			{
-				try {
+				try
+				{
 					const HRESULT hr{ CoInitialize(nullptr) };
 					if (FAILED(hr))
 					{

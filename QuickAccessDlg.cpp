@@ -62,6 +62,15 @@ CString GetQuickAcessFilePath()
 	TCHAR lpszExeFilePath[_MAX_PATH];
 	TCHAR lpszGetQuickAcess[_MAX_PATH];
 
+	WCHAR* lpszSpecialFolderPath = nullptr;
+	if ((SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &lpszSpecialFolderPath)) == S_OK)
+	{
+		std::wstring result(lpszSpecialFolderPath);
+		CoTaskMemFree(lpszSpecialFolderPath);
+		result += _T("\\FavoriteFolders.txt");
+		return result.c_str();
+	}
+	
 	const int nLength = GetModuleFileName(NULL, lpszExeFilePath, _MAX_PATH);
 	ASSERT(nLength > 0);
 	VERIFY(0 == _tsplitpath_s(lpszExeFilePath, lpszDrive, _MAX_DRIVE, lpszDirectory, _MAX_DIR, lpszFilename, _MAX_FNAME, lpszExtension, _MAX_EXT));

@@ -48,8 +48,9 @@ END_MESSAGE_MAP()
 BOOL CChangeDriveDlg::OnInitDialog()
 {
 	const int nVolumeNameSize = MAX_PATH + 1;
-	TCHAR VolumeNameBuffer[nVolumeNameSize];
+	TCHAR VolumeNameBuffer[nVolumeNameSize] = { 0, };
 	CString strDriveName;
+
 	CDialogEx::OnInitDialog();
 
 	const DWORD nDriveList = ::GetLogicalDrives();
@@ -125,12 +126,20 @@ BOOL CChangeDriveDlg::OnInitDialog()
 
 void CChangeDriveDlg::OnOK()
 {
-	m_strNewDriveName = m_arrDriveName.GetAt(m_ctrlDriveList.GetCurSel());
-	CDialogEx::OnOK();
+	const int nCurSel = m_ctrlDriveList.GetCurSel();
+	if (CB_ERR != nCurSel)
+	{
+		m_strNewDriveName = m_arrDriveName.GetAt(nCurSel);
+		CDialogEx::OnOK();
+	}
 }
 
 void CChangeDriveDlg::OnDblclkDriveList()
 {
-	m_strNewDriveName = m_arrDriveName.GetAt(m_ctrlDriveList.GetCurSel());
-	CDialogEx::OnOK();
+	const int nCurSel = m_ctrlDriveList.GetCurSel();
+	if (CB_ERR != nCurSel)
+	{
+		m_strNewDriveName = m_arrDriveName.GetAt(nCurSel);
+		CDialogEx::OnOK();
+	}
 }

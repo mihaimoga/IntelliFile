@@ -183,10 +183,18 @@ const TCHAR* g_sqlKeywords
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pLexer{ nullptr }
 {
+	m_pFileData.m_dwDataLength = 0;
+	m_pFileData.m_hData = nullptr;
 }
 
 CViewTextFileDlg::~CViewTextFileDlg()
 {
+	if (m_pFileData.m_hData != nullptr)
+	{
+		::GlobalFree(m_pFileData.m_hData);
+		m_pFileData.m_hData = nullptr;
+		m_pFileData.m_dwDataLength = 0;
+	}
 }
 
 void CViewTextFileDlg::DoDataExchange(CDataExchange* pDX)
@@ -593,24 +601,24 @@ BOOL CViewTextFileDlg::OnInitDialog()
 		// try to open the file
 		CFile pTextFile(m_strFilePath, CFile::modeRead);
 		// query the file's length
-		const ULONGLONG nFileLength = pTextFile.GetLength();
-		if (nFileLength > 0)
+		m_pFileData.m_dwDataLength = pTextFile.GetLength();
+		if (m_pFileData.m_dwDataLength > 0)
 		{
-			// allocate buffer for reading file's content
-			char* pFileBuffer = new char[(UINT)nFileLength + 1];
-			if (nullptr != pFileBuffer)
+			m_pFileData.m_hData = ::GlobalAlloc(GPTR, m_pFileData.m_dwDataLength + 1);
+			if (m_pFileData.m_hData != nullptr)
 			{
-				ZeroMemory(pFileBuffer, sizeof(pFileBuffer));
-				// read file's content
-				const UINT nActualLength = pTextFile.Read(pFileBuffer, (UINT)nFileLength);
-				pFileBuffer[nActualLength] = 0;
-				// convert UTF8 to Unicode characters
-				CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
-				// actual show the content of file
-				m_ctrlTextFile.SetText(strConvertedText);
-				// delete the buffer
-				delete[] pFileBuffer;
-				pFileBuffer = nullptr;
+				char* pFileBuffer = (char*) ::GlobalLock(m_pFileData.m_hData);
+				if (pFileBuffer != nullptr)
+				{
+					// read file's content
+					const UINT nActualLength = pTextFile.Read(pFileBuffer, (UINT)m_pFileData.m_dwDataLength);
+					pFileBuffer[nActualLength] = 0;
+					// convert UTF8 to Unicode characters
+					CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
+					// actual show the content of file
+					m_ctrlTextFile.SetText(strConvertedText);
+				}
+				VERIFY(::GlobalUnlock(m_pFileData.m_hData));
 			}
 		}
 		// close the file handle

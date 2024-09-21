@@ -37,6 +37,7 @@ public:
 	CWndResizer m_pWindowResizer;
 	Scintilla::ILexer5* m_pLexer;
 	Scintilla::CScintillaCtrl m_ctrlTextFile;
+	CLongBinary m_pFileData;
 	CString m_strFilePath;
 	UINT_PTR m_nTimerID;
 

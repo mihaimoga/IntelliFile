@@ -14,10 +14,18 @@ IMPLEMENT_DYNAMIC(CViewBinaryFileDlg, CDialogEx)
 CViewBinaryFileDlg::CViewBinaryFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewBinaryFileDlg, pParent)
 {
+	m_pFileData.m_dwDataLength = 0;
+	m_pFileData.m_hData = nullptr;
 }
 
 CViewBinaryFileDlg::~CViewBinaryFileDlg()
 {
+	if (m_pFileData.m_hData != nullptr)
+	{
+		::GlobalFree(m_pFileData.m_hData);
+		m_pFileData.m_hData = nullptr;
+		m_pFileData.m_dwDataLength = 0;
+	}
 }
 
 void CViewBinaryFileDlg::DoDataExchange(CDataExchange* pDX)
@@ -42,31 +50,30 @@ BOOL CViewBinaryFileDlg::OnInitDialog()
 	m_pHexDlg->CreateDialogCtrl(IDC_BINARY_FILE, m_hWnd);
 	m_pHexDlg->SetScrollRatio(2, true); //Two lines scroll with mouse-wheel.
 	m_pHexDlg->SetPageSize(64);
-	m_pHexDlg->SetMutable(false);
 
 	try
 	{
 		// try to open the file
 		CFile pBinaryFile(m_strFilePath, CFile::modeRead);
 		// query the file's length
-		const ULONGLONG nFileLength = pBinaryFile.GetLength();
-		if (nFileLength > 0)
+		m_pFileData.m_dwDataLength = pBinaryFile.GetLength();
+		if (m_pFileData.m_dwDataLength > 0)
 		{
-			// allocate buffer for reading file's content
-			char* pFileBuffer = new char[(UINT)nFileLength + 1];
-			if (nullptr != pFileBuffer)
+			m_pFileData.m_hData = ::GlobalAlloc(GPTR, m_pFileData.m_dwDataLength + 1);
+			if (m_pFileData.m_hData != nullptr)
 			{
-				ZeroMemory(pFileBuffer, sizeof(pFileBuffer));
-				// read file's content
-				const UINT nActualLength = pBinaryFile.Read(pFileBuffer, (UINT)nFileLength);
-				pFileBuffer[nActualLength] = 0;
-				// actual show the content of file
-				HEXDATA hds;
-				hds.spnData = { reinterpret_cast<std::byte*>(pFileBuffer), nFileLength };
-				m_pHexDlg->SetData(hds);
-				/* delete the buffer
-				delete[] pFileBuffer;
-				pFileBuffer = nullptr;*/
+				char* pFileBuffer = (char*) ::GlobalLock(m_pFileData.m_hData);
+				if (pFileBuffer != nullptr)
+				{
+					// read file's content
+					const UINT nActualLength = pBinaryFile.Read(pFileBuffer, (UINT)m_pFileData.m_dwDataLength);
+					pFileBuffer[nActualLength] = 0;
+					// actual show the content of file
+					HEXDATA hds;
+					hds.spnData = { reinterpret_cast<std::byte*>(pFileBuffer), m_pFileData.m_dwDataLength };
+					m_pHexDlg->SetData(hds);
+				}
+				VERIFY(::GlobalUnlock(m_pFileData.m_hData));
 			}
 		}
 		// close the file handle

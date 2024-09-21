@@ -325,6 +325,7 @@ void CWebBrowser::RegisterEventHandlers()
 	CHECK_FAILURE(m_pImpl->m_webView->add_DocumentTitleChanged(
 		Callback<ICoreWebView2DocumentTitleChangedEventHandler>(
 			[this](ICoreWebView2* sender, IUnknown* args) -> HRESULT {
+				UNREFERENCED_PARAMETER(args);
 				wil::unique_cotaskmem_string title;
 				CHECK_FAILURE(sender->get_DocumentTitle(&title));
 
@@ -731,6 +732,7 @@ void CWebBrowser::ExecuteScript(CString const& code)
 			Callback<ICoreWebView2ExecuteScriptCompletedHandler>(
 				[](HRESULT error, PCWSTR result) -> HRESULT
 				{
+					UNREFERENCED_PARAMETER(result);
 					if (error != S_OK) {
 						ShowFailure(error, L"ExecuteScript failed");
 					}

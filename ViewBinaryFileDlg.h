@@ -20,6 +20,7 @@ public:
 #endif
 	CWndResizer m_pWindowResizer;
 	IHexCtrlPtr m_pHexDlg{ CreateHexCtrl() };
+	CLongBinary m_pFileData;
 	CString m_strFilePath;
 
 protected:

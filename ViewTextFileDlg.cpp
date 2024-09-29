@@ -183,18 +183,10 @@ const TCHAR* g_sqlKeywords
 CViewTextFileDlg::CViewTextFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewTextFileDlg, pParent), m_pLexer{ nullptr }
 {
-	m_pFileData.m_dwDataLength = 0;
-	m_pFileData.m_hData = nullptr;
 }
 
 CViewTextFileDlg::~CViewTextFileDlg()
 {
-	if (m_pFileData.m_hData != nullptr)
-	{
-		::GlobalFree(m_pFileData.m_hData);
-		m_pFileData.m_hData = nullptr;
-		m_pFileData.m_dwDataLength = 0;
-	}
 }
 
 void CViewTextFileDlg::DoDataExchange(CDataExchange* pDX)
@@ -253,6 +245,147 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	SetWindowText(m_strFilePath);
+
+	try
+	{
+		// try to open the file
+		CFile pTextFile(m_strFilePath, CFile::modeRead);
+		// query the file's length
+		const auto nFileSize = pTextFile.GetLength();
+		if (nFileSize > 0)
+		{
+			// Check if the size of the file to be loaded can be handled via CreateLoader and fail if not
+			const auto nFileSizeForLoader{ static_cast<Scintilla::Position>(nFileSize) };
+			if (nFileSize != static_cast<ULONGLONG>(nFileSizeForLoader))
+			{
+				AfxMessageBox(_T("Document is too large to be loaded!"), MB_ICONEXCLAMATION);
+				AfxThrowUserException();
+			}
+
+			// Create an ILoader instance
+			auto pLoader = static_cast<Scintilla::ILoader*>(m_ctrlTextFile.CreateLoader(nFileSizeForLoader, Scintilla::DocumentOption::Default));
+			if (pLoader == nullptr)
+			{
+				AfxMessageBox(_T("Failed to create Loader interface while loading a document!"), MB_ICONEXCLAMATION);
+				AfxThrowUserException();
+			}
+
+			// Read the data in from the file in blocks
+			std::vector<BYTE> byBuffer{ 0x1000, std::allocator<BYTE>{} };
+			int nBytesRead{ 0 };
+			BOM m_BOM = BOM::Unknown;
+			bool bDetectedBOM{ false };
+			do
+			{
+#pragma warning(suppress: 26472)
+				nBytesRead = pTextFile.Read(byBuffer.data(), static_cast<UINT>(byBuffer.size()));
+				if (nBytesRead)
+				{
+					int nSkip{ 0 };
+					if (!bDetectedBOM)
+					{
+						bDetectedBOM = true;
+						int nUniTest = IS_TEXT_UNICODE_STATISTICS;
+						// detect UTF-16BE with BOM
+#pragma warning(suppress: 26446)
+						if ((nBytesRead > 1) && ((nFileSize % 2) == 0) && ((nBytesRead % 2) == 0) && (byBuffer[0] == 0xFE) && (byBuffer[1] == 0xFF))
+						{
+							m_BOM = BOM::UTF16BE;
+							nSkip = 2;
+						}
+						// detect UTF-16LE with BOM
+#pragma warning(suppress: 26446)
+						else if ((nBytesRead > 1) && ((nFileSize % 2) == 0) && ((nBytesRead % 2) == 0) && (byBuffer[0] == 0xFF) && (byBuffer[1] == 0xFE))
+						{
+							m_BOM = BOM::UTF16LE;
+							nSkip = 2;
+						}
+						// detect UTF-8 with BOM
+#pragma warning(suppress: 26446)
+						else if ((nBytesRead > 2) && (byBuffer[0] == 0xEF) && (byBuffer[1] == 0xBB) && (byBuffer[2] == 0xBF))
+						{
+							m_BOM = BOM::UTF8;
+							nSkip = 3;
+						}
+						// detect UTF-16LE without BOM (Note IS_TEXT_UNICODE_STATISTICS implies Little Endian for all versions of supported Windows platforms i.e. x86, x64, ARM & ARM64)
+#pragma warning(suppress: 26446)
+						else if ((nBytesRead > 1) && ((nFileSize % 2) == 0) && ((nBytesRead % 2) == 0) && (byBuffer[0] != 0) && (byBuffer[1] == 0) && IsTextUnicode(byBuffer.data(), nBytesRead, &nUniTest))
+						{
+							m_BOM = BOM::UTF16LE_NOBOM;
+							nSkip = 0;
+						}
+					}
+
+					// Work out the data to pass to ILoader->AddData
+					const char* pLoadData{ nullptr };
+					int nBytesToLoad{ 0 };
+					CStringA sUTF8Data;
+					if ((m_BOM == BOM::UTF16LE_NOBOM) || (m_BOM == BOM::UTF16LE))
+					{
+						// Handle conversion from UTF16LE to UTF8
+#pragma warning(suppress: 26481 26490)
+						sUTF8Data = Scintilla::CScintillaCtrl::W2UTF8(reinterpret_cast<const wchar_t*>(byBuffer.data() + nSkip), (nBytesRead - nSkip) / 2);
+						pLoadData = sUTF8Data;
+						nBytesToLoad = sUTF8Data.GetLength();
+					}
+					else if (m_BOM == BOM::UTF16BE)
+					{
+						// Handle conversion from UTF16BE to UTF8
+#pragma warning(suppress: 26429 26481)
+						BYTE* p = byBuffer.data() + nSkip;
+						const int nUTF16CharsRead = (nBytesRead - nSkip) / 2;
+						for (int i = 0; i < nUTF16CharsRead; i++)
+						{
+							const BYTE t{ *p };
+#pragma warning(suppress: 26481)
+							* p = p[1];
+#pragma warning(suppress: 26481)
+							p[1] = t;
+#pragma warning(suppress: 26481)
+							p += 2;
+						}
+#pragma warning(suppress: 26481 26490)
+						sUTF8Data = Scintilla::CScintillaCtrl::W2UTF8(reinterpret_cast<const wchar_t*>(byBuffer.data() + nSkip), (nBytesRead - nSkip) / 2);
+						pLoadData = sUTF8Data;
+						nBytesToLoad = sUTF8Data.GetLength();
+					}
+					else
+					{
+#pragma warning(suppress: 26481 26490)
+						pLoadData = reinterpret_cast<const char*>(byBuffer.data()) + nSkip;
+						nBytesToLoad = nBytesRead - nSkip;
+					}
+					ASSERT(pLoadData != nullptr);
+					const auto nAddDataError{ pLoader->AddData(pLoadData, nBytesToLoad) };
+					if (nAddDataError != SC_STATUS_OK)
+					{
+						pLoader->Release();
+						CString sError;
+						sError.Format(_T("%d"), nAddDataError);
+						AfxMessageBox(_T("Failed to load document!"), MB_ICONEXCLAMATION);
+						AfxThrowUserException();
+					}
+				}
+			} while (nBytesRead);
+
+			// Set the document pointer to the loaded content
+			m_ctrlTextFile.SetDocPointer(static_cast<Scintilla::IDocumentEditable*>(pLoader->ConvertToDocument())); //NOLINT(clang-analyzer-core.CallAndMessage)
+
+			// Reinitialize the control settings
+			m_ctrlTextFile.SetUndoCollection(TRUE);
+			m_ctrlTextFile.EmptyUndoBuffer();
+			m_ctrlTextFile.SetSavePoint();
+			m_ctrlTextFile.GotoPos(0);
+		}
+		// close the file handle
+		pTextFile.Close();
+	}
+	catch (CFileException* pEx)
+	{
+		// if an error occurs, just make a message box
+		pEx->ReportError();
+		pEx->Delete();
+	}
 
 	CString strTempPath = m_strFilePath;
 	strTempPath.MakeLower();
@@ -595,41 +728,6 @@ BOOL CViewTextFileDlg::OnInitDialog()
 
 	// Enable Multiple selection
 	// m_ctrlTextFile.SetMultipleSelection(TRUE);
-
-	try
-	{
-		// try to open the file
-		CFile pTextFile(m_strFilePath, CFile::modeRead);
-		// query the file's length
-		m_pFileData.m_dwDataLength = pTextFile.GetLength();
-		if (m_pFileData.m_dwDataLength > 0)
-		{
-			m_pFileData.m_hData = ::GlobalAlloc(GPTR, m_pFileData.m_dwDataLength + 1);
-			if (m_pFileData.m_hData != nullptr)
-			{
-				char* pFileBuffer = (char*) ::GlobalLock(m_pFileData.m_hData);
-				if (pFileBuffer != nullptr)
-				{
-					// read file's content
-					const UINT nActualLength = pTextFile.Read(pFileBuffer, (UINT)m_pFileData.m_dwDataLength);
-					pFileBuffer[nActualLength] = 0;
-					// convert UTF8 to Unicode characters
-					CString strConvertedText(utf8_to_wstring(pFileBuffer).c_str());
-					// actual show the content of file
-					m_ctrlTextFile.SetText(strConvertedText);
-				}
-				VERIFY(::GlobalUnlock(m_pFileData.m_hData));
-			}
-		}
-		// close the file handle
-		pTextFile.Close();
-	}
-	catch (CFileException* pEx)
-	{
-		// if an error occurs, just make a message box
-		pEx->ReportError();
-		pEx->Delete();
-	}
 
 	VERIFY(m_pWindowResizer.Hook(this));
 	VERIFY(m_pWindowResizer.SetAnchor(IDC_TEXT_FILE, ANCHOR_LEFT | ANCHOR_RIGHT | ANCHOR_TOP | ANCHOR_BOTTOM));

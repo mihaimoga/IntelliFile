@@ -34,10 +34,17 @@ public:
 #endif
 
 public:
+	enum class BOM
+	{
+		Unknown,
+		UTF8,
+		UTF16BE,
+		UTF16LE,
+		UTF16LE_NOBOM
+	};
 	CWndResizer m_pWindowResizer;
 	Scintilla::ILexer5* m_pLexer;
 	Scintilla::CScintillaCtrl m_ctrlTextFile;
-	CLongBinary m_pFileData;
 	CString m_strFilePath;
 	UINT_PTR m_nTimerID;
 

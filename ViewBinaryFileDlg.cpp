@@ -84,6 +84,7 @@ BOOL CViewBinaryFileDlg::OnInitDialog()
 		// if an error occurs, just make a message box
 		pEx->ReportError();
 		pEx->Delete();
+		CDialogEx::EndDialog(IDCANCEL);
 	}
 
 	VERIFY(m_pWindowResizer.Hook(this));

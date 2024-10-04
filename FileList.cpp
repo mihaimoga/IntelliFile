@@ -156,6 +156,7 @@ bool IsTextFile(CString strFilePath)
 		(_tcsicmp(lpszExtension, _T(".sh")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".sql")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".php")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".tcl")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".txt")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
 		((_tcsicmp(lpszFileName, _T("cmakelists")) == 0) && (_tcsicmp(lpszExtension, _T(".txt")) == 0)) ||

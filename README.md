@@ -74,6 +74,7 @@ The following Programming Languages are supported by _IntelliFile_:
 - R
 - Rust
 - SQL
+- TCL/TK
 - XML
 
 ## Create and Submit your Pull Request

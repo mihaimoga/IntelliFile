@@ -27,6 +27,7 @@ IMPLEMENT_DYNAMIC(CViewRichFileDlg, CDialogEx)
 CViewRichFileDlg::CViewRichFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewRichFileDlg, pParent)
 {
+	m_nTimerID = 0;
 }
 
 CViewRichFileDlg::~CViewRichFileDlg()
@@ -70,6 +71,8 @@ BOOL CViewRichFileDlg::OnInitDialog()
 
 	SetWindowText(m_strFilePath);
 
+	m_ctrlTextFile.LimitText(-1);
+
 	try
 	{
 		// try to open the file
@@ -90,6 +93,7 @@ BOOL CViewRichFileDlg::OnInitDialog()
 		// if an error occurs, just make a message box
 		pEx->ReportError();
 		pEx->Delete();
+		CDialogEx::EndDialog(IDCANCEL);
 	}
 
 	VERIFY(m_pWindowResizer.Hook(this));

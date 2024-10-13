@@ -367,5 +367,6 @@ void CSearchFileDlg::OnBnClickedCancel()
 		g_bThreadRunning = false;
 		VERIFY(WaitWithMessageLoop(m_hSearchThread, INFINITE));
 	}
+
 	CDialogEx::OnCancel();
 }

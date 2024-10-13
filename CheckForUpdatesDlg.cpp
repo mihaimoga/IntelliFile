@@ -36,6 +36,7 @@ CCheckForUpdatesDlg::CCheckForUpdatesDlg(CWnd* pParent /*=nullptr*/)
 {
 	m_nUpdateThreadID = 0;
 	m_hUpdateThread = nullptr;
+	m_nTimerID = 0;
 }
 
 CCheckForUpdatesDlg::~CCheckForUpdatesDlg()
@@ -123,6 +124,7 @@ void CCheckForUpdatesDlg::OnTimer(UINT_PTR nIDEvent)
 	{
 		if (!g_bThreadRunning)
 		{
+			VERIFY(KillTimer(m_nTimerID));
 			CDialogEx::OnCancel();
 			if (g_bNewUpdateFound)
 			{

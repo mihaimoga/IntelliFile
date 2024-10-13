@@ -185,43 +185,6 @@ bool IsRichTextFile(CString strFilePath)
 	return false;
 }
 
-bool IsCodeFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if ((_tcsicmp(lpszExtension, _T(".cpp")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".c")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".h")) == 0) ||
-		(_tcsicmp(lpszExtension, _T(".hpp")) == 0))
-		return true;
-	return false;
-}
-
-bool IsDataFile(CString strFilePath)
-{
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
-	TCHAR lpszFolder[_MAX_DIR] = { 0 };
-	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
-	TCHAR lpszExtension[_MAX_EXT] = { 0 };
-	strFilePath.MakeLower();
-	_tsplitpath_s(strFilePath,
-		lpszDrive, _MAX_DRIVE,
-		lpszFolder, _MAX_DIR,
-		lpszFileName, _MAX_FNAME,
-		lpszExtension, _MAX_EXT);
-	if (_tcsicmp(lpszExtension, _T(".csv")) == 0)
-		return true;
-	return false;
-}
-
 bool IsMetaFile(CString strFilePath)
 {
 	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
@@ -237,6 +200,29 @@ bool IsMetaFile(CString strFilePath)
 	if ((_tcsicmp(lpszExtension, _T(".xml")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".htm")) == 0) ||
 		(_tcsicmp(lpszExtension, _T(".html")) == 0))
+		return true;
+	return false;
+}
+
+bool IsAudioFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".aac")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".flac")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".m4a")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".mp3")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".mp4")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".wav")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".wma")) == 0))
 		return true;
 	return false;
 }

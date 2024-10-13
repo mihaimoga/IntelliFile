@@ -29,9 +29,8 @@ bool IsApplication(CString strFilePath);
 bool IsBinaryFile(CString strFilePath);
 bool IsTextFile(CString strFilePath);
 bool IsRichTextFile(CString strFilePath);
-bool IsCodeFile(CString strFilePath);
-bool IsDataFile(CString strFilePath);
 bool IsMetaFile(CString strFilePath);
+bool IsAudioFile(CString strFilePath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileData command target

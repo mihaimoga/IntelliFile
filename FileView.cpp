@@ -27,6 +27,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "NewFolderDlg.h"
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
+#include "ViewAudioFileDlg.h"
 #include "ViewBinaryFileDlg.h"
 
 #include <Shobjidl.h>
@@ -543,13 +544,23 @@ bool CFileView::ViewFile()
 				}
 				else
 				{
-					/*CString strWarningPreview;
-					VERIFY(strWarningPreview.LoadString(IDS_WARNING_PREVIEW));
-					MessageBox(strWarningPreview, _T("IntelliFile"), MB_OK | MB_ICONEXCLAMATION);
-					return false;*/
-					CViewBinaryFileDlg dlgViewBinaryFile(this);
-					dlgViewBinaryFile.m_strFilePath = strFilePath;
-					dlgViewBinaryFile.DoModal();
+					if (IsAudioFile(strFilePath))
+					{
+						CViewAudioFileDlg dlgViewAudioFile(this);
+						dlgViewAudioFile.m_strFilePath = strFilePath;
+						/* dlgViewAudioFile.Create(IDD_ViewAudioFileDlg);
+						dlgViewAudioFile.CenterWindow();
+						dlgViewAudioFile.ShowWindow(SW_SHOW);
+						::PlaySound(strFilePath, nullptr, SND_FILENAME);
+						dlgViewAudioFile.ShowWindow(SW_HIDE); */
+						dlgViewAudioFile.DoModal();
+					}
+					else
+					{
+						CViewBinaryFileDlg dlgViewBinaryFile(this);
+						dlgViewBinaryFile.m_strFilePath = strFilePath;
+						dlgViewBinaryFile.DoModal();
+					}
 				}
 			}
 		}

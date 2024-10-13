@@ -426,6 +426,9 @@
     <ClInclude Include="HexCtrl\HexCtrl\dep\ListEx\ListEx.h">
       <Filter>HexCtrl\dep\ListEx</Filter>
     </ClInclude>
+    <ClInclude Include="ViewAudioFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -547,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="HexCtrl\HexCtrl\dep\ListEx\CListEx.cpp">
       <Filter>HexCtrl\dep\ListEx</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewAudioFileDlg.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -429,6 +429,15 @@
     <ClInclude Include="ViewAudioFileDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ViewImageFileDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Icon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IntelliFile.cpp">
@@ -552,6 +561,15 @@
       <Filter>HexCtrl\dep\ListEx</Filter>
     </ClCompile>
     <ClCompile Include="ViewAudioFileDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewImageFileDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

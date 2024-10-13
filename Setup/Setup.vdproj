@@ -326,7 +326,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -346,7 +346,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -506,7 +506,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -706,7 +706,7 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
@@ -1336,7 +1336,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2CC6DBEDD49B423E861A2C2CE11D6CD1"
             {
-            "SourcePath" = "8:..\\x64\\Release\\genUp4win.dll"
+            "SourcePath" = "8:..\\x64\\Debug\\genUp4win.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
@@ -1364,7 +1364,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_4EC0133FAD4141989B9246C943950B35"
             {
-            "SourcePath" = "8:..\\x64\\Release\\Lexilla.dll"
+            "SourcePath" = "8:..\\x64\\Debug\\Lexilla.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
@@ -1392,7 +1392,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_658A59D744C848AA84CA29835B04B972"
             {
-            "SourcePath" = "8:..\\x64\\Release\\IntelliFile.exe"
+            "SourcePath" = "8:..\\x64\\Debug\\IntelliFile.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
@@ -1420,7 +1420,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_993164C3311547498DBE36E9340CD9AC"
             {
-            "SourcePath" = "8:..\\x64\\Release\\Scintilla.dll"
+            "SourcePath" = "8:..\\x64\\Debug\\Scintilla.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"

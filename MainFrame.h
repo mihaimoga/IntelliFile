@@ -52,7 +52,7 @@ protected:  // control bar embedded members
 	CMFCRibbonBar     m_wndRibbonBar;
 	CMFCRibbonApplicationButton* m_MainButton;
 	CMFCToolBarImages m_PanelImages;
-	CMFCRibbonStatusBar  m_wndStatusBar;
+	// CMFCRibbonStatusBar  m_wndStatusBar;
 	CMFCCaptionBar    m_wndCaptionBar;
 	CSplitterWndEx m_wndSplitter;
 	CFileView*    m_wndLeftFileView;
@@ -103,7 +103,7 @@ public:
 	bool CreateCaptionBar();
 	bool HideMessageBar();
 	bool ShowMessageBar(CString strMessage);
-	bool SetStatusBar(CString strMessage);
+	// bool SetStatusBar(CString strMessage);
 
 	DECLARE_MESSAGE_MAP()
 };

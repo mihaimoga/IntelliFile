@@ -227,6 +227,35 @@ bool IsAudioFile(CString strFilePath)
 	return false;
 }
 
+bool IsImageFile(CString strFilePath)
+{
+	TCHAR lpszDrive[_MAX_DRIVE] = { 0 };
+	TCHAR lpszFolder[_MAX_DIR] = { 0 };
+	TCHAR lpszFileName[_MAX_FNAME] = { 0 };
+	TCHAR lpszExtension[_MAX_EXT] = { 0 };
+	strFilePath.MakeLower();
+	_tsplitpath_s(strFilePath,
+		lpszDrive, _MAX_DRIVE,
+		lpszFolder, _MAX_DIR,
+		lpszFileName, _MAX_FNAME,
+		lpszExtension, _MAX_EXT);
+	if ((_tcsicmp(lpszExtension, _T(".bmp")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".dib")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".emf")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".gif")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".ico")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".jpg")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".jpeg")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".jpe")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".jfif")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".png")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".tif")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".tiff")) == 0) ||
+		(_tcsicmp(lpszExtension, _T(".wmf")) == 0))
+		return true;
+	return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CFileList member functions
 ///////////////////////////////////////////////////////////////////////////////

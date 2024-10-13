@@ -31,6 +31,7 @@ bool IsTextFile(CString strFilePath);
 bool IsRichTextFile(CString strFilePath);
 bool IsMetaFile(CString strFilePath);
 bool IsAudioFile(CString strFilePath);
+bool IsImageFile(CString strFilePath);
 
 ///////////////////////////////////////////////////////////////////////////////
 // CFileData command target

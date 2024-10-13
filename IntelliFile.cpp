@@ -276,6 +276,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_WM_DESTROY()
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()

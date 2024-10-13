@@ -28,6 +28,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "ViewRichFileDlg.h"
 #include "ViewTextFileDlg.h"
 #include "ViewAudioFileDlg.h"
+#include "ViewImageFileDlg.h"
 #include "ViewBinaryFileDlg.h"
 
 #include <Shobjidl.h>
@@ -250,7 +251,9 @@ void CFileView::OnEndLabelEdit(NMHDR *pNMHDR, LRESULT *pResult)
 void CFileView::OnSetFocus(CWnd* /*pOldWnd*/)
 {
 	ASSERT_VALID(m_pMainFrame);
-	m_pMainFrame->SetStatusBar(m_pFileSystem.GetCurrentFolder());
+	CString strCurrentFolder = m_pFileSystem.GetCurrentFolder();
+	// m_pMainFrame->SetStatusBar(strCurrentFolder);
+	m_pMainFrame->SetWindowText(strCurrentFolder + _T(" - IntelliFile"));
 }
 
 BOOL CFileView::PreTranslateMessage(MSG* pMsg)
@@ -476,7 +479,10 @@ bool CFileView::Refresh(CString* strNewFolderName)
 	GetListCtrl().UpdateWindow();
 	ResizeListCtrl();
 	ASSERT_VALID(m_pMainFrame);
-	m_pMainFrame->SetStatusBar(m_pFileSystem.GetCurrentFolder());
+	CString strCurrentFolder = m_pFileSystem.GetCurrentFolder();
+	// m_pMainFrame->SetStatusBar(strCurrentFolder);
+	m_pMainFrame->SetWindowText(strCurrentFolder + _T(" - IntelliFile"));
+
 	return bRetVal;
 }
 
@@ -557,9 +563,18 @@ bool CFileView::ViewFile()
 					}
 					else
 					{
-						CViewBinaryFileDlg dlgViewBinaryFile(this);
-						dlgViewBinaryFile.m_strFilePath = strFilePath;
-						dlgViewBinaryFile.DoModal();
+						if (IsImageFile(strFilePath))
+						{
+							CViewImageFileDlg dlgViewImageFile(this);
+							dlgViewImageFile.m_strFilePath = strFilePath;
+							dlgViewImageFile.DoModal();
+						}
+						else
+						{
+							CViewBinaryFileDlg dlgViewBinaryFile(this);
+							dlgViewBinaryFile.m_strFilePath = strFilePath;
+							dlgViewBinaryFile.DoModal();
+						}
 					}
 				}
 			}

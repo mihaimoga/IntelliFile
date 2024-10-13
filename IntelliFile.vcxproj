@@ -120,6 +120,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -174,6 +175,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>odbc32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -489,6 +491,8 @@ echo.
     <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgSearch.h" />
     <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgTemplMgr.h" />
     <ClInclude Include="HLinkCtrl.h" />
+    <ClInclude Include="Icon.h" />
+    <ClInclude Include="ImageCtrl.h" />
     <ClInclude Include="IntelliFile.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="Messages.h" />
@@ -503,6 +507,7 @@ echo.
     <ClInclude Include="VersionInfo.h" />
     <ClInclude Include="ViewAudioFileDlg.h" />
     <ClInclude Include="ViewBinaryFileDlg.h" />
+    <ClInclude Include="ViewImageFileDlg.h" />
     <ClInclude Include="ViewRichFileDlg.h" />
     <ClInclude Include="ViewTextFileDlg.h" />
     <ClInclude Include="WebBrowserDlg.h" />
@@ -630,6 +635,8 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="HLinkCtrl.cpp" />
+    <ClCompile Include="Icon.cpp" />
+    <ClCompile Include="ImageCtrl.cpp" />
     <ClCompile Include="IntelliFile.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MFCListView.cpp" />
@@ -649,6 +656,7 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="VersionInfo.cpp" />
     <ClCompile Include="ViewAudioFileDlg.cpp" />
     <ClCompile Include="ViewBinaryFileDlg.cpp" />
+    <ClCompile Include="ViewImageFileDlg.cpp" />
     <ClCompile Include="ViewRichFileDlg.cpp" />
     <ClCompile Include="ViewTextFileDlg.cpp" />
     <ClCompile Include="WebBrowserDlg.cpp" />

@@ -50,9 +50,29 @@ These instructions will allow you to run a portable or mini-portable (also calle
 
 The portable zip edition of _IntelliFile_ can be removed by deleting the directory they came in. If you manually set up file associations or context-menu entries in the OS, it is your responsibility to remove them yourself.
 
+## Application's menu
+
+The _IntelliFile_ menu features the application's most important functions:
+
+- **Refresh**: Refreshes the current view content.
+- **Change Drive**: Changes the current view's drive.
+- **Reset View**: Resets current folder to root folder.
+- **Switch Views**: Switches source view with target view.
+- **View File**: Views current selected file.
+- **Edit File**: Edits current selected file.
+- **Select File**: Shows/selects files with specific search pattern, size, date or contents.
+- **Search File(s)**: Enhanced search function with full text search in any files.
+- **Copy File/Folder**: Copies current selected file(s)/folder(s).
+- **Move File/Folder**: Moves current selected file(s)/folder(s).
+- **New Folder**: Creates a new folder.
+- **Delete File/Folder**: Deletes current selected file(s)/folder(s).
+- **Favorite Folders**: Quick access folder.
+- **Base64 Encode/Decode**: Encodes/decodes files using Base64 standard.
+- **Command Prompt**: Opens a command prompt.
+
 ## Supported Programming Languages
 
-The following Programming Languages are supported by _IntelliFile_:
+The following programming languages are supported by _IntelliFile_:
 
 - ASP
 - Bash

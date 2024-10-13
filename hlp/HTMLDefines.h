@@ -49,6 +49,7 @@
 #define HIDD_CheckForUpdatesDlg                 0x20144
 #define HIDD_ViewBinaryFileDlg                  0x20145
 #define HIDD_ViewAudioFileDlg                   0x20146
+#define HIDD_ViewImageFileDlg                   0x20147
  
 // Frame Controls (IDW_*) 
 // This is a part of the Microsoft Foundation Classes C++ library.

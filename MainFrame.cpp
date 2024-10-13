@@ -115,7 +115,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_MainButton->SetVisible(FALSE);
 	m_wndRibbonBar.SetApplicationButton(m_MainButton, CSize());
 
-	if (!m_wndStatusBar.Create(this))
+	/* if (!m_wndStatusBar.Create(this))
 	{
 		TRACE0("Failed to create status bar\n");
 		return -1;      // fail to create
@@ -123,7 +123,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndStatusBar.AddElement(new CMFCRibbonStatusBarPane(
 		ID_STATUSBAR_PANE1, m_wndLeftFileView->m_pFileSystem.GetCurrentFolder(), TRUE, nullptr,
-		_T("012345678901234567890123456789012345678901234567890123456789")), _T(""));
+		_T("012345678901234567890123456789012345678901234567890123456789")), _T("")); */
 
 	// Create a caption bar:
 	if (!CreateCaptionBar())
@@ -447,7 +447,7 @@ bool CMainFrame::ShowMessageBar(CString strMessage)
 	return true;
 }
 
-bool CMainFrame::SetStatusBar(CString strMessage)
+/* bool CMainFrame::SetStatusBar(CString strMessage)
 {
 	if (m_wndStatusBar.GetSafeHwnd() != nullptr)
 	{
@@ -457,7 +457,7 @@ bool CMainFrame::SetStatusBar(CString strMessage)
 		return true;
 	}
 	return false;
-}
+} */
 
 void CMainFrame::OnRefresh()
 {

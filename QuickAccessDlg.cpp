@@ -59,8 +59,8 @@ CString GetQuickAcessFilePath()
 	TCHAR lpszDirectory[_MAX_DIR];
 	TCHAR lpszFilename[_MAX_FNAME];
 	TCHAR lpszExtension[_MAX_EXT];
-	TCHAR lpszExeFilePath[_MAX_PATH];
-	TCHAR lpszGetQuickAcess[_MAX_PATH];
+	TCHAR lpszExeFilePath[0x1000 /* _MAX_PATH */];
+	TCHAR lpszGetQuickAcess[0x1000 /* _MAX_PATH */];
 
 	WCHAR* lpszSpecialFolderPath = nullptr;
 	if ((SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &lpszSpecialFolderPath)) == S_OK)
@@ -71,10 +71,10 @@ CString GetQuickAcessFilePath()
 		return result.c_str();
 	}
 	
-	const int nLength = GetModuleFileName(NULL, lpszExeFilePath, _MAX_PATH);
+	const int nLength = GetModuleFileName(NULL, lpszExeFilePath, 0x1000 /* _MAX_PATH */);
 	ASSERT(nLength > 0);
 	VERIFY(0 == _tsplitpath_s(lpszExeFilePath, lpszDrive, _MAX_DRIVE, lpszDirectory, _MAX_DIR, lpszFilename, _MAX_FNAME, lpszExtension, _MAX_EXT));
-	VERIFY(0 == _tmakepath_s(lpszGetQuickAcess, _MAX_PATH, lpszDrive, lpszDirectory, lpszFilename, _T(".txt")));
+	VERIFY(0 == _tmakepath_s(lpszGetQuickAcess, 0x1000 /* _MAX_PATH */, lpszDrive, lpszDirectory, lpszFilename, _T(".txt")));
 	return lpszGetQuickAcess;
 }
 

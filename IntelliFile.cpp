@@ -101,7 +101,7 @@ BOOL CIntelliFileApp::InitInstance()
 	// AfxInitRichEdit2() is required to use RichEdit control	
 	AfxInitRichEdit2();
 
-	//Check for the previous instance as soon as possible
+	// Check for the previous instance as soon as possible
 	if (m_pInstanceChecker.PreviousInstanceRunning())
 	{
 		CCommandLineInfo cmdInfo;
@@ -129,7 +129,7 @@ BOOL CIntelliFileApp::InitInstance()
 		return FALSE;
 	}
 
-	//Create the C++ Lexer from Lexilla
+	// Create the C++ Lexer from Lexilla
 #pragma warning(suppress: 26490)
 	m_pCreateLexer = reinterpret_cast<Lexilla::CreateLexerFn>(GetProcAddress(m_hLexilla, LEXILLA_CREATELEXER));
 	if (m_pCreateLexer == nullptr)
@@ -206,7 +206,7 @@ HMODULE CIntelliFileApp::LoadLibraryFromApplicationDirectory(LPCTSTR lpFileName)
 {
 	//Get the Application directory
 	CString sFullPath;
-	const DWORD dwGMFN{ GetModuleFileName(nullptr, sFullPath.GetBuffer(_MAX_PATH), _MAX_PATH) };
+	const DWORD dwGMFN{ GetModuleFileName(nullptr, sFullPath.GetBuffer(0x1000 /* _MAX_PATH */), 0x1000 /* _MAX_PATH */) };
 	sFullPath.ReleaseBuffer();
 	if (dwGMFN == 0)
 #pragma warning(suppress: 26487)
@@ -276,7 +276,6 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_WM_DESTROY()
-	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 BOOL CAboutDlg::OnInitDialog()

@@ -41,7 +41,6 @@ void CViewImageFileDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CViewImageFileDlg, CDialogEx)
 	ON_WM_DESTROY()
-	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CViewImageFileDlg message handlers

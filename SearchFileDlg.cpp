@@ -316,8 +316,9 @@ DWORD WINAPI SearchThreadProc(LPVOID lpParam)
 	dlgSearchFile->m_btnSearch.EnableWindow(TRUE);
 	dlgSearchFile->m_ctrlProgress.SetMarquee(FALSE, 30);
 	dlgSearchFile->m_ctrlProgress.ShowWindow(SW_HIDE);
+
 	::ExitThread(0);
-	return 0;
+	// return 0;
 }
 
 void CSearchFileDlg::OnClickedSearch()

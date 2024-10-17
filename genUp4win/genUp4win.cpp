@@ -40,7 +40,7 @@ const std::wstring GetAppSettingsFilePath(const std::wstring& strFilePath, const
 	TCHAR lpszDirectory[_MAX_DIR] = { 0, };
 	TCHAR lpszFilename[_MAX_FNAME] = { 0, };
 	TCHAR lpszExtension[_MAX_EXT] = { 0, };
-	TCHAR lpszFullPath[_MAX_PATH] = { 0, };
+	TCHAR lpszFullPath[0x1000 /* _MAX_PATH */] = { 0, };
 
 	WCHAR* lpszSpecialFolderPath = nullptr;
 	if ((SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &lpszSpecialFolderPath)) == S_OK)
@@ -55,7 +55,7 @@ const std::wstring GetAppSettingsFilePath(const std::wstring& strFilePath, const
 	}
 
 	_tsplitpath_s(strFilePath.c_str(), lpszDrive, _MAX_DRIVE, lpszDirectory, _MAX_DIR, lpszFilename, _MAX_FNAME, lpszExtension, _MAX_EXT);
-	_tmakepath_s(lpszFullPath, _MAX_PATH, lpszDrive, lpszDirectory, strProductName.c_str(), _T(".xml"));
+	_tmakepath_s(lpszFullPath, 0x1000 /* _MAX_PATH */, lpszDrive, lpszDirectory, strProductName.c_str(), _T(".xml"));
 	OutputDebugString(lpszFullPath);
 	return lpszFullPath;
 }
@@ -100,11 +100,11 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 	CString strStatusMessage;
 	HRESULT hResult = S_OK;
 	bool retVal = false;
-	TCHAR lpszTempPath[_MAX_PATH] = { 0 };
-	DWORD nLength = GetTempPath(_MAX_PATH, lpszTempPath);
+	TCHAR lpszTempPath[0x1000 /* _MAX_PATH */] = { 0, };
+	DWORD nLength = GetTempPath(0x1000 /* _MAX_PATH */, lpszTempPath);
 	if (nLength > 0)
 	{
-		TCHAR lpszFilePath[_MAX_PATH] = { 0 };
+		TCHAR lpszFilePath[0x1000 /* _MAX_PATH */] = { 0, };
 		nLength = GetTempFileName(lpszTempPath, nullptr, 0, lpszFilePath);
 		if (nLength > 0)
 		{
@@ -168,11 +168,11 @@ bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strCon
 			bool bNewUpdateFound = (strLatestVersion.compare(pVersionInfo.GetProductVersionAsString()) != 0);
 			if (bNewUpdateFound)
 			{
-				TCHAR lpszTempPath[_MAX_PATH] = { 0 };
-				DWORD nLength = GetTempPath(_MAX_PATH, lpszTempPath);
+				TCHAR lpszTempPath[0x1000 /* _MAX_PATH */] = { 0, };
+				DWORD nLength = GetTempPath(0x1000 /* _MAX_PATH */, lpszTempPath);
 				if (nLength > 0)
 				{
-					TCHAR lpszFilePath[_MAX_PATH] = { 0 };
+					TCHAR lpszFilePath[0x1000 /* _MAX_PATH */] = { 0, };
 					nLength = GetTempFileName(lpszTempPath, nullptr, 0, lpszFilePath);
 					if (nLength > 0)
 					{

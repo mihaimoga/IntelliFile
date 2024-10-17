@@ -62,7 +62,7 @@ DWORD WINAPI PlaySoundThreadProc(LPVOID lpParam)
 	g_bThreadRunning = false;
 
 	::ExitThread(0);
-	return 0;
+	// return 0;
 }
 
 BOOL CViewAudioFileDlg::OnInitDialog()

@@ -204,15 +204,15 @@ int CIntelliFileApp::ExitInstance()
 // CIntelliFileApp message handlers
 HMODULE CIntelliFileApp::LoadLibraryFromApplicationDirectory(LPCTSTR lpFileName)
 {
-	//Get the Application directory
+	// Get the Application directory
 	CString sFullPath;
-	const DWORD dwGMFN{ GetModuleFileName(nullptr, sFullPath.GetBuffer(0x1000 /* _MAX_PATH */), 0x1000 /* _MAX_PATH */) };
+	const DWORD dwGMFN{ GetModuleFileName(nullptr, sFullPath.GetBuffer(_MAX_PATH), _MAX_PATH) };
 	sFullPath.ReleaseBuffer();
 	if (dwGMFN == 0)
 #pragma warning(suppress: 26487)
 		return nullptr;
 
-	//Form the new path
+	// Form the new path
 	CString sDrive;
 	CString sDir;
 	_tsplitpath_s(sFullPath, sDrive.GetBuffer(_MAX_DRIVE), _MAX_DRIVE, sDir.GetBuffer(_MAX_DIR), _MAX_DIR, nullptr, 0, nullptr, 0);
@@ -226,7 +226,7 @@ HMODULE CIntelliFileApp::LoadLibraryFromApplicationDirectory(LPCTSTR lpFileName)
 	_tmakepath_s(sFullPath.GetBuffer(_MAX_PATH), _MAX_PATH, sDrive, sDir, sFname, sExt);
 	sFullPath.ReleaseBuffer();
 
-	//Delegate to LoadLibrary
+	// Delegate to LoadLibrary
 #pragma warning(suppress: 26487)
 	return LoadLibrary(sFullPath);
 }

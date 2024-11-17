@@ -1,4 +1,4 @@
-/* Copyright (C) 2022-2024 Stefan-Mihai MOGA
+/* Copyright (C) 2022-2025 Stefan-Mihai MOGA
 This file is part of IntelliFile application developed by Stefan-Mihai MOGA.
 IntelliFile is an alternative Windows version to the famous Total Commander!
 

@@ -325,6 +325,7 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 24-08-2024 1. Updated class to work with Scintilla v5.5.2. New messages wrapped include: SCI_STYLESETSTRETCH,
                           SCI_STYLEGETSTRETCH, SCI_GETUNDOSEQUENCE, SCI_LineIndent, SCI_LINEDEDENT, SCI_SETCOPYSEPARATOR & 
                           SCI_GETCOPYSEPARATOR.
+         PJN / 26-10-2024 1. Verified the code against Scintilla v5.5.3.
 
 Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -398,7 +399,7 @@ BOOL CScintillaCtrl::Create(_In_ HWND hWndParent, _In_ ATL::_U_RECT rect, _In_ D
 
 		SetupDirectAccess();
 
-		//If we are running as Unicode, then use the UTF8 codepage else use the ANSI codepage
+		//If we are running as Unicode, then use the UTF8 codepage else disable multi-byte support
 #ifdef _UNICODE
 		SetCodePage(CpUtf8);
 #else

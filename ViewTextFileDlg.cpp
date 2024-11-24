@@ -406,6 +406,12 @@ BOOL CViewTextFileDlg::OnInitDialog()
 			// Set the document pointer to the loaded content
 			m_ctrlTextFile.SetDocPointer(static_cast<Scintilla::IDocumentEditable*>(pLoader->ConvertToDocument())); //NOLINT(clang-analyzer-core.CallAndMessage)
 
+			// If we detected UTF data, then use the UTF8 codepage else disable multi-byte support
+			if (m_BOM == BOM::Unknown)
+				m_ctrlTextFile.SetCodePage(0);
+			else
+				m_ctrlTextFile.SetCodePage(Scintilla::CpUtf8);
+
 			// Reinitialize the control settings
 			m_ctrlTextFile.SetUndoCollection(TRUE);
 			m_ctrlTextFile.EmptyUndoBuffer();

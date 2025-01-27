@@ -326,8 +326,9 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           SCI_STYLEGETSTRETCH, SCI_GETUNDOSEQUENCE, SCI_LineIndent, SCI_LINEDEDENT, SCI_SETCOPYSEPARATOR & 
                           SCI_GETCOPYSEPARATOR.
          PJN / 26-10-2024 1. Verified the code against Scintilla v5.5.3.
+         PJN / 21-12-2024 1. Verified the code against Scintilla v5.5.4.
 
-Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -371,9 +372,9 @@ IMPLEMENT_DYNAMIC(CScintillaCtrl, CWnd)
 
 CScintillaCtrl::CScintillaCtrl() noexcept : m_DirectStatusFunction{ nullptr },
 m_DirectPointer{ 0 },
-m_LastStatus(Status::Ok),
-m_dwOwnerThreadID(0),
-m_bDoneInitialSetup(false)
+m_LastStatus{ Status::Ok },
+m_dwOwnerThreadID{ 0 },
+m_bDoneInitialSetup{ false }
 {
 }
 

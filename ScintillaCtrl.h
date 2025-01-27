@@ -3,7 +3,7 @@ Module : ScintillaCtrl.h
 Purpose: Defines the interface for an MFC wrapper class for the Scintilla edit control (www.scintilla.org)
 Created: PJN / 19-03-2004
 
-Copyright (c) 2004 - 2024 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -36,6 +36,7 @@ to maintain a single distribution point for the source code.
 
 #ifndef SCINTILLACALL_H
 #pragma message("To avoid this message, please put ScintillaCall.h in your pre compiled header (normally stdafx.h)")
+#include <string>
 #include <ScintillaCall.h>
 #endif //#ifndef SCINTILLACALL_H
 
@@ -100,7 +101,7 @@ namespace Scintilla
 		static LPCTSTR GetWndClassName() noexcept
 		{
 			return _T("scintilla");
-		}
+	}
 #endif //#idef _AFX
 		void SetupDirectAccess();
 
@@ -1062,7 +1063,7 @@ namespace Scintilla
 		Status m_LastStatus;
 		DWORD m_dwOwnerThreadID;
 		bool m_bDoneInitialSetup;
-	};
+};
 
 
 }; //namespace Scintilla

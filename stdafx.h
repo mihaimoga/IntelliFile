@@ -67,19 +67,24 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #endif
 #endif
 
+#include <afxwin.h>
+#include <afxext.h>
+#include <memory>
+#include <array>
+#include <vector>
 #include <string>
+#include <string_view>
+#include <filesystem>
+
 #include <sstream>
 #include <iomanip>
 #include <atlsync.h>
-#include <vector>
 #include <map>
 #include <codecvt>
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <cctype>
-#include <afxcontrolbars.h>
-#include <afxcontrolbars.h>
 
 #define ID_MFCLISTCTRL (WM_USER+0x1234)
 

@@ -278,20 +278,46 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
+CString GetModuleFileName(_Inout_opt_ DWORD* pdwLastError = nullptr)
+{
+	CString strModuleFileName;
+	DWORD dwSize{ _MAX_PATH };
+	while (true)
+	{
+		TCHAR* pszModuleFileName{ strModuleFileName.GetBuffer(dwSize) };
+		const DWORD dwResult{ ::GetModuleFileName(nullptr, pszModuleFileName, dwSize) };
+		if (dwResult == 0)
+		{
+			if (pdwLastError != nullptr)
+				*pdwLastError = GetLastError();
+			strModuleFileName.ReleaseBuffer(0);
+			return CString{};
+		}
+		else if (dwResult < dwSize)
+		{
+			if (pdwLastError != nullptr)
+				*pdwLastError = ERROR_SUCCESS;
+			strModuleFileName.ReleaseBuffer(dwResult);
+			return strModuleFileName;
+		}
+		else if (dwResult == dwSize)
+		{
+			strModuleFileName.ReleaseBuffer(0);
+			dwSize *= 2;
+		}
+	}
+}
+
 BOOL CAboutDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	TCHAR lpszDrive[_MAX_DRIVE];
-	TCHAR lpszDirectory[_MAX_DIR];
-	TCHAR lpszFilename[_MAX_FNAME];
-	TCHAR lpszExtension[_MAX_EXT];
-	TCHAR lpszFullPath[_MAX_PATH];
+	CString strFullPath{ GetModuleFileName() };
+	if (strFullPath.IsEmpty())
+#pragma warning(suppress: 26487)
+		return FALSE;
 
-	VERIFY(0 == _tsplitpath_s(AfxGetApp()->m_pszHelpFilePath, lpszDrive, _MAX_DRIVE, lpszDirectory, _MAX_DIR, lpszFilename, _MAX_FNAME, lpszExtension, _MAX_EXT));
-	VERIFY(0 == _tmakepath_s(lpszFullPath, _MAX_PATH, lpszDrive, lpszDirectory, lpszFilename, _T(".exe")));
-
-	if (m_pVersionInfo.Load(lpszFullPath))
+	if (m_pVersionInfo.Load(strFullPath.GetString()))
 	{
 		CString strName = m_pVersionInfo.GetProductName().c_str();
 		CString strVersion = m_pVersionInfo.GetProductVersionAsString().c_str();

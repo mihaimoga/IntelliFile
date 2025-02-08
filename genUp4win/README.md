@@ -18,10 +18,8 @@ Second step is to generate the configuration file, using the `WriteConfigFile` f
 
 The C++ code to generate the configuration file is:
 ```cpp
-const DWORD nLength = 0x1000 /* _MAX_PATH */;
-TCHAR lpszFilePath[nLength] = { 0, };
-GetModuleFileName(nullptr, lpszFilePath, nLength);
-WriteConfigFile(lpszFilePath, MSI_OR_EXE_INSTALLATION_FILE);
+CString strFullPath{ GetModuleFileName() };
+WriteConfigFile(strFullPath.GetString(), MSI_OR_EXE_INSTALLATION_FILE);
 ```
 
 **Please upload the configuration file to your Web Server.**
@@ -30,10 +28,8 @@ Third step is to check for updates, using the `CheckForUpdates` function.
 
 The C++ code to check for updates is:
 ```cpp
-const DWORD nLength = 0x1000 /* _MAX_PATH */;
-TCHAR lpszFilePath[nLength] = { 0, };
-GetModuleFileName(nullptr, lpszFilePath, nLength);
-g_bNewUpdateFound = CheckForUpdates(lpszFilePath, XML_CONFIGURATION_FILE);
+CString strFullPath{ GetModuleFileName() };
+g_bNewUpdateFound = CheckForUpdates(strFullPath.GetString(), XML_CONFIGURATION_FILE);
 ```
 
 ```mermaid

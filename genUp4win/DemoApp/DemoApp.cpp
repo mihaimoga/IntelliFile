@@ -45,6 +45,36 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    AboutCallback(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    UpdateCallback(HWND, UINT, WPARAM, LPARAM);
 
+CString GetModuleFileName(_Inout_opt_ DWORD* pdwLastError = nullptr)
+{
+    CString strModuleFileName;
+    DWORD dwSize{ _MAX_PATH };
+    while (true)
+    {
+        TCHAR* pszModuleFileName{ strModuleFileName.GetBuffer(dwSize) };
+        const DWORD dwResult{ ::GetModuleFileName(nullptr, pszModuleFileName, dwSize) };
+        if (dwResult == 0)
+        {
+            if (pdwLastError != nullptr)
+                *pdwLastError = GetLastError();
+            strModuleFileName.ReleaseBuffer(0);
+            return CString{};
+        }
+        else if (dwResult < dwSize)
+        {
+            if (pdwLastError != nullptr)
+                *pdwLastError = ERROR_SUCCESS;
+            strModuleFileName.ReleaseBuffer(dwResult);
+            return strModuleFileName;
+        }
+        else if (dwResult == dwSize)
+        {
+            strModuleFileName.ReleaseBuffer(0);
+            dwSize *= 2;
+        }
+    }
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
@@ -53,10 +83,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    const DWORD nLength = 0x1000 /* _MAX_PATH */;
-    TCHAR lpszFilePath[nLength] = { 0, };
-    GetModuleFileName(nullptr, lpszFilePath, nLength);
-    WriteConfigFile(lpszFilePath, _T("https://www.moga.doctor/freeware/IntelliEditSetup.msi"));
+    CString strFullPath{ GetModuleFileName() };
+    WriteConfigFile(strFullPath.GetString(), _T("https://www.moga.doctor/freeware/IntelliEditSetup.msi"));
 
     // TODO: Please upload the configuration file to your Web Server.
 
@@ -264,10 +292,8 @@ DWORD WINAPI UpdateThreadProc(LPVOID lpParam)
     UNREFERENCED_PARAMETER(lpParam);
 
     g_bThreadRunning = true;
-    const DWORD nLength = 0x1000 /* _MAX_PATH */;
-    TCHAR lpszFilePath[nLength] = { 0, };
-    GetModuleFileName(nullptr, lpszFilePath, nLength);
-    g_bNewUpdateFound = CheckForUpdates(lpszFilePath, _T("https://www.moga.doctor/freeware/genUp4win.xml"), UI_Callback);
+    CString strFullPath{ GetModuleFileName() };
+    g_bNewUpdateFound = CheckForUpdates(strFullPath.GetString(), _T("https://www.moga.doctor/freeware/genUp4win.xml"), UI_Callback);
     g_bThreadRunning = false;
 
     ::ExitThread(0);

@@ -48,6 +48,7 @@ SOFTWARE. */
 #include <fstream>
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
 
 #include <shlobj.h>
 #include <atlstr.h>

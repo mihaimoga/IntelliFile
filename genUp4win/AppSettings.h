@@ -125,8 +125,11 @@ History: PJN / 12-06-2006 1. Minor update to a comment
                           2. Updated module to indicate that it needs to be compiled using /std:c++17. Thanks to Martin Richter
                           for reporting this issue.
          PJN / 03-10-2023 1. Optimized construction of various std::vector and std::[w]string instances throughout the codebase.
+         PJN / 05-02-2025 1. Updated copyright details
+                          2. Updated GetModuleFileName calls to handle path length > _MAX_PATH
+                          3. Reworked CIniAppSettings::GetCurrentProcessIniFileLocation to use std::filesystem::path
 
-Copyright (c) 2006 - 2023 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2006 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -190,6 +193,12 @@ to maintain a single distribution point for the source code.
 #pragma message("To avoid this message, please put sstream in your pre compiled header (normally stdafx.h)")
 #include <sstream>
 #endif //#ifndef _SSTREAM_
+
+#ifndef _FILESYSTEM_
+#pragma message("To avoid this message, please put filesystem in your pre compiled header (normally stdafx.h)")
+#include <filesystem>
+#endif //#ifndef _FILESYSTEM_
+
 
 #ifndef __ATLSTR_H__
 #pragma message("To avoid this message, please put atlstr.h in your pre compiled header (normally stdafx.h)")
@@ -306,7 +315,7 @@ public:
 	IAppSettings(IAppSettings&&) = delete;
 	virtual ~IAppSettings() {}; //NOLINT(modernize-use-equals-default)
 
-  //Virtual methods
+	//Virtual methods
 	virtual int GetInt(_In_opt_z_ LPCTSTR lpszSection, _In_opt_z_ LPCTSTR lpszEntry) = 0;
 	virtual String GetString(_In_opt_z_ LPCTSTR lpszSection, _In_opt_z_ LPCTSTR lpszEntry) = 0;
 	virtual std::vector<BYTE> GetBinary(_In_opt_z_ LPCTSTR lpszSection, _In_opt_z_ LPCTSTR lpszEntry) = 0;
@@ -1046,7 +1055,7 @@ protected:
 		for (const auto& entry : arr)
 			nSize += (entry.length() + 1); //1 extra for each null terminator
 
-		  //Need one second null for the double null at the end
+		//Need one second null for the double null at the end
 		nSize++;
 
 		//Allocate the memory we want
@@ -1342,7 +1351,7 @@ public:
 		if (_tcscmp(sT, sCLSID) == 0)
 			ThrowWin32AppSettingsException(ERROR_NOT_FOUND);
 
-		return { sT.operator LPCTSTR() };
+		return { sT.GetString() };
 	}
 
 	std::vector<BYTE> GetBinary(_In_opt_z_ LPCTSTR lpszSection, _In_opt_z_ LPCTSTR lpszEntry) override
@@ -1543,7 +1552,7 @@ public:
 		for (const auto& sText : arr)
 			nSize += (sText.length() + 1); //1 extra for each null terminator
 
-		  //Need one second null for the double null at the end
+		//Need one second null for the double null at the end
 		nSize++;
 
 		//Allocate the memory we want
@@ -1610,26 +1619,51 @@ public:
 	}
 
 	//Static methods
-	  //Note, using this function for an ini path is not a good idea for security reasons, but if you really want to you can use this function to return a ini 
-	  //path which has a filename the same name as the current process and in the same directory as it.
+	[[nodiscard]] static ATL::CAtlString GetModuleFileName(_Inout_opt_ DWORD* pdwLastError = nullptr)
+	{
+		ATL::CAtlString sModuleFileName;
+		DWORD dwSize{ _MAX_PATH };
+		while (true)
+		{
+			TCHAR* pszModuleFileName{ sModuleFileName.GetBuffer(dwSize) };
+			const DWORD dwResult{ ::GetModuleFileName(nullptr, pszModuleFileName, dwSize) };
+			if (dwResult == 0)
+			{
+				if (pdwLastError != nullptr)
+					*pdwLastError = GetLastError();
+				sModuleFileName.ReleaseBuffer(0);
+				return ATL::CAtlString{};
+			}
+			else if (dwResult < dwSize)
+			{
+				if (pdwLastError != nullptr)
+					*pdwLastError = ERROR_SUCCESS;
+				sModuleFileName.ReleaseBuffer(dwResult);
+				return sModuleFileName;
+			}
+			else if (dwResult == dwSize)
+			{
+				sModuleFileName.ReleaseBuffer(0);
+				dwSize *= 2;
+			}
+		}
+	}
+
+	//Note, using this function for an ini path is not a good idea for security reasons, but if you really want to you can use this function to return a ini 
+	//path which has a filename the same name as the current process and in the same directory as it.
 	static String GetCurrentProcessIniFileLocation()
 	{
-		ATL::CAtlString sIni;
-		const DWORD dwGMFN{ GetModuleFileName(nullptr, sIni.GetBuffer(_MAX_PATH), _MAX_PATH) };
-		sIni.ReleaseBuffer();
-		if (dwGMFN == 0)
-			ThrowWin32AppSettingsException();
-		ATL::CAtlString sDrive;
-		ATL::CAtlString sDir;
-		ATL::CAtlString sFname;
-		_tsplitpath_s(sIni, sDrive.GetBuffer(_MAX_DRIVE), _MAX_DRIVE, sDir.GetBuffer(_MAX_DIR), _MAX_DIR, sFname.GetBuffer(_MAX_FNAME), _MAX_FNAME, nullptr, 0);
-		sFname.ReleaseBuffer();
-		sDir.ReleaseBuffer();
-		sDrive.ReleaseBuffer();
-		_tmakepath_s(sIni.GetBuffer(_MAX_PATH), _MAX_PATH, sDrive, sDir, sFname, _T("ini"));
-		sIni.ReleaseBuffer();
-
-		return { sIni.operator LPCTSTR() };
+		DWORD dwError{ ERROR_SUCCESS };
+		ATL::CAtlString sIni{ GetModuleFileName(&dwError) };
+		if (sIni.IsEmpty())
+			ThrowWin32AppSettingsException(dwError);
+		std::filesystem::path ini{ sIni.GetString() };
+		ini.replace_extension(L"ini");
+#ifdef _UNICODE
+		return { ini.c_str() };
+#else
+		return { ATL::CW2A(ini.c_str()).operator LPSTR() };
+#endif //#ifdef _UNICODE
 	}
 
 	static String GetRoamingDataFileLocation(_In_ const String& sCompanyName, _In_ const String& sProductName, _In_ const String& sProductVersion, _In_ const String& sIniFileName)
@@ -1704,7 +1738,7 @@ protected:
 		sPath += sIniFileName.c_str();
 
 		//If we got here, then everything is cool
-		return { sPath.operator LPCTSTR() };
+		return { sPath.GetString() };
 	}
 
 	//Member variables
@@ -2056,7 +2090,7 @@ public:
 		for (const auto& sText : arr)
 			nSize += (sText.length() + 1); //1 extra for each null terminator
 
-		  //Need one second null for the double null at the end
+		//Need one second null for the double null at the end
 		nSize++;
 
 		//Allocate the memory we want
@@ -2707,7 +2741,7 @@ public:
 		for (const auto& sText : arr)
 			nSize += (sText.length() + 1); //1 extra for each null terminator
 
-		  //Need one second null for the double null at the end
+		//Need one second null for the double null at the end
 		nSize++;
 
 		//Allocate the memory we want

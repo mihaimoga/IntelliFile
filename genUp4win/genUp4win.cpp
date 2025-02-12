@@ -33,15 +33,9 @@ SOFTWARE. */
 #pragma comment(lib, "Shell32.lib")
 
 #include <comdef.h>
-
+#include <shlobj.h>
 const std::wstring GetAppSettingsFilePath(const std::wstring& strFilePath, const std::wstring& strProductName)
 {
-	TCHAR lpszDrive[_MAX_DRIVE] = { 0, };
-	TCHAR lpszDirectory[_MAX_DIR] = { 0, };
-	TCHAR lpszFilename[_MAX_FNAME] = { 0, };
-	TCHAR lpszExtension[_MAX_EXT] = { 0, };
-	TCHAR lpszFullPath[0x1000 /* _MAX_PATH */] = { 0, };
-
 	WCHAR* lpszSpecialFolderPath = nullptr;
 	if ((SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &lpszSpecialFolderPath)) == S_OK)
 	{
@@ -54,12 +48,13 @@ const std::wstring GetAppSettingsFilePath(const std::wstring& strFilePath, const
 		return result;
 	}
 
-	_tsplitpath_s(strFilePath.c_str(), lpszDrive, _MAX_DRIVE, lpszDirectory, _MAX_DIR, lpszFilename, _MAX_FNAME, lpszExtension, _MAX_EXT);
-	_tmakepath_s(lpszFullPath, 0x1000 /* _MAX_PATH */, lpszDrive, lpszDirectory, strProductName.c_str(), _T(".xml"));
-	OutputDebugString(lpszFullPath);
-	return lpszFullPath;
+	std::filesystem::path strFullPath{ strFilePath.c_str() };
+	strFullPath.replace_filename(strProductName);
+	strFullPath.replace_extension(_T(".xml"));
+	OutputDebugString(strFullPath.c_str());
+	return strFullPath.c_str();
 }
-
+/* The WriteConfigFile function writes configuration data to an XML file. */
 bool WriteConfigFile(const std::wstring& strFilePath, const std::wstring& strDownloadURL, fnCallback ParentCallback)
 {
 	bool retVal = false;
@@ -95,16 +90,19 @@ bool WriteConfigFile(const std::wstring& strFilePath, const std::wstring& strDow
 	return retVal;
 }
 
+/* The ReadConfigFile function downloads a configuration file from a specified
+URL, parses it to retrieve the latest version and download URL for a product,
+and invokes a callback function to report the status of the operation. */
 bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strProductName, std::wstring& strLatestVersion, std::wstring& strDownloadURL, fnCallback ParentCallback)
 {
 	CString strStatusMessage;
 	HRESULT hResult = S_OK;
 	bool retVal = false;
-	TCHAR lpszTempPath[0x1000 /* _MAX_PATH */] = { 0, };
-	DWORD nLength = GetTempPath(0x1000 /* _MAX_PATH */, lpszTempPath);
+	TCHAR lpszTempPath[_MAX_PATH + 1] = { 0, };
+	DWORD nLength = GetTempPath2(_MAX_PATH, lpszTempPath);
 	if (nLength > 0)
 	{
-		TCHAR lpszFilePath[0x1000 /* _MAX_PATH */] = { 0, };
+		TCHAR lpszFilePath[_MAX_PATH + 1] = { 0, };
 		nLength = GetTempFileName(lpszTempPath, nullptr, 0, lpszFilePath);
 		if (nLength > 0)
 		{
@@ -151,6 +149,10 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 	return retVal;
 }
 
+/* The CheckForUpdates function checks for software updates by comparing the
+current version of a product with the latest version available from a specified
+configuration URL, and it downloads the update if a new version is found,
+utilizing a callback function to report the status of the operation. */
 bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strConfigURL, fnCallback ParentCallback)
 {
 	CString strStatusMessage;
@@ -168,11 +170,11 @@ bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strCon
 			bool bNewUpdateFound = (strLatestVersion.compare(pVersionInfo.GetProductVersionAsString()) != 0);
 			if (bNewUpdateFound)
 			{
-				TCHAR lpszTempPath[0x1000 /* _MAX_PATH */] = { 0, };
-				DWORD nLength = GetTempPath(0x1000 /* _MAX_PATH */, lpszTempPath);
+				TCHAR lpszTempPath[_MAX_PATH + 1] = { 0, };
+				DWORD nLength = GetTempPath2(_MAX_PATH, lpszTempPath);
 				if (nLength > 0)
 				{
-					TCHAR lpszFilePath[0x1000 /* _MAX_PATH */] = { 0, };
+					TCHAR lpszFilePath[_MAX_PATH + 1] = { 0, };
 					nLength = GetTempFileName(lpszTempPath, nullptr, 0, lpszFilePath);
 					if (nLength > 0)
 					{

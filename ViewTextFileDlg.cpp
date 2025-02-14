@@ -827,6 +827,7 @@ BOOL CViewTextFileDlg::OnInitDialog()
 	m_nTimerID = SetTimer(0x1234, 100, nullptr);
 	// const int nMarginWidth{ m_ctrlTextFile.GetMarginWidthN(0) };
 	m_ctrlTextFile.SetMarginWidthN(0, 32);
+	m_ctrlTextFile.SetWrapMode(Scintilla::Wrap::Word);
 
 	m_ctrlTextFile.SetReadOnly(TRUE);
 

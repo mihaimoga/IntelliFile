@@ -99,7 +99,7 @@ bool ReadConfigFile(const std::wstring& strConfigURL, const std::wstring& strPro
 	HRESULT hResult = S_OK;
 	bool retVal = false;
 	TCHAR lpszTempPath[_MAX_PATH + 1] = { 0, };
-	DWORD nLength = GetTempPath2(_MAX_PATH, lpszTempPath);
+	DWORD nLength = GetTempPath(_MAX_PATH, lpszTempPath);
 	if (nLength > 0)
 	{
 		TCHAR lpszFilePath[_MAX_PATH + 1] = { 0, };
@@ -167,11 +167,11 @@ bool CheckForUpdates(const std::wstring& strFilePath, const std::wstring& strCon
 		OutputDebugString(strProductName.c_str());
 		if (ReadConfigFile(strConfigURL, strProductName, strLatestVersion, strDownloadURL, ParentCallback))
 		{
-			bool bNewUpdateFound = (strLatestVersion.compare(pVersionInfo.GetProductVersionAsString()) != 0);
+			const bool bNewUpdateFound = (strLatestVersion.compare(pVersionInfo.GetProductVersionAsString()) != 0);
 			if (bNewUpdateFound)
 			{
 				TCHAR lpszTempPath[_MAX_PATH + 1] = { 0, };
-				DWORD nLength = GetTempPath2(_MAX_PATH, lpszTempPath);
+				DWORD nLength = GetTempPath(_MAX_PATH, lpszTempPath);
 				if (nLength > 0)
 				{
 					TCHAR lpszFilePath[_MAX_PATH + 1] = { 0, };

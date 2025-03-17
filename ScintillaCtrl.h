@@ -101,7 +101,7 @@ namespace Scintilla
 		static LPCTSTR GetWndClassName() noexcept
 		{
 			return _T("scintilla");
-	}
+		}
 #endif //#idef _AFX
 		void SetupDirectAccess();
 
@@ -515,6 +515,10 @@ namespace Scintilla
 		[[nodiscard]] Position FormatRangeFull(_In_ BOOL draw, _In_ RangeToFormatFull* fr);
 		void SetChangeHistory(_In_ ChangeHistoryOption changeHistory);
 		[[nodiscard]] int GetChangeHistory();
+		void SetUndoSelectionHistory(_In_ UndoSelectionHistoryOption undoSelectionHistory);
+		[[nodiscard]] UndoSelectionHistoryOption GetUndoSelectionHistory();
+		void SetSelectionSerialized(_In_z_ const char* selectionString);
+		Position GetSelectionSerialized(_Inout_opt_z_ char* selectionString);
 		[[nodiscard]] Line GetFirstVisibleLine();
 		Position GetLine(_In_ Line line, _Inout_opt_z_ char* text);
 		[[nodiscard]] Line GetLineCount();
@@ -1063,7 +1067,7 @@ namespace Scintilla
 		Status m_LastStatus;
 		DWORD m_dwOwnerThreadID;
 		bool m_bDoneInitialSetup;
-};
+	};
 
 
 }; //namespace Scintilla

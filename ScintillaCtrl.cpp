@@ -327,6 +327,8 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           SCI_GETCOPYSEPARATOR.
          PJN / 26-10-2024 1. Verified the code against Scintilla v5.5.3.
          PJN / 21-12-2024 1. Verified the code against Scintilla v5.5.4.
+         PJN / 16-03-2025 1. Updated class to work with Scintilla v5.5.5. New messages wrapped include: SCI_SETUNDOSELECTIONHISTORY,
+                          SCI_GETUNDOSELECTIONHISTORY, SCI_GETSELECTIONSERIALIZED and SCI_SETSELECTIONSERIALIZED.
 
 Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -2312,12 +2314,12 @@ BOOL CScintillaCtrl::StyleGetCheckMonospaced(_In_ int style)
 
 void CScintillaCtrl::StyleSetStretch(_In_ int style, _In_ FontStretch stretch)
 {
-	Call(static_cast<UINT>(Scintilla::Message::StyleSetStretch), static_cast<WPARAM>(style), static_cast<LPARAM>(stretch));
+	Call(static_cast<UINT>(Message::StyleSetStretch), static_cast<WPARAM>(style), static_cast<LPARAM>(stretch));
 }
 
 FontStretch CScintillaCtrl::StyleGetStretch(_In_ int style)
 {
-	return static_cast<FontStretch>(Call(static_cast<UINT>(Scintilla::Message::StyleGetStretch), static_cast<WPARAM>(style), 0));
+	return static_cast<FontStretch>(Call(static_cast<UINT>(Message::StyleGetStretch), static_cast<WPARAM>(style), 0));
 }
 
 void CScintillaCtrl::StyleSetInvisibleRepresentation(_In_ int style, _In_z_ const char* representation)
@@ -2492,57 +2494,57 @@ void CScintillaCtrl::EndUndoAction()
 
 int CScintillaCtrl::GetUndoSequence()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoSequence), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoSequence), 0, 0));
 }
 
 int CScintillaCtrl::GetUndoActions()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActions), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoActions), 0, 0));
 }
 
 void CScintillaCtrl::SetUndoSavePoint(_In_ int action)
 {
-	Call(static_cast<UINT>(Scintilla::Message::SetUndoSavePoint), static_cast<WPARAM>(action), 0);
+	Call(static_cast<UINT>(Message::SetUndoSavePoint), static_cast<WPARAM>(action), 0);
 }
 
 int CScintillaCtrl::GetUndoSavePoint()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoSavePoint), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoSavePoint), 0, 0));
 }
 
 void CScintillaCtrl::SetUndoDetach(_In_ int action)
 {
-	Call(static_cast<UINT>(Scintilla::Message::SetUndoDetach), static_cast<WPARAM>(action), 0);
+	Call(static_cast<UINT>(Message::SetUndoDetach), static_cast<WPARAM>(action), 0);
 }
 
 int CScintillaCtrl::GetUndoDetach()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoDetach), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoDetach), 0, 0));
 }
 
 void CScintillaCtrl::SetUndoTentative(_In_ int action)
 {
-	Call(static_cast<UINT>(Scintilla::Message::SetUndoTentative), static_cast<WPARAM>(action), 0);
+	Call(static_cast<UINT>(Message::SetUndoTentative), static_cast<WPARAM>(action), 0);
 }
 
 int CScintillaCtrl::GetUndoTentative()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoTentative), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoTentative), 0, 0));
 }
 
 void CScintillaCtrl::SetUndoCurrent(_In_ int action)
 {
-	Call(static_cast<UINT>(Scintilla::Message::SetUndoCurrent), static_cast<WPARAM>(action), 0);
+	Call(static_cast<UINT>(Message::SetUndoCurrent), static_cast<WPARAM>(action), 0);
 }
 
 int CScintillaCtrl::GetUndoCurrent()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoCurrent), 0, 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoCurrent), 0, 0));
 }
 
 void CScintillaCtrl::PushUndoActionType(_In_ int type, Position pos)
 {
-	Call(static_cast<UINT>(Scintilla::Message::PushUndoActionType), static_cast<WPARAM>(type), static_cast<LPARAM>(pos));
+	Call(static_cast<UINT>(Message::PushUndoActionType), static_cast<WPARAM>(type), static_cast<LPARAM>(pos));
 }
 
 void CScintillaCtrl::ChangeLastUndoActionText(_In_z_ const char* text)
@@ -2552,22 +2554,22 @@ void CScintillaCtrl::ChangeLastUndoActionText(_In_z_ const char* text)
 
 void CScintillaCtrl::ChangeLastUndoActionText(_In_ Position length, _In_reads_bytes_(length) const char* text)
 {
-	Call(static_cast<UINT>(Scintilla::Message::ChangeLastUndoActionText), static_cast<WPARAM>(length), reinterpret_cast<LPARAM>(text));
+	Call(static_cast<UINT>(Message::ChangeLastUndoActionText), static_cast<WPARAM>(length), reinterpret_cast<LPARAM>(text));
 }
 
 int CScintillaCtrl::GetUndoActionType(_In_ int action)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActionType), static_cast<WPARAM>(action), 0));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoActionType), static_cast<WPARAM>(action), 0));
 }
 
 Position CScintillaCtrl::GetUndoActionPosition(_In_ int action)
 {
-	return Call(static_cast<UINT>(Scintilla::Message::GetUndoActionPosition), static_cast<WPARAM>(action), 0);
+	return Call(static_cast<UINT>(Message::GetUndoActionPosition), static_cast<WPARAM>(action), 0);
 }
 
 int CScintillaCtrl::GetUndoActionText(_In_ int action, _Inout_opt_z_ char* text)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetUndoActionText), static_cast<WPARAM>(action), reinterpret_cast<LPARAM>(text)));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetUndoActionText), static_cast<WPARAM>(action), reinterpret_cast<LPARAM>(text)));
 }
 
 void CScintillaCtrl::IndicSetStyle(_In_ int indicator, _In_ IndicatorStyle indicatorStyle)
@@ -3053,6 +3055,26 @@ void CScintillaCtrl::SetChangeHistory(_In_ ChangeHistoryOption changeHistory)
 int CScintillaCtrl::GetChangeHistory()
 {
 	return static_cast<int>(Call(static_cast<UINT>(Message::GetChangeHistory), 0, 0));
+}
+
+void CScintillaCtrl::SetUndoSelectionHistory(_In_ UndoSelectionHistoryOption undoSelectionHistory)
+{
+	Call(static_cast<UINT>(Message::SetUndoSelectionHistory), static_cast<WPARAM>(undoSelectionHistory), 0);
+}
+
+UndoSelectionHistoryOption CScintillaCtrl::GetUndoSelectionHistory()
+{
+	return static_cast<UndoSelectionHistoryOption>(Call(static_cast<UINT>(Message::GetUndoSelectionHistory), 0, 0));
+}
+
+void CScintillaCtrl::SetSelectionSerialized(_In_z_ const char* selectionString)
+{
+	Call(static_cast<UINT>(Message::SetSelectionSerialized), 0, reinterpret_cast<LPARAM>(selectionString));
+}
+
+Position CScintillaCtrl::GetSelectionSerialized(_Inout_opt_z_ char* selectionString)
+{
+	return static_cast<Position>(Call(static_cast<UINT>(Message::GetSelectionSerialized), 0, reinterpret_cast<LPARAM>(selectionString)));
 }
 
 Line CScintillaCtrl::GetFirstVisibleLine()
@@ -3922,7 +3944,7 @@ void CScintillaCtrl::Tab()
 
 void CScintillaCtrl::LineIndent()
 {
-	Call(static_cast<UINT>(Scintilla::Message::LineIndent), 0, 0);
+	Call(static_cast<UINT>(Message::LineIndent), 0, 0);
 }
 
 void CScintillaCtrl::BackTab()
@@ -3932,7 +3954,7 @@ void CScintillaCtrl::BackTab()
 
 void CScintillaCtrl::LineDedent()
 {
-	Call(static_cast<UINT>(Scintilla::Message::LineDedent), 0, 0);
+	Call(static_cast<UINT>(Message::LineDedent), 0, 0);
 }
 
 void CScintillaCtrl::NewLine()
@@ -4844,12 +4866,12 @@ void CScintillaCtrl::CutAllowLine()
 
 void CScintillaCtrl::SetCopySeparator(_In_z_ const char* separator)
 {
-	Call(static_cast<UINT>(Scintilla::Message::SetCopySeparator), 0, reinterpret_cast<LPARAM>(separator));
+	Call(static_cast<UINT>(Message::SetCopySeparator), 0, reinterpret_cast<LPARAM>(separator));
 }
 
 int CScintillaCtrl::GetCopySeparator(_Inout_opt_z_ char* separator)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::GetCopySeparator), 0, reinterpret_cast<LPARAM>(separator)));
+	return static_cast<int>(Call(static_cast<UINT>(Message::GetCopySeparator), 0, reinterpret_cast<LPARAM>(separator)));
 }
 
 const char* CScintillaCtrl::GetCharacterPointer()

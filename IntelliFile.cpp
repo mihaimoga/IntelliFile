@@ -171,7 +171,7 @@ BOOL CIntelliFileApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	pFrame->ShowWindow(SW_SHOW);
 	pFrame->UpdateWindow();
-	// pFrame->MoveWindow(CRect(0, 0, 800, 600));
+	// pFrame->MoveWindow(CRect(0, 0, 814, 607));
 	// pFrame->CenterWindow();
 
 	// If this is the first instance of our App then track it so any other instances can find us

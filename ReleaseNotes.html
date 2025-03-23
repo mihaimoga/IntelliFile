@@ -181,23 +181,23 @@
                         </li>
                         <li>Version 1.36 (February 14<sup>th</sup>, 2025):
                             <ul>
+                                <li>Implemented <em>Word Wrap</em> for text file viewing.</li>
                                 <li>Updated <code>LEXILLA</code> library to version 5.4.2 and <code>SCINTILLA</code> library to version 5.5.4.</li>
                                 <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>The code now includes <code>&lt;string&gt;</code> prior to <code>#including &lt;ScintillaCall.h&gt;</code>. This fixes an issue when the code is used with GSL Library 4.1.0.<br>Reworked <code>CScintillaDemoApp::LoadLibraryFromApplicationDirectory</code> to use <code>std::filesystem::path</code>.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.</blockquote></li>
-                                <li>Implemented <em>Word Wrap</em> for text file viewing.</li>
-                                <li>Updated <code>genUp4win</code> library to the latest version available.</li>
+                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Updated PJ Naughter's <code>AppSettings</code> library to the latest version available.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.<br>Updated <code>GetAppSettingsFilePath</code> to use <code>std::filesystem::path</code>.</blockquote></li>
                             </ul>
                         </li>
                         <li>Version 1.37 (March 8<sup>th</sup>, 2025):
                             <ul>
                                 <li>Updated <code>LEXILLA</code> library to version 5.4.3 and <code>SCINTILLA</code> library to version 5.5.5.</li>
-                                <li>Updated <code>genUp4win</code> library to the latest version available.</li>
                                 <li>Removed deprecated functions in C++17, defined in <code>&lt;codecvt&gt;</code> header.</li>
+                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Added support for Italian, Spanish, German and Greek languages.<br>Added support for Russian, Turkish, Chinese and Czech languages.</blockquote></li>
                             </ul>
                         </li>
                         <li>Version 1.38 (TBD):
                             <ul>
-                                <li>Updated <code>genUp4win</code> library to the latest version available.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.</li>
+                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Reverted back from <code>GetTempPath2</code> to <code>GetTempPath</code> to make it compatible again with Windows 10.</blockquote></li>
+                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.5. New messages wrapped include: <code>SCI_SETUNDOSELECTIONHISTORY</code>, <code>SCI_GETUNDOSELECTIONHISTORY</code>, <code>SCI_GETSELECTIONSERIALIZED</code> and <code>SCI_SETSELECTIONSERIALIZED</code>.</blockquote></li>
                             </ul>
                         </li>
                     </ul>

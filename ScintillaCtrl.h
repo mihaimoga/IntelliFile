@@ -156,6 +156,7 @@ namespace Scintilla
 		void AutoCSetFillUps(_In_z_ const wchar_t* characterSet);
 		void UserListShow(_In_ int listType, _In_z_ const wchar_t* itemList);
 		[[nodiscard]] StringW GetLine(_In_ Line line);
+		[[nodiscard]] StringW GetSelectionSerialized();
 		void ReplaceSel(_In_z_ const wchar_t* text);
 		void SetText(_In_z_ const wchar_t* text);
 		[[nodiscard]] StringW GetText(_In_ int length);
@@ -214,6 +215,7 @@ namespace Scintilla
 		[[nodiscard]] StringA GetSelText();
 		[[nodiscard]] StringA GetCurLine();
 		[[nodiscard]] StringA GetLine(_In_ Line line);
+		[[nodiscard]] StringA GetSelectionSerialized();
 		[[nodiscard]] StringA GetSCIProperty(_In_z_ const char* key);
 		[[nodiscard]] StringA GetText(_In_ int length);
 		[[nodiscard]] StringA GetPropertyExpanded(_In_z_ const char* key);
@@ -889,7 +891,7 @@ namespace Scintilla
 		[[nodiscard]] int GetExtraAscent();
 		void SetExtraDescent(_In_ int extraDescent);
 		[[nodiscard]] int GetExtraDescent();
-		[[nodiscard]] int MarkerSymbolDefined(_In_ int markerNumber);
+		[[nodiscard]] MarkerSymbol MarkerSymbolDefined(_In_ int markerNumber);
 		void MarginSetText(_In_ Line line, _In_z_ const char* text);
 		int MarginGetText(_In_ Line line, _Inout_opt_z_ char* text);
 		void MarginSetStyle(_In_ Line line, _In_ int style);

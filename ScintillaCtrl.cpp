@@ -329,6 +329,8 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 21-12-2024 1. Verified the code against Scintilla v5.5.4.
          PJN / 16-03-2025 1. Updated class to work with Scintilla v5.5.5. New messages wrapped include: SCI_SETUNDOSELECTIONHISTORY,
                           SCI_GETUNDOSELECTIONHISTORY, SCI_GETSELECTIONSERIALIZED and SCI_SETSELECTIONSERIALIZED.
+         PJN / 11-04-2025 1. Updated CScintillaCtrl::MarkerSymbolDefined method to return MarkerSymbol.
+                          2. Verified the code against Scintilla v5.5.6.
 
 Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -652,6 +654,20 @@ CScintillaCtrl::StringW CScintillaCtrl::GetLine(_In_ Line line)
 	StringA sUTF8;
 #pragma warning(suppress: 26472)
 	GetLine(line, sUTF8.GetBufferSetLength(static_cast<int>(nUTF8Length)));
+	sUTF8.ReleaseBuffer();
+
+	return UTF82W(sUTF8, -1);
+}
+
+CScintillaCtrl::StringW CScintillaCtrl::GetSelectionSerialized()
+{
+	//Work out the length of string to allocate
+	const Position nUTF8Length{ GetSelectionSerialized(nullptr) };
+
+	//Call the function which does the work
+	StringA sUTF8;
+#pragma warning(suppress: 26472)
+	GetSelectionSerialized(sUTF8.GetBufferSetLength(static_cast<int>(nUTF8Length)));
 	sUTF8.ReleaseBuffer();
 
 	return UTF82W(sUTF8, -1);
@@ -1330,6 +1346,18 @@ CScintillaCtrl::StringA CScintillaCtrl::GetLine(_In_ Line line)
 	GetLine(line, pszLine);
 	sLine.ReleaseBuffer();
 	return sLine;
+}
+
+CScintillaCtrl::StringA CScintillaCtrl::GetSelectionSerialized()
+{
+	//Call the function which does the work
+	StringA sSelectionSerialized;
+	const Position nLength{ GetSelectionSerialized(nullptr) };
+#pragma warning(suppress: 26472)
+	char* pszSelectionSerialized{ sSelectionSerialized.GetBufferSetLength(static_cast<int>(nLength)) };
+	GetSelectionSerialized(pszSelectionSerialized);
+	sSelectionSerialized.ReleaseBuffer();
+	return sSelectionSerialized;
 }
 
 CScintillaCtrl::StringA CScintillaCtrl::GetSCIProperty(_In_z_ const char* key)
@@ -4931,9 +4959,9 @@ int CScintillaCtrl::GetExtraDescent()
 	return static_cast<int>(Call(static_cast<UINT>(Message::GetExtraDescent), 0, 0));
 }
 
-int CScintillaCtrl::MarkerSymbolDefined(_In_ int markerNumber)
+MarkerSymbol CScintillaCtrl::MarkerSymbolDefined(_In_ int markerNumber)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::MarkerSymbolDefined), static_cast<WPARAM>(markerNumber), 0));
+	return static_cast<MarkerSymbol>(Call(static_cast<UINT>(Message::MarkerSymbolDefined), static_cast<WPARAM>(markerNumber), 0));
 }
 
 void CScintillaCtrl::MarginSetText(_In_ Line line, _In_z_ const char* text)

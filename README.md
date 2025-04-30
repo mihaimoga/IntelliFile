@@ -4,8 +4,6 @@ Download:
 - [IntelliFileSetup.msi](https://www.moga.doctor/freeware/IntelliFileSetup.msi)
 - [IntelliFile.zip](https://www.moga.doctor/freeware/IntelliFile.zip)
 
-[<img src="https://api.gitsponsors.com/api/badge/img?id=453333610" height="20">](https://api.gitsponsors.com/api/badge/link?p=3xDIK7EEyP+36Xm5yQrhbGY5lHswfaLgNwoa6KVkHGXVzSlQATJzOX4we88x7J8Gl+600W4cpOY8qHg7DcoZWZj5jWuOIieBSA3ebLQyGwQ=)
-
 ## Introduction
 
 _IntelliFile_ is a free (as in “free speech” and also as in “free beer”) file manager. Running in the Microsoft Windows environment, its use is governed by [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). _IntelliFile_ is written in C++ and uses pure Win32 API and STL which ensures a higher execution speed and smaller program size. By optimizing as many routines as possible without losing user friendliness, _IntelliFile_ is trying to reduce the world carbon dioxide emissions. When using less CPU power, the PC can throttle down and reduce power consumption, resulting in a greener environment. I hope you enjoy _IntelliFile_ as much as I enjoy coding it!

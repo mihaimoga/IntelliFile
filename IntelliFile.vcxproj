@@ -484,18 +484,8 @@ echo.
     <ClInclude Include="FileView.h" />
     <ClInclude Include="FilteredFolderDlg.h" />
     <ClInclude Include="FolderDlg.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\dep\ListEx\ListEx.h" />
     <ClInclude Include="HexCtrl\HexCtrl\HexCtrl.h" />
     <ClInclude Include="HexCtrl\HexCtrl\res\HexCtrlRes.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\CHexCtrl.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgBkmMgr.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgCallback.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgCodepage.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgDataInterp.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgGoTo.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgModify.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgSearch.h" />
-    <ClInclude Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgTemplMgr.h" />
     <ClInclude Include="HLinkCtrl.h" />
     <ClInclude Include="Icon.h" />
     <ClInclude Include="ImageCtrl.h" />
@@ -609,8 +599,24 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <ClCompile Include="FileView.cpp" />
     <ClCompile Include="FilteredFolderDlg.cpp" />
     <ClCompile Include="FolderDlg.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\dep\ListEx\CListEx.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\CHexCtrl.cpp" />
+    <ClCompile Include="HexCtrl\HexCtrl\dep\ListEx\ListEx.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\dep\StrToNum\StrToNum.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\CHexCtrl.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="HexCtrl\HexCtrl\src\CHexScroll.ixx">
       <FileType>Document</FileType>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -625,14 +631,54 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgBkmMgr.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgCallback.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgCodepage.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgDataInterp.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgGoTo.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgModify.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgSearch.cpp" />
-    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgTemplMgr.cpp" />
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgBkmMgr.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgCodepage.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgDataInterp.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgGoTo.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgModify.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgProgress.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgSearch.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="HexCtrl\HexCtrl\src\Dialogs\CHexDlgTemplMgr.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="HexCtrl\HexCtrl\src\HexUtility.ixx">
       <FileType>Document</FileType>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -682,7 +728,6 @@ makehm /h /a afxhh.h IDW_,HIDW_,0x50000 "%(FullPath)" &gt;&gt; "hlp\HTMLDefines.
     <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_LOGO.bmp" />
     <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_MODIFY.bmp" />
     <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp" />
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_SCROLL_ARROW.bmp" />
     <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp" />
     <Image Include="res\ribbon.png" />
   </ItemGroup>

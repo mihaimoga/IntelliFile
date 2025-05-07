@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="HexCtrl">
+      <UniqueIdentifier>{625af687-57d6-4e75-907b-eb9730d5feb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\src">
+      <UniqueIdentifier>{22979420-660f-47db-aa4b-2e70d4d11598}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\src\Dialogs">
+      <UniqueIdentifier>{2b48a932-9a86-4e73-ab10-ce442ea73d80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\res">
+      <UniqueIdentifier>{5939ca0d-077d-4e58-9022-87ae277af5be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep">
+      <UniqueIdentifier>{ec2e9c83-a8cc-4167-ade4-dbba26d39f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep\ListEx">
+      <UniqueIdentifier>{9752f1bb-669f-4114-8ef1-196b3553a7a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep\StrToNum">
+      <UniqueIdentifier>{baa40ccd-0457-40e2-a00f-9c8944425f30}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CMFCDialogApp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CMFCDialogDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HexCtrl\HexCtrl.h">
+      <Filter>HexCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HexCtrl\res\HexCtrlRes.h">
+      <Filter>HexCtrl\res</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="CMFCDialogApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CMFCDialogDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexCtrl.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgBkmMgr.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgProgress.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgCodepage.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgSearch.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgGoTo.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgDataInterp.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgTemplMgr.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgModify.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexScroll.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\HexUtility.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexSelection.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\dep\StrToNum\StrToNum.ixx">
+      <Filter>HexCtrl\dep\StrToNum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\dep\ListEx\ListEx.ixx">
+      <Filter>HexCtrl\dep\ListEx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MFCDialog.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\HexCtrl\res\HexCtrl.rc">
+      <Filter>HexCtrl\res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\MFCDialog.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json">
+      <Filter>HexCtrl\res</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\MFCDialog.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_BKMS.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_DATAINTERP.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_GROUP.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_LOGO.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_FONTCHOOSE.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

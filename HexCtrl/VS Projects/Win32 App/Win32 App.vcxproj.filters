@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="HexCtrl">
+      <UniqueIdentifier>{f145095d-3a85-465a-adb5-621765758fd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\src">
+      <UniqueIdentifier>{45134480-b9b0-45f1-a166-e8f3b464559d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\src\Dialogs">
+      <UniqueIdentifier>{2cecf9c7-c15d-4124-88c1-6acdc2994d10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\res">
+      <UniqueIdentifier>{2e41c414-aa87-4032-ae0a-c8b3e5a3734b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep">
+      <UniqueIdentifier>{3a58aff7-67ea-44ab-9a4d-adf5587a1574}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep\ListEx">
+      <UniqueIdentifier>{e3848219-a1b8-401e-a15e-033189923cae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HexCtrl\dep\StrToNum">
+      <UniqueIdentifier>{befeef45-33c9-4106-a02d-0c5da7a6cc3a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32 App.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HexCtrl\HexCtrl.h">
+      <Filter>HexCtrl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\HexCtrl\res\HexCtrlRes.h">
+      <Filter>HexCtrl\res</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Win32 App.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexSelection.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexScroll.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\HexUtility.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\CHexCtrl.ixx">
+      <Filter>HexCtrl\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgBkmMgr.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgProgress.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgDataInterp.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgCodepage.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgGoTo.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgModify.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgSearch.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\Dialogs\CHexDlgTemplMgr.ixx">
+      <Filter>HexCtrl\src\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\dep\ListEx\ListEx.ixx">
+      <Filter>HexCtrl\dep\ListEx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\dep\StrToNum\StrToNum.ixx">
+      <Filter>HexCtrl\dep\StrToNum</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Win32 App.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="..\..\HexCtrl\res\HexCtrl.rc">
+      <Filter>HexCtrl\res</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Win32 App.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_BKMS.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_FONTCHOOSE.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_GROUP.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_LOGO.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp">
+      <Filter>HexCtrl\res</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json">
+      <Filter>HexCtrl\res</Filter>
+    </None>
+  </ItemGroup>
+</Project>

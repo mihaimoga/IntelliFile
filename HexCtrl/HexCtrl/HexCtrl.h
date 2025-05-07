@@ -5,7 +5,7 @@
 * This software is available under "The HexCtrl License", see the LICENSE file.         *
 ****************************************************************************************/
 #pragma once
-#include <afxwin.h>
+#include <Windows.h>
 #include <compare>
 #include <cstdint>
 #include <memory>
@@ -19,34 +19,42 @@
 #error "C++20 compliant compiler is required to build HexCtrl."
 #endif
 
-#ifdef HEXCTRL_SHARED_DLL
-#ifdef HEXCTRL_EXPORT
+#ifdef HEXCTRL_DYNAMIC_LIB
+#ifdef HEXCTRL_DYNAMIC_LIB_EXPORT
 #define HEXCTRLAPI __declspec(dllexport)
-#else //^^^ HEXCTRL_EXPORT / vvv !HEXCTRL_EXPORT
+#else //^^^ HEXCTRL_DYNAMIC_LIB_EXPORT / vvv !HEXCTRL_DYNAMIC_LIB_EXPORT
 #define HEXCTRLAPI __declspec(dllimport)
-#ifdef _WIN64
+
+#ifdef _M_IX86
 #ifdef _DEBUG
-#define HEXCTRL_LIBNAME(x) x"64d.lib"
+#define HEXCTRL_LIBNAME(x) x"x86D.lib"
 #else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME(x) x"64.lib"
-#endif //_DEBUG
-#else //^^^ _WIN64 / vvv !_WIN64
+#define HEXCTRL_LIBNAME(x) x"x86.lib"
+#endif //^^^ !_DEBUG
+#elif defined(_M_X64) //^^^ _M_IX86 / vvv _M_X64
 #ifdef _DEBUG
-#define HEXCTRL_LIBNAME(x) x"d.lib"
+#define HEXCTRL_LIBNAME(x) x"x64D.lib"
 #else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME(x) x".lib"
-#endif //_DEBUG
-#endif //_WIN64
+#define HEXCTRL_LIBNAME(x) x"x64.lib"
+#endif //^^^ !_DEBUG
+#elif defined(_M_ARM64) //^^^ _M_X64 / vvv _M_ARM64
+#ifdef _DEBUG
+#define HEXCTRL_LIBNAME(x) x"ARM64D.lib"
+#else //^^^ _DEBUG / vvv !_DEBUG
+#define HEXCTRL_LIBNAME(x) x"ARM64.lib"
+#endif //^^^ _DEBUG
+#endif //^^^ _M_ARM64
+
 #pragma comment(lib, HEXCTRL_LIBNAME("HexCtrl"))
-#endif //HEXCTRL_EXPORT
-#else //^^^ HEXCTRL_SHARED_DLL / vvv !HEXCTRL_SHARED_DLL
+#endif //^^^ !HEXCTRL_DYNAMIC_LIB_EXPORT
+#else //^^^ HEXCTRL_DYNAMIC_LIB / vvv !HEXCTRL_DYNAMIC_LIB
 #define	HEXCTRLAPI
-#endif //HEXCTRL_SHARED_DLL
+#endif //^^^ !HEXCTRL_DYNAMIC_LIB
 
 namespace HEXCTRL {
 	constexpr auto HEXCTRL_VERSION_MAJOR = 3;
-	constexpr auto HEXCTRL_VERSION_MINOR = 6;
-	constexpr auto HEXCTRL_VERSION_PATCH = 1;
+	constexpr auto HEXCTRL_VERSION_MINOR = 7;
+	constexpr auto HEXCTRL_VERSION_PATCH = 2;
 
 	using SpanByte = std::span<std::byte>;
 	using SpanCByte = std::span<const std::byte>;
@@ -64,7 +72,7 @@ namespace HEXCTRL {
 		CMD_CLPBRD_COPY_BASE64, CMD_CLPBRD_COPY_CARR, CMD_CLPBRD_COPY_GREPHEX, CMD_CLPBRD_COPY_PRNTSCRN,
 		CMD_CLPBRD_COPY_OFFSET, CMD_CLPBRD_PASTE_HEX, CMD_CLPBRD_PASTE_TEXTUTF16, CMD_CLPBRD_PASTE_TEXTCP,
 		CMD_MODIFY_OPERS_DLG, CMD_MODIFY_FILLZEROS, CMD_MODIFY_FILLDATA_DLG, CMD_MODIFY_UNDO, CMD_MODIFY_REDO,
-		CMD_SEL_MARKSTART, CMD_SEL_MARKEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
+		CMD_SEL_MARKSTARTEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
 		CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG, CMD_APPEAR_FONTINC,
 		CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC, CMD_PRINT_DLG, CMD_ABOUT_DLG,
 		CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,
@@ -273,9 +281,14 @@ namespace HEXCTRL {
 		COLORREF clrBkSel { GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
 		COLORREF clrBkBkm { RGB(240, 240, 0) };                      //Bookmarks background color.
 		COLORREF clrBkDataInterp { RGB(147, 58, 22) };               //Data Interpreter Bk color.
-		COLORREF clrBkInfoBar { GetSysColor(COLOR_BTNFACE) };        //Background color of the bottom Info bar.
+		COLORREF clrBkInfoBar { GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
 		COLORREF clrBkCaret { RGB(0, 0, 255) };                      //Caret background color.
 		COLORREF clrBkCaretSel { RGB(0, 0, 200) };                   //Caret background color in selection.
+		COLORREF clrLinesMain { RGB(200, 200, 200) };                //Main window and pages lines color.
+		COLORREF clrLinesTempl { RGB(75, 75, 75) };                  //Templates data confining lines color.
+		COLORREF clrScrollBar { RGB(241, 241, 241) };                //Scrollbar color.
+		COLORREF clrScrollThumb { RGB(200, 200, 200) };              //Scrollbar thumb color.
+		COLORREF clrScrollArrow { RGB(110, 110, 110) };              //Scrollbar arrow color.
 	};
 	using PCHEXCOLORS = const HEXCOLORS*;
 
@@ -283,6 +296,7 @@ namespace HEXCTRL {
 	* HEXCREATE: Main struct for the HexCtrl creation.                                          *
 	********************************************************************************************/
 	struct HEXCREATE {
+		HINSTANCE       hInstRes { };           //Hinstance of the HexCtrl resources, nullptr for current module.
 		HWND            hWndParent { };         //Parent window handle.
 		PCHEXCOLORS     pColors { };            //HexCtrl colors, nullptr for default.
 		const LOGFONTW* pLogFont { };           //Monospaced font for HexCtrl, nullptr for default.
@@ -394,7 +408,8 @@ namespace HEXCTRL {
 		virtual void ClearData() = 0; //Clears all data from HexCtrl's view (not touching data itself).
 		virtual bool Create(const HEXCREATE& hcs) = 0;                       //Main initialization method.
 		virtual bool CreateDialogCtrl(UINT uCtrlID, HWND hWndParent) = 0;    //Сreates custom dialog control.
-		virtual void Destroy() = 0;                                          //Deleter.
+		virtual void Delete() = 0;                                           //IHexCtrl object deleter.
+		virtual void DestroyWindow() = 0;                                    //Destroy HexCtrl window.
 		virtual void ExecuteCmd(EHexCmd eCmd) = 0;                           //Execute a command within HexCtrl.
 		[[nodiscard]] virtual auto GetActualWidth()const->int = 0;           //Working area actual width.
 		[[nodiscard]] virtual auto GetBookmarks()const->IHexBookmarks* = 0;  //Get Bookmarks interface.
@@ -407,8 +422,8 @@ namespace HEXCTRL {
 		[[nodiscard]] virtual auto GetData(HEXSPAN hss)const->SpanByte = 0;  //Get pointer to data offset, no matter what mode HexCtrl works in.
 		[[nodiscard]] virtual auto GetDataSize()const->ULONGLONG = 0;        //Get currently set data size.
 		[[nodiscard]] virtual auto GetDateInfo()const->std::tuple<DWORD, wchar_t> = 0; //Get date format and separator info.
-		[[nodiscard]] virtual auto GetDlgItemHandle(EHexWnd eWnd, EHexDlgItem eItem)const->HWND = 0; //Dialogs' items.
-		[[nodiscard]] virtual auto GetFont()const->LOGFONTW = 0;             //Get current font.
+		[[nodiscard]] virtual auto GetDlgItemHandle(EHexDlgItem eItem)const->HWND = 0; //Dialogs' items.
+		[[nodiscard]] virtual auto GetFont(bool fMain = true)const->LOGFONTW = 0; //Get current main/infobar font.
 		[[nodiscard]] virtual auto GetGroupSize()const->DWORD = 0;           //Retrieves current data grouping size.
 		[[nodiscard]] virtual auto GetMenuHandle()const->HMENU = 0;          //Context menu handle.
 		[[nodiscard]] virtual auto GetOffset(ULONGLONG ullOffset, bool fGetVirt)const->ULONGLONG = 0; //Offset<->VirtOffset conversion.
@@ -421,17 +436,18 @@ namespace HEXCTRL {
 		[[nodiscard]] virtual auto GetUnprintableChar()const->wchar_t = 0;   //Get unprintable replacement character.
 		[[nodiscard]] virtual auto GetWndHandle(EHexWnd eWnd, bool fCreate = true)const->HWND = 0; //Get HWND of internal window/dialogs.
 		virtual void GoToOffset(ULONGLONG ullOffset, int iPosAt = 0) = 0;    //Go to the given offset.
+		[[nodiscard]] virtual bool HasInfoBar()const = 0;      //Is InfoBar currently visible?
 		[[nodiscard]] virtual bool HasSelection()const = 0;    //Does currently have any selection or not.
 		[[nodiscard]] virtual auto HitTest(POINT pt, bool fScreen = true)const->std::optional<HEXHITTEST> = 0; //HitTest given point.
 		[[nodiscard]] virtual bool IsCmdAvail(EHexCmd eCmd)const = 0; //Is given Cmd currently available (can be executed)?
 		[[nodiscard]] virtual bool IsCreated()const = 0;       //Shows whether HexCtrl is created or not.
 		[[nodiscard]] virtual bool IsDataSet()const = 0;       //Shows whether a data was set to HexCtrl or not.
-		[[nodiscard]] virtual bool IsInfoBar()const = 0;       //Is InfoBar visible?
 		[[nodiscard]] virtual bool IsMutable()const = 0;       //Is data mutable or not.
 		[[nodiscard]] virtual bool IsOffsetAsHex()const = 0;   //Are offsets shown as Hex or as Decimal.
 		[[nodiscard]] virtual auto IsOffsetVisible(ULONGLONG ullOffset)const->HEXVISION = 0; //Ensures that the given offset is visible.
 		[[nodiscard]] virtual bool IsVirtual()const = 0;       //Is working in VirtualData or default mode.		
 		virtual void ModifyData(const HEXMODIFY& hms) = 0;     //Main routine to modify data in IsMutable()==true mode.
+		[[nodiscard]] virtual bool PreTranslateMsg(MSG* pMsg) = 0;
 		virtual void Redraw() = 0;                             //Redraw HexCtrl's window.
 		virtual void SetCapacity(DWORD dwCapacity) = 0;        //Set current capacity.
 		virtual void SetCaretPos(ULONGLONG ullOffset, bool fHighLow = true, bool fRedraw = true) = 0; //Set the caret position.
@@ -439,12 +455,12 @@ namespace HEXCTRL {
 		virtual void SetCodepage(int iCodepage) = 0;           //Codepage for text area.
 		virtual void SetColors(const HEXCOLORS& hcs) = 0;      //Set HexCtrl's colors.
 		virtual bool SetConfig(std::wstring_view wsvPath) = 0; //Set configuration file, or "" for defaults.
-		virtual void SetData(const HEXDATA& hds) = 0;          //Main method for setting data to display (and edit).
+		virtual void SetData(const HEXDATA& hds, bool fAdjust = false) = 0; //Main method to set data for HexCtrl.
 		virtual void SetDateInfo(DWORD dwFormat, wchar_t wchSepar) = 0; //Set date format and date separator.
 		virtual void SetDlgProperties(EHexWnd eWnd, std::uint64_t u64Flags) = 0; //Properties for the internal dialogs.
-		virtual void SetFont(const LOGFONTW& lf) = 0;          //Set HexCtrl's font, this font has to be monospaced.
+		virtual void SetFont(const LOGFONTW& lf, bool fMain = true) = 0; //Set main/infobar font.
 		virtual void SetGroupSize(DWORD dwSize) = 0;           //Set data grouping size.
-		virtual void SetMutable(bool fEnable) = 0;             //Enable or disable mutable/editable mode.
+		virtual void SetMutable(bool fMutable) = 0;            //Enable or disable mutable/editable mode.
 		virtual void SetOffsetMode(bool fHex) = 0;             //Set offset being shown as Hex or as Decimal.
 		virtual void SetPageSize(DWORD dwSize, std::wstring_view wsvName = L"Page") = 0; //Set page size and name to draw the lines in-between.
 		virtual void SetRedraw(bool fRedraw) = 0;              //Handle WM_PAINT message or not.
@@ -452,19 +468,13 @@ namespace HEXCTRL {
 		virtual void SetSelection(const VecSpan& vecSel, bool fRedraw = true, bool fHighlight = false) = 0; //Set current selection.
 		virtual void SetUnprintableChar(wchar_t wch) = 0;      //Set unprintable replacement character.
 		virtual void SetVirtualBkm(IHexBookmarks* pVirtBkm) = 0; //Set pointer for Bookmarks Virtual Mode.
+		virtual void SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags = SWP_NOACTIVATE | SWP_NOZORDER) = 0;
 		virtual void ShowInfoBar(bool fShow) = 0;              //Show/hide bottom Info bar.
 	};
 
-	struct IHexCtrlDeleter {
-		void operator()(IHexCtrl* p)const { p->Destroy(); }
-	};
-
+	struct IHexCtrlDeleter { void operator()(IHexCtrl* p)const { p->Delete(); } };
 	using IHexCtrlPtr = std::unique_ptr<IHexCtrl, IHexCtrlDeleter>;
-	[[nodiscard]] HEXCTRLAPI IHexCtrlPtr CreateHexCtrl(HINSTANCE hInstClass = nullptr);
-
-#if defined(HEXCTRL_SHARED_DLL) || defined(HEXCTRL_MANUAL_MFC_INIT)
-	extern "C" HEXCTRLAPI BOOL __cdecl HexCtrlPreTranslateMessage(MSG * pMsg);
-#endif
+	[[nodiscard]] HEXCTRLAPI IHexCtrlPtr CreateHexCtrl();
 
 	/**************************************************************************
 	* WM_NOTIFY message codes (NMHDR.code values).                            *
@@ -490,13 +500,12 @@ namespace HEXCTRL {
 	constexpr auto HEXCTRL_MSG_SETGROUPSIZE { 0x0110U };  //Data grouping size has changed.
 	constexpr auto HEXCTRL_MSG_SETSELECTION { 0x0111U };  //Selection has been made.
 
-
 	/**************************************************************************
 	* Flags for the internal dialogs, used with the SetDlgProperties method.  *
 	**************************************************************************/
 
 	constexpr auto HEXCTRL_FLAG_DLG_NOESC { 0x01ULL };
 
-	//Setting a manifest for the ComCtl32.dll version 6.
+//Manifest for the Comctl32.dll v6. Must be here, in header, to pick up v6 for the .dll as well.
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 }

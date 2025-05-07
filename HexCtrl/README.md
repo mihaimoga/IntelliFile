@@ -1,11 +1,10 @@
-## **Hex Control, C++/MFC**
+## **Hex Control**
 ![](docs/img/HexCtrl_Main.jpg)
 ## Table of Contents
 * [Introduction](#introduction)
 * [How To Build](#how-to-build)
   * [Integrate Sources](#integrate-sources)
   * [Dynamic Link Library](#dynamic-link-library)
-    * [HexCtrlPreTranslateMessage](#hexctrlpretranslatemessage)
 * [Creating](#creating)
   * [Classic Approach](#classic-approach)
   * [In Dialog](#in-dialog)
@@ -19,7 +18,8 @@
   * [ClearData](#cleardata)
   * [Create](#create)
   * [CreateDialogCtrl](#createdialogctrl)
-  * [Destroy](#destroy)
+  * [Delete](#delete)
+  * [DestroyWindow](#destroywindow)
   * [ExecuteCmd](#executecmd)
   * [GetActualWidth](#getactualwidth)
   * [GetBookmarks](#getbookmarks)
@@ -46,17 +46,18 @@
   * [GetUnprintableChar](#getunprintablechar)
   * [GetWndHandle](#getwndhandle)
   * [GoToOffset](#gotooffset)
+  * [HasInfoBar](#hasinfobar)
   * [HasSelection](#hasselection)
   * [HitTest](#hittest)
   * [IsCmdAvail](#iscmdavail)
   * [IsCreated](#iscreated)
   * [IsDataSet](#isdataset)
-  * [IsInfoBar](#isinfobar)
   * [IsMutable](#ismutable)
   * [IsOffsetAsHex](#isoffsetashex)
   * [IsOffsetVisible](#isoffsetvisible)
   * [IsVirtual](#isvirtual)
   * [ModifyData](#modifydata)
+  * [PreTranslateMsg](#pretranslatemsg)
   * [Redraw](#redraw)
   * [SetCapacity](#setcapacity)
   * [SetCaretPos](#setcaretpos)
@@ -77,6 +78,7 @@
   * [SetSelection](#setselection)
   * [SetUnprintableChar](#setunprintablechar)
   * [SetVirtualBkm](#setvirtualbkm)
+  * [SetWindowPos](#setwindowpos)
   * [ShowInfoBar](#showinfobar)
    </details>
 * [Structures](#structures) <details><summary>_Expand_</summary>
@@ -130,95 +132,78 @@
 * [Licensing](#licensing)
 
 ## [](#)Introduction
-**HexCtrl** is a fully-featured Hex-Editor Control written in **C++/MFC**. It's implemented as a pure abstract interface and can be used even if you don't use **MFC** directly.
+**HexCtrl** is the fully-featured Hex Control written in pure **Win32 API**.
 
 ### The main features of the **HexCtrl**:
 * View and edit data up to **16EB** (exabyte)
 * Two working modes: **Memory** and [**Virtual Data Mode**](#virtual-data-mode)
 * Fully-featured **Bookmarks Manager**
 * Fully-featured **Search and Replace**
+* Fully-featured **Data Interpreter**
+* Grouping data with arbitrary group size
 * Changeable codepage for the text area
 * Many options to **Copy/Paste** to/from clipboard
-* **Undo/Redo**
 * Modify data with **Filling** and many predefined **Operations** options
+* **Undo/Redo**
 * Ability to visually divide data into [pages](#setpagesize)
 * Print whole document/pages range/selection
-* Set individual colors for the data chunks with [**Custom Colors**](#ihexvirtcolors)
+* Customizable colors for data with [**Custom Colors**](#custom-colors)
 * Powerful system of [Templates](#templates)
 * [Assignable keyboard shortcuts](#setconfig) via external config file
-* Customizable look and appearance
+* Customizable look and appearance, font, colors
+* **High-DPI** compliant
+* Utilizes **AVX/AVX2** instruction set for best performance
+* Supports compiling for the **ARM64** architecture
 * Written with the **/std:c++20** standard conformance
 
 ![](docs/img/HexCtrl_Operations.jpg)
 
 ## [](#)How To Build
-Clone the repo with all submodules:  
 `git clone https://github.com/jovibor/HexCtrl.git`  
 
 ### [](#)Integrate Sources
 To build **HexCtrl** from the sources:
-1. Add all files from the `HexCtrl` folder into your project  
-(can skip adding *rapidjson-amalgam.h* and *StrToNum.h*)
+1. Add all files from the `HexCtrl` folder into your project
+1. Make sure to disable **Precompiled Header** usage for all `*.ixx` files in the project
 1. Add `#include "HexCtrl.h"`
-1. Declare **HexCtrl** object:
-    ```cpp
-    auto myHex { HEXCTRL::CreateHexCtrl() };
-    ```
+1. Declare **HexCtrl** object: `auto myHex { HEXCTRL::CreateHexCtrl() };`
 1. [Create](#creating) control instance
 
 > [!NOTE]
-> If you want to build **HexCtrl** from the sources in non-**MFC** app:
-> 1. Add support for the **Use MFC in a Shared DLL** in your project settings.
-> 1. Add the `/DHEXCTRL_MANUAL_MFC_INIT` compiler option.
+> You can skip adding *rapidjson-amalgam.h* into your project, to avoid polluting project's global namespace.
 
 ### [](#)Dynamic Link Library
 To build and use **HexCtrl** as a DLL:
-1. Build **HexCtrl.dll** and **HexCtrl.lib** using the **HexCtrl DLL/HexCtrl DLL.vcxproj**  project
-1. Define the `HEXCTRL_SHARED_DLL` before including `HexCtrl.h`:
+1. Build **HexCtrl{x86/x64/ARM64}.dll** and **HexCtrl{x86/x64/ARM64}.lib** with the **HexCtrl DLL.vcxproj**  project
+1. Include `HexCtrl.h` into your project
+1. Add `/DHEXCTRL_DYNAMIC_LIB` compiler option, or alternatively `#define` it before including `HexCtrl.h`:
     ```cpp
-    #define HEXCTRL_SHARED_DLL
+    #define HEXCTRL_DYNAMIC_LIB
     #include "HexCtrl.h"
     ```
-1. Declare `IHexCtrlPtr` object: `IHexCtrlPtr myHex { HEXCTRL::CreateHexCtrl() };`
+1. Declare `IHexCtrlPtr` object: `auto myHex { HEXCTRL::CreateHexCtrl() };`
 1. [Create](#creating) control instance
-
-> [!NOTE]
-**HexCtrl**'s DLL is built with the **MFC Static Linking**. So, even if you are to use it in your own **MFC** project, even with a different **MFC** version, there should be no interferences.  
-Building **HexCtrl** with the **MFC Shared DLL** turned out to be a little tricky. Even with the `AFX_MANAGE_STATE(AfxGetStaticModuleState())` macro help there are always  **MFC** debug assertions, which origins are quite hard to comprehend.
-
-#### [](#)HexCtrlPreTranslateMessage
-By default a `PreTranslateMessage` routine doesn't work within DLLs. It means that all dialog's keyboard navigation will not work. To remedy this **HexCtrl**'s DLL provides the `HexCtrlPreTranslateMessage` exported function which you can plug into your app's main message loop:
-```cpp
-BOOL CMyApp::PreTranslateMessage(MSG* pMsg)
-{
-    if (HEXCTRL::HexCtrlPreTranslateMessage(pMsg))
-        return TRUE;
-
-    return CWinApp::PreTranslateMessage(pMsg);
-}
-```
 
 ## [](#)Creating
 
 ### [](#)Classic Approach
-First you need to create a **HexCtrl** object:
+First you need to create **HexCtrl** object:
 ```cpp
-HEXCTRL::IHexCtrlPtr myHex { HEXCTRL::CreateHexCtrl() };
+auto myHex { HEXCTRL::CreateHexCtrl() };
 ```
-Then call the [`IHexCtrl::Create`](#create) method, which takes the [`HEXCREATE`](#hexcreate) struct with the all necessary information for the **HexCtrl** creation. The `HEXCREATE::dwStyle` and `dwExStyle` are [Window](https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles) and [Extended Window](https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles) styles respectively, set these styles according to your needs. For all available options see the [`HEXCREATE`](#hexcreate) struct description.
+Then call the [`Create`](#create) method, which takes the [`HEXCREATE`](#hexcreate) struct with the all necessary information for the **HexCtrl** creation. The `HEXCREATE::dwStyle` and `dwExStyle` are [window](https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles) and [extended window](https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles) styles respectively, set these styles according to your needs. For all available options see the [`HEXCREATE`](#hexcreate) struct description.
 
 ### [](#)In Dialog
 To use **HexCtrl** in a Dialog you can create it with the [Classic Approach](#classic-approach): call [`Create`](#create) method and provide all the necessary information.  
 But there is another option:
 1. Put the **Custom Control** from the **Toolbox** in **Visual Studio** dialog designer onto your dialog template.  
 ![](docs/img/HexCtrl_VSToolbox.jpg) ![](docs/img/HexCtrl_VSCustomCtrl.jpg)
-2. In the **Properties** of this control in the **Class** field, within the **Misc** section, put: *HexCtrl*.
-![](docs/img/HexCtrl_VSProperties.jpg)
-3. Declare `IHexCtrlPtr` member variable within your dialog class:
+1. In the **Properties** of this control in the **Class** field within the **Misc** section write: **HexCtrl_MainWnd**.
+1. Declare `IHexCtrlPtr` member variable within your dialog class:
     ```cpp
-    IHexCtrlPtr m_myHex { CreateHexCtrl() };
+    HEXCTRL::IHexCtrlPtr m_myHex { CreateHexCtrl() };
     ```
-4. Call the [`CreateDialogCtrl`](#createdialogctrl ) method from dialog's `OnInitDialog` method.
+1. Call the [`CreateDialogCtrl`](#createdialogctrl ) method from dialog's `OnInitDialog` method.
     ```cpp
     BOOL CMyDialog::OnInitDialog() {
         CDialogEx::OnInitDialog();
@@ -227,10 +212,10 @@ But there is another option:
     ```
 
 ### [](#)CreateHexCtrl
-```cpp
-[[nodiscard]] IHexCtrlPtr CreateHexCtrl(HINSTANCE hInstClass = nullptr);
+```cpp 
+[[nodiscard]] IHexCtrlPtr CreateHexCtrl();
 ```
-This is the main factory function for creating **HexCtrl** object. The `hInstClass` argument might be additionally provided to set the `HINSTANCE` where **HexCtrl**'s window class will be registered, its main application is for cases when **HexCtrl** is build as a DLL and used as a custom-control in a dialog.
+This is the main factory function for creating **HexCtrl** object. The `IHexCtrlPtr` class is a `IHexCtrl` interface pointer wrapped into a standard `std::unique_ptr` with custom deleter, so you don't need to worry about its destruction.
 
 ## [](#)Setting Data
 To set a data for the **HexCtrl** the [`SetData`](#setdata) method is used. The code below shows how to construct `HexCtrl` object and display first `0x1FF` bytes of the current app's memory:
@@ -267,7 +252,11 @@ Then provide a pointer to the created object of this derived class through the `
 But if you have big and complicated data logic and want to handle all these bookmarks yourself, you can do it with the help of the **Virtual Bookmarks** mode. In this mode all bookmark's burden is handled by yourself, by implementing the [`IHexBookmarks`](#ihexbookmarks) interface and providing pointer to this implementation to the **HexCtrl** by calling the [`SetVirtualBkm`](#setvirtualbkm) method.
 
 ## [](#)Custom Colors
-If you'd like to colorize data regions with different colors, use the [`IHexVirtColors`](#ihexvirtcolors) interface.
+If you'd like to colorize data regions with your own custom colors, use the [`IHexVirtColors`](#ihexvirtcolors) interface.
+
+To use it set the [`HEXDATA::pHexVirtColors`](#hexdata) member to a valid instance of your own class that implements this interface, prior to calling the [`SetData`](#setdata) method.
+
+The `OnHexGetColor` method of this interface takes [`HEXCOLORINFO`](#hexcolorinfo) struct as an argument. The `HEXCOLORINFO::ullOffset` member indicates the offset for which the color is requested. This method should return `true` if it sets custom colors for the given offset or `false` for default colors.
 
 ## [](#)Templates
 ![](docs/img/HexCtrl_Templates.jpg)  
@@ -377,15 +366,20 @@ bool CreateDialogCtrl(UINT uCtrlID, HWND hwndDlg);
 ```
 Creates **HexCtrl** from a **Custom Control** dialog's template. Takes control **id**, and dialog's window **handle** as arguments. See **[Creating](#in-dialog)** section for more info.
 
-### [](#)Destroy
+### [](#)Delete
 ```cpp
-void Destroy();
+void Delete();
 ```
-Destroys the control.  
-You only invoke this method if you use a raw `IHexCtrl` pointer, otherwise don't use it.
+Deletes the **HexCtrl** object. You only use this method if you want, for some reason, to manually delete the **HexCtrl** object, otherwise `IHexCtrlPtr` will invoke this method automatically.
 
 > [!IMPORTANT]
 You usually don't need to call this method unless you use the **HexCtrl** through a raw pointer. If you use **HexCtrl** in the standard way, through the `IHexCtrlPtr` pointer obtained by the [`CreateHexCtrl`](#createhexctrl) function, this method will be called automatically.
+
+### [](#)DestroyWindow
+```cpp
+void DestroyWindow();
+```
+Destroys the **HexCtrl** main window.
 
 ### [](#)ExecuteCmd
 ```cpp
@@ -458,7 +452,7 @@ Returns tuple of the current [date format-ordering specifier](https://docs.micro
 
 ### [](#)GetDlgItemHandle
 ```cpp
-[[nodiscard]] auto GetDlgItemHandle(EHexWnd eWnd, EHexDlgItem eItem)const->HWND;
+[[nodiscard]] auto GetDlgItemHandle(EHexDlgItem eItem)const->HWND;
 ```
 Returns `HWND` of a dialog's internal child control.
 
@@ -470,9 +464,9 @@ Returns code page that is currently in use.
 
 ### [](#)GetFont
 ```cpp
-[[nodiscard]] auto GetFont()const->LOGFONTW;
+[[nodiscard]] auto GetFont(bool fMain)const->LOGFONTW;
 ```
-Returns current font's `LOGFONTW`.
+Returns current main font if `fMain` is `true`, and infobar font if `fMain` is `false`.
 
 ### [](#)GetGroupSize
 ```cpp
@@ -551,6 +545,12 @@ Go to the given offset. The second argument `iPosAt` can take three values:
 * &nbsp; `0` - offset will appear in the center
 * &nbsp; `1` - offset will appear at the bottom line
 
+### [](#)HasInfoBar
+```cpp
+[[nodiscard]] bool HasInfoBar()const;
+```
+Shows whether bottom info bar currently visible or not.
+
 ### [](#)HasSelection
 ```cpp
 [[nodiscard]] bool HasSelection()const;
@@ -581,12 +581,6 @@ Shows whether **HexCtrl** is created or not.
 ```
 Shows whether a data was set to **HexCtrl** or not
 
-### [](#)IsInfoBar
-```cpp
-[[nodiscard]] bool IsInfoBar()const;
-```
-Shows whether the bottom Info bar is visible at the moment or not.
-
 ### [](#)IsMutable
 ```cpp
 [[nodiscard]] bool IsMutable()const;
@@ -616,6 +610,23 @@ Returns `true` if **HexCtrl** currently works in [Virtual Data Mode](#virtual-da
 void ModifyData(const HEXMODIFY& hms);
 ```
 Modify data currently set in **HexCtrl**, see the [`HEXMODIFY`](#hexmodify) struct for details.
+
+### [](#)PreTranslateMsg
+```cpp
+[[nodiscard]] bool PreTranslateMsg(MSG* pMsg);
+```
+The **HexCtrl** has many internal dialog windows. In order for dialog keyboard navigation to work correctly, this method must be hooked into your app's main message loop before `TranslateMessage` and `DispatchMessage`, or into MFC's `PreTranslateMessage` virtual function.
+```cpp
+while (GetMessageW(&msg, nullptr, 0, 0)) {
+    if (!TranslateAcceleratorW(msg.hwnd, hAccelTable, &msg)) {
+        if (!m_pHexCtrl->PreTranslateMsg(&msg)) { //Process further only if it returns false.
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+    }
+}
+```
+If this method returns `true` it means that no further message processing should be made, **HexCtrl** has done all processing by itself.
 
 ### [](#)Redraw
 ```cpp
@@ -672,9 +683,10 @@ For default values see the [`IDR_HEXCTRL_JSON_KEYBIND.json`](https://github.com/
 
 ### [](#)SetData
 ```cpp
-void SetData(const HEXDATA& hds);
+void SetData(const HEXDATA& hds, bool fAdjust = false)
 ```
-Main method to set a data to display in read-only or mutable modes. Takes [`HEXDATA`](#hexdata) as an  argument.
+Main method to set data for **HexCtrl**. It takes [`HEXDATA`](#hexdata) struct as an  argument.  
+The `fAdjust` flag when set to `true` allows adjusting already set data. For example to switch between [virtual](#virtual-data-mode) and normal data modes.
 
 ### [](#)SetDateInfo
 ```cpp
@@ -694,9 +706,9 @@ HEXCTRL_FLAG_DLG_NOESC //Prevent dialog from closing on Esc key.
 
 ### [](#)SetFont
 ```cpp
-void SetFont(const LOGFONTW& lf);
+void SetFont(const LOGFONTW& lf, bool fMain);
 ```
-Sets a new font for the **HexCtrl**. This font has to be monospaced.
+Sets new main font for the **HexCtrl** if `fMain` is `true`, or infobar font when `fMain` is `false`. This font has to be monospaced.
 
 ### [](#)SetGroupSize
 ```cpp
@@ -706,9 +718,9 @@ Sets current data grouping size in bytes.
 
 ### [](#)SetMutable
 ```cpp
-void SetMutable(bool fEnable);
+void SetMutable(bool fMutable);
 ```
-Enables or disables mutable mode. In mutable mode all the data can be modified.
+Enables or disables mutable mode. In the mutable mode all the data can be modified.
 
 ### [](#)SetOffsetMode
 ```cpp
@@ -753,6 +765,12 @@ void SetVirtualBkm(IHexBookmarks* pVirtBkm);
 ```
 Sets a pointer for the [Virtual Bookmarks](#virtual-bookmarks) mode, or disables this mode if `nullptr` is set.
 
+### [](#)SetWindowPos
+```cpp
+void SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags);
+```
+Sets **HexCtrl** window position. This method replicates behavior of the [`SetWindowPos`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowpos) Windows function.
+
 ### [](#)ShowInfoBar
 ```cpp
 void ShowInfoBar(bool fShow);
@@ -766,11 +784,11 @@ Below are listed all **HexCtrl**'s structures.
 Main bookmarks structure, used with the [IHexBookmarks](#ihexbookmarks) interface.
 ```cpp
 struct HEXBKM {
-    VecSpan      vecSpan { };  //Vector of offsets and sizes.
-    std::wstring wstrDesc { }; //Bookmark description.
-    ULONGLONG    ullID { };    //Bookmark ID, assigned internally by framework.
-    ULONGLONG    ullData { };  //User defined custom data.
-    HEXCOLOR     stClr { };    //Bookmark bk/text color.
+    VecSpan      vecSpan;     //Vector of offsets and sizes.
+    std::wstring wstrDesc;    //Bookmark description.
+    ULONGLONG    ullID { };   //Bookmark ID, assigned internally by framework.
+    ULONGLONG    ullData { }; //User defined custom data.
+    HEXCOLOR     stClr;       //Bookmark bk/text color.
 };
 using PHEXBKM = HEXBKM*;
 ```
@@ -804,7 +822,7 @@ Struct for hex chunks' color information.
 struct HEXCOLORINFO {
     NMHDR     hdr { };       //Standard Windows header.
     ULONGLONG ullOffset { }; //Offset for the color.
-    HEXCOLOR  stClr { };     //Colors of the given offset.
+    HEXCOLOR  stClr;         //Colors of the given offset.
 };
 ```
 
@@ -825,32 +843,48 @@ struct HEXCOLORS {
     COLORREF clrBkSel { GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
     COLORREF clrBkBkm { RGB(240, 240, 0) };                      //Bookmarks background color.
     COLORREF clrBkDataInterp { RGB(147, 58, 22) };               //Data Interpreter Bk color.
-    COLORREF clrBkInfoBar { GetSysColor(COLOR_BTNFACE) };        //Background color of the bottom Info bar.
+    COLORREF clrBkInfoBar { GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
     COLORREF clrBkCaret { RGB(0, 0, 255) };                      //Caret background color.
     COLORREF clrBkCaretSel { RGB(0, 0, 200) };                   //Caret background color in selection.
+    COLORREF clrLinesMain { RGB(200, 200, 200) };                //Main window and pages lines color.
+    COLORREF clrLinesTempl { RGB(75, 75, 75) };                  //Templates data confining lines color.
 };
+using PCHEXCOLORS = const HEXCOLORS*;
 ```
 
 ### [](#)HEXCREATE
 The main initialization struct used for the **HexCtrl** creation.
 ```cpp
 struct HEXCREATE {
-    HWND             hWndParent { };         //Parent window handle.
-    const HEXCOLORS* pColors { };            //HexCtrl colors, nullptr for default.
-    const LOGFONTW*  pLogFont { };           //Monospaced font for HexCtrl, nullptr for default.
-    RECT             rect { };               //Initial window rect.
-    UINT             uID { };                //Control ID if it's a child window.
-    DWORD            dwStyle { };            //Window styles.
-    DWORD            dwExStyle { };          //Extended window styles.
-    DWORD            dwCapacity { 16UL };    //Initial capacity size.
-    DWORD            dwGroupSize { 1UL };    //Initial data grouping size.
-    float            flScrollRatio { 1.0F }; //Either a screen-ratio or lines amount to scroll with Page-scroll (mouse-wheel).
-    bool             fScrollLines { false }; //Treat flScrollRatio as screen-ratio (false) or as amount of lines (true).
-    bool             fInfoBar { true };      //Show bottom Info bar or not.
-    bool             fOffsetHex { true };    //Show offset digits as Hex or Decimal.
-    bool             fCustom { false };      //If it's a custom control in a dialog.
+    HINSTANCE       hInstRes { };           //Hinstance of the HexCtrl resources, nullptr for current module.
+    HWND            hWndParent { };         //Parent window handle.
+    PCHEXCOLORS     pColors { };            //HexCtrl colors, nullptr for default.
+    const LOGFONTW* pLogFont { };           //Monospaced font for HexCtrl, nullptr for default.
+    RECT            rect { };               //Initial window rect.
+    UINT            uID { };                //Control ID if it's a child window.
+    DWORD           dwStyle { };            //Window styles.
+    DWORD           dwExStyle { };          //Extended window styles.
+    DWORD           dwCapacity { 16UL };    //Initial capacity size.
+    DWORD           dwGroupSize { 1UL };    //Initial data grouping size.
+    float           flScrollRatio { 1.0F }; //Either a screen-ratio or lines amount to scroll with Page-scroll (mouse-wheel).
+    bool            fScrollLines { false }; //Treat flScrollRatio as screen-ratio (false) or as amount of lines (true).
+    bool            fInfoBar { true };      //Show bottom Info bar or not.
+    bool            fOffsetHex { true };    //Show offset digits as Hex or Decimal.
+    bool            fCustom { false };      //If it's a custom control in a dialog.
 };
 ```
+#### Members:
+**HINSTANCE hInstRes**  
+
+The `hInstRes` member allows you to provide an alternative `HINSTANCE` of a module where all **HexCtrl** resources (dialogs, menu, etc...) reside. By default **HexCtrl** uses its current module, whether it's a `.exe` or `.dll`.
+
+**DWORD dwStyle**  
+
+Standard [window style](https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles) for the main **HexCtrl** window.
+
+**DWORD dwExStyle**  
+
+Standard [extended window style](https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles) for the main **HexCtrl** window.
 
 ### [](#)HEXDATA
 The main struct to set a data to display in the **HexCtrl**.
@@ -865,14 +899,18 @@ struct HEXDATA {
     bool            fHighLatency { false };     //Do not redraw until scroll thumb is released.
 };
 ```
+#### Members:
+**ULONGLONG ullMaxVirtOffset**  
+
+Used to set maximum virtual data offset in virtual data mode. This is needed for the offset digits amount calculation.
 
 ### [](#)HEXDATAINFO
 Struct for a data information used in [`IHexVirtData`](#virtual-data-mode).
 ```cpp
 struct HEXDATAINFO {
-    NMHDR    hdr { };       //Standard Windows header.
-    HEXSPAN  stHexSpan { }; //Offset and size of the data bytes.
-    SpanByte spnData { };   //Data span.
+    NMHDR    hdr { };   //Standard Windows header.
+    HEXSPAN  stHexSpan; //Offset and size of the data.
+    SpanByte spnData;   //Data span.
 };
 ```
 
@@ -905,8 +943,8 @@ struct HEXMODIFY {
     EHexModifyMode eModifyMode { };      //Modify mode.
     EHexOperMode   eOperMode { };        //Operation mode, used if eModifyMode == MODIFY_OPERATION.
     EHexDataType   eDataType { };        //Data type of the underlying data, used if eModifyMode == MODIFY_OPERATION.
-    SpanCByte      spnData { };          //Span of the data to modify with.
-    VecSpan        vecSpan { };          //Vector of data offsets and sizes to modify.
+    SpanCByte      spnData;              //Span of the data to modify with.
+    VecSpan        vecSpan;              //Vector of data offsets and sizes to modify.
     bool           fBigEndian { false }; //Treat data as the big endian, used if eModifyMode == MODIFY_OPERATION.
 };
 ```
@@ -1046,10 +1084,6 @@ public:
     virtual bool OnHexGetColor(HEXCOLORINFO&) = 0; //Should return true if colors are set.
 };
 ```
-This interface is used to set custom bk/text colors for data regions.  
-To use this feature set the [`HEXDATA::pHexVirtColors`](#hexdata) member to a valid instance of your class implementing this interface, prior to calling the [`SetData`](#setdata) method.
-
-The `OnHexGetColor` method of this interface takes [`HEXCOLORINFO`](#hexcolorinfo) struct as an argument and should return `true` if it sets custom colors.
 
 ### [](#)IHexVirtData
 ```cpp
@@ -1060,6 +1094,9 @@ public:
     virtual void OnHexSetData(const HEXDATAINFO&) = 0; //Data to set, if mutable.
 };
 ```
+
+#### [](#)OnHexGetOffset
+Internally **HexCtrl** operates with flat data offsets. If you set data of 1MB size, **HexCtrl** will have working offsets in the `[0-1'048'575]` range. However, from the user perspective the real data offsets may differ. For instance, in processes memory model very high virtual memory addresses can be used (e.g. `0x7FF96BA622C0`). The process data can be mapped by operating system to literally any virtual address. The `OnHexGetOffset` method serves exactly for the **Flat<->Virtual** offset converting purpose.
 
 ## [](#)Enums
 
@@ -1076,7 +1113,7 @@ enum class EHexCmd : std::uint8_t {
     CMD_CLPBRD_COPY_BASE64, CMD_CLPBRD_COPY_CARR, CMD_CLPBRD_COPY_GREPHEX, CMD_CLPBRD_COPY_PRNTSCRN,
     CMD_CLPBRD_COPY_OFFSET, CMD_CLPBRD_PASTE_HEX, CMD_CLPBRD_PASTE_TEXTUTF16, CMD_CLPBRD_PASTE_TEXTCP,
     CMD_MODIFY_OPERS_DLG, CMD_MODIFY_FILLZEROS, CMD_MODIFY_FILLDATA_DLG, CMD_MODIFY_UNDO, CMD_MODIFY_REDO,
-    CMD_SEL_MARKSTART, CMD_SEL_MARKEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
+    CMD_SEL_MARKSTARTEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
     CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG, CMD_APPEAR_FONTINC,
     CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC, CMD_PRINT_DLG, CMD_ABOUT_DLG,
     CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,

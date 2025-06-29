@@ -478,6 +478,7 @@ bool CFileSystem::Refresh()
 
 bool CFileSystem::ViewFile(CString strFilePath)
 {
+	UNREFERENCED_PARAMETER(strFilePath);
 	return false;
 }
 

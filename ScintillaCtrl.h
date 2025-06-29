@@ -481,6 +481,8 @@ namespace Scintilla
 		[[nodiscard]] int AutoCGetMaxHeight();
 		void AutoCSetStyle(_In_ int style);
 		[[nodiscard]] int AutoCGetStyle();
+		void AutoCSetImageScale(_In_ int scalePercent);
+		[[nodiscard]] int AutoCGetImageScale();
 		void SetIndent(_In_ int indentSize);
 		[[nodiscard]] int GetIndent();
 		void SetUseTabs(_In_ BOOL useTabs);
@@ -541,6 +543,7 @@ namespace Scintilla
 		[[nodiscard]] Line LineFromPosition(_In_ Position pos);
 		[[nodiscard]] Position PositionFromLine(_In_ Line line);
 		void LineScroll(_In_ Position columns, _In_ Line lines);
+		void ScrollVertical(_In_ Line docLine, _In_ Line subLine);
 		void ScrollCaret();
 		void ScrollRange(_In_ Position secondary, _In_ Position primary);
 		void ReplaceSel(_In_z_ const char* text);

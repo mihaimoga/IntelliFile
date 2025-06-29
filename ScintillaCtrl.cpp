@@ -331,6 +331,8 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           SCI_GETUNDOSELECTIONHISTORY, SCI_GETSELECTIONSERIALIZED and SCI_SETSELECTIONSERIALIZED.
          PJN / 11-04-2025 1. Updated CScintillaCtrl::MarkerSymbolDefined method to return MarkerSymbol.
                           2. Verified the code against Scintilla v5.5.6.
+         PJN / 16-03-2025 1. Updated class to work with Scintilla v5.5.7. New messages wrapped include: SCI_AUTOCSETIMAGESCALE,
+                          SCI_AUTOCGETIMAGESCALE and SCI_SCROLLVERTICAL.
 
 Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -2905,6 +2907,16 @@ int CScintillaCtrl::AutoCGetStyle()
 	return static_cast<int>(Call(static_cast<UINT>(Message::AutoCGetStyle), 0, 0));
 }
 
+void CScintillaCtrl::AutoCSetImageScale(_In_ int scalePercent)
+{
+	Call(static_cast<UINT>(Scintilla::Message::AutoCSetImageScale), static_cast<WPARAM>(scalePercent), 0);
+}
+
+int CScintillaCtrl::AutoCGetImageScale()
+{
+	return static_cast<int>(Call(static_cast<UINT>(Scintilla::Message::AutoCGetImageScale), 0, 0));
+}
+
 void CScintillaCtrl::SetIndent(_In_ int indentSize)
 {
 	Call(static_cast<UINT>(Message::SetIndent), static_cast<WPARAM>(indentSize), 0);
@@ -3203,6 +3215,11 @@ Position CScintillaCtrl::PositionFromLine(_In_ Line line)
 void CScintillaCtrl::LineScroll(_In_ Position columns, _In_ Line lines)
 {
 	Call(static_cast<UINT>(Message::LineScroll), static_cast<WPARAM>(columns), static_cast<LPARAM>(lines));
+}
+
+void CScintillaCtrl::ScrollVertical(_In_ Line docLine, _In_ Line subLine)
+{
+	Call(static_cast<UINT>(Scintilla::Message::ScrollVertical), static_cast<WPARAM>(docLine), static_cast<LPARAM>(subLine));
 }
 
 void CScintillaCtrl::ScrollCaret()

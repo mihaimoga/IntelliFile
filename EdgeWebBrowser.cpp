@@ -11,7 +11,13 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-IntelliEdit. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
+IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
+
+/**
+ * @file EdgeWebBrowser.cpp
+ * @brief Implements the CWebBrowser class, an MFC wrapper for embedding Microsoft Edge WebView2 in a window.
+ *        Provides navigation, event handling, and browser control for the NetVoyager application.
+ */
 
 #include "stdafx.h"
 #include <wrl.h>
@@ -21,25 +27,26 @@ using namespace Microsoft::WRL;
 
 #include "EdgeWebBrowser.h"
 #include "Messages.h"
-
 #include "WebView2.h"
 
 #include <sstream>
 #include <iomanip>
-
 #include <shlwapi.h>
 #pragma comment(lib,"shlwapi.lib")
 #include "shlobj.h"
-
 #pragma comment(lib,"Version.lib")
-
 #include <string>
 
+// Macros for error checking and reporting
 #define CHECK_FAILURE_STRINGIFY(arg)         #arg
 #define CHECK_FAILURE_FILE_LINE(file, line)  ([](HRESULT hr){ CheckFailure(hr, L"Failure at " CHECK_FAILURE_STRINGIFY(file) L"(" CHECK_FAILURE_STRINGIFY(line) L")"); })
 #define CHECK_FAILURE                        CHECK_FAILURE_FILE_LINE(__FILE__, __LINE__)
 #define CHECK_FAILURE_BOOL(value)            CHECK_FAILURE((value) ? S_OK : E_UNEXPECTED)
 
+/**
+ * @struct CWebBrowserImpl
+ * @brief Internal implementation details for CWebBrowser, holding WebView2 COM pointers.
+ */
 struct CWebBrowserImpl
 {
 	wil::com_ptr<ICoreWebView2Environment>    m_webViewEnvironment;
@@ -51,43 +58,56 @@ struct CWebBrowserImpl
 	wil::com_ptr<ICoreWebView2Settings>       m_webSettings;
 };
 
+/**
+ * @brief Displays a message box with the specified error message and HRESULT.
+ * @param hr HRESULT error code.
+ * @param message Error message to display.
+ */
 void ShowFailure(HRESULT hr, CString const& message)
 {
 	CString text;
 	text.Format(L"%s (0x%08X)", (LPCTSTR)message, hr);
-
 	::MessageBox(nullptr, static_cast<LPCTSTR>(text), L"Failure", MB_OK);
 }
 
+/**
+ * @brief Checks HRESULT and terminates the process if failed, after logging the error.
+ * @param hr HRESULT error code.
+ * @param message Error message to log.
+ */
 void CheckFailure(HRESULT hr, CString const& message)
 {
 	if (FAILED(hr))
 	{
 		CString text;
 		text.Format(L"%s : 0x%08X", (LPCTSTR)message, hr);
-
 		// TODO: log text
-
 		std::exit(hr);
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // CWebBrowser
 
 IMPLEMENT_DYNCREATE(CWebBrowser, CWnd)
 
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 // CWebBrowser properties
 BEGIN_MESSAGE_MAP(CWebBrowser, CWnd)
 END_MESSAGE_MAP()
 
+/**
+ * @brief Constructs a CWebBrowser object and initializes callback storage.
+ */
 CWebBrowser::CWebBrowser() :m_pImpl(new CWebBrowserImpl())
 {
 	m_callbacks[CallbackType::CreationCompleted] = nullptr;
 	m_callbacks[CallbackType::NavigationCompleted] = nullptr;
 }
 
+/**
+ * @brief Destructor. Cleans up resources and closes the WebView.
+ */
 CWebBrowser::~CWebBrowser()
 {
 	SetWindowLongPtr(m_hWnd, GWLP_USERDATA, 0);
@@ -95,6 +115,16 @@ CWebBrowser::~CWebBrowser()
 	delete m_pImpl;
 }
 
+/**
+ * @brief Creates the host window for the browser control.
+ * @param lpszClassName Window class name.
+ * @param lpszWindowName Window name.
+ * @param dwStyle Window style.
+ * @param rect Initial window rectangle.
+ * @param pParentWnd Parent window pointer.
+ * @param nID Control ID.
+ * @return TRUE if successful, FALSE otherwise.
+ */
 BOOL CWebBrowser::CreateHostWindow(
 	LPCTSTR lpszClassName,
 	LPCTSTR lpszWindowName,
@@ -114,6 +144,17 @@ BOOL CWebBrowser::CreateHostWindow(
 	return TRUE;
 }
 
+/**
+ * @brief Creates the browser control and initializes WebView synchronously.
+ * @param lpszClassName Window class name.
+ * @param lpszWindowName Window name.
+ * @param dwStyle Window style.
+ * @param rect Initial window rectangle.
+ * @param pParentWnd Parent window pointer.
+ * @param nID Control ID.
+ * @param pContext Creation context (optional).
+ * @return TRUE if successful, FALSE otherwise.
+ */
 BOOL CWebBrowser::Create(
 	LPCTSTR lpszClassName,
 	LPCTSTR lpszWindowName,
@@ -131,6 +172,15 @@ BOOL CWebBrowser::Create(
 	return TRUE;
 }
 
+/**
+ * @brief Asynchronously creates the browser control and initializes WebView.
+ * @param dwStyle Window style.
+ * @param rect Initial window rectangle.
+ * @param pParentWnd Parent window pointer.
+ * @param nID Control ID.
+ * @param onCreated Callback to invoke when creation is complete.
+ * @return TRUE if successful, FALSE otherwise.
+ */
 BOOL CWebBrowser::CreateAsync(
 	DWORD dwStyle,
 	const RECT& rect,
@@ -148,11 +198,19 @@ BOOL CWebBrowser::CreateAsync(
 	return TRUE;
 }
 
+/**
+ * @brief Registers a callback for a specific browser event.
+ * @param type Callback type.
+ * @param callback Function to call on event.
+ */
 void CWebBrowser::RegisterCallback(CallbackType const type, CallbackFunc callback)
 {
 	m_callbacks[type] = callback;
 }
 
+/**
+ * @brief Closes and releases all WebView and related resources.
+ */
 void CWebBrowser::CloseWebView()
 {
 	if (m_pImpl->m_webView)
@@ -174,6 +232,9 @@ void CWebBrowser::CloseWebView()
 	m_pImpl->m_webViewEnvironment = nullptr;
 }
 
+/**
+ * @brief Initializes the WebView2 environment and starts browser creation.
+ */
 void CWebBrowser::InitializeWebView()
 {
 	CloseWebView();
@@ -206,6 +267,12 @@ void CWebBrowser::InitializeWebView()
 	}
 }
 
+/**
+ * @brief Callback for when the WebView2 environment is created.
+ * @param result HRESULT result.
+ * @param environment Pointer to the created environment.
+ * @return HRESULT
+ */
 HRESULT CWebBrowser::OnCreateEnvironmentCompleted(
 	HRESULT result,
 	ICoreWebView2Environment* environment)
@@ -227,6 +294,12 @@ HRESULT CWebBrowser::OnCreateEnvironmentCompleted(
 	return S_OK;
 }
 
+/**
+ * @brief Callback for when the WebView2 controller is created.
+ * @param result HRESULT result.
+ * @param controller Pointer to the created controller.
+ * @return HRESULT
+ */
 HRESULT CWebBrowser::OnCreateWebViewControllerCompleted(
 	HRESULT result,
 	ICoreWebView2Controller* controller)
@@ -263,6 +336,9 @@ HRESULT CWebBrowser::OnCreateWebViewControllerCompleted(
 	return S_OK;
 }
 
+/**
+ * @brief Registers event handlers for navigation and title changes.
+ */
 void CWebBrowser::RegisterEventHandlers()
 {
 	// NavigationCompleted handler
@@ -283,9 +359,7 @@ void CWebBrowser::RegisterEventHandlers()
 					CHECK_FAILURE(args->get_WebErrorStatus(&webErrorStatus));
 					if (webErrorStatus == COREWEBVIEW2_WEB_ERROR_STATUS_DISCONNECTED)
 					{
-						// Do something here if you want to handle a specific error case.
-						// In most cases this isn't necessary, because the WebView will
-						// display its own error page automatically.
+						// Handle specific error case if needed.
 					}
 				}
 
@@ -340,6 +414,9 @@ void CWebBrowser::RegisterEventHandlers()
 		.Get(), &m_documentTitleChangedToken));
 }
 
+/**
+ * @brief Resizes the WebView to fit the client area of the window.
+ */
 void CWebBrowser::ResizeToClientArea()
 {
 	if (m_pImpl->m_webController)
@@ -350,6 +427,10 @@ void CWebBrowser::ResizeToClientArea()
 	}
 }
 
+/**
+ * @brief Gets the bounds of the WebView controller.
+ * @return RECT structure with bounds.
+ */
 RECT CWebBrowser::GetBounds()
 {
 	RECT rc{ 0,0,0,0 };
@@ -361,11 +442,20 @@ RECT CWebBrowser::GetBounds()
 	return rc;
 }
 
+/**
+ * @brief Resizes the browser window to the specified width and height.
+ * @param width New width.
+ * @param height New height.
+ */
 void CWebBrowser::Resize(LONG const width, LONG const height)
 {
 	SetWindowPos(nullptr, 0, 0, width, height, SWP_NOMOVE | SWP_NOREPOSITION);
 }
 
+/**
+ * @brief Gets the current URL loaded in the browser.
+ * @return Current URL as CString.
+ */
 CString CWebBrowser::GetLocationURL()
 {
 	CString url;
@@ -385,6 +475,11 @@ CString CWebBrowser::GetLocationURL()
 	return url;
 }
 
+/**
+ * @brief Normalizes a URL, adding protocol if missing.
+ * @param url Input URL.
+ * @return Normalized URL.
+ */
 CString CWebBrowser::NormalizeUrl(CString url)
 {
 	if (url.Find(_T("://")) < 0)
@@ -398,11 +493,20 @@ CString CWebBrowser::NormalizeUrl(CString url)
 	return url;
 }
 
+/**
+ * @brief Navigates the browser to the specified URL.
+ * @param url URL to navigate to.
+ */
 void CWebBrowser::NavigateTo(CString url)
 {
 	m_pImpl->m_webView->Navigate(NormalizeUrl(url));
 }
 
+/**
+ * @brief Navigates to a URL and invokes a callback upon completion.
+ * @param url URL to navigate to.
+ * @param onComplete Callback to invoke when navigation completes.
+ */
 void CWebBrowser::Navigate(CString const& url, CallbackFunc onComplete)
 {
 	if (m_pImpl->m_webView)
@@ -412,7 +516,13 @@ void CWebBrowser::Navigate(CString const& url, CallbackFunc onComplete)
 	}
 }
 
-// The raw request header string delimited by CRLF(optional in last header).
+/**
+ * @brief Navigates to a URL using HTTP POST with custom content and headers.
+ * @param url Target URL.
+ * @param content POST data.
+ * @param headers HTTP headers.
+ * @param onComplete Callback to invoke when navigation completes.
+ */
 void CWebBrowser::NavigatePost(CString const& url, CString const& content, CString const& headers, std::function<void()> onComplete)
 {
 	if (!m_pImpl->m_webView) return;
@@ -435,6 +545,10 @@ void CWebBrowser::NavigatePost(CString const& url, CString const& content, CStri
 
 	CHECK_FAILURE(m_pImpl->m_webView2->NavigateWithWebResourceRequest(webResourceRequest.get()));
 }
+
+/**
+ * @brief Prints the current document using the browser's print dialog.
+ */
 void CWebBrowser::PrintDocument()
 {
 	if (m_pImpl->m_webView)
@@ -443,6 +557,9 @@ void CWebBrowser::PrintDocument()
 	}
 }
 
+/**
+ * @brief Stops the current navigation or page load.
+ */
 void CWebBrowser::Stop()
 {
 	if (m_pImpl->m_webView)
@@ -451,6 +568,9 @@ void CWebBrowser::Stop()
 	}
 }
 
+/**
+ * @brief Reloads the current page.
+ */
 void CWebBrowser::Reload()
 {
 	if (m_pImpl->m_webView)
@@ -459,6 +579,9 @@ void CWebBrowser::Reload()
 	}
 }
 
+/**
+ * @brief Navigates back in the browser history if possible.
+ */
 void CWebBrowser::GoBack()
 {
 	if (m_pImpl->m_webView)
@@ -470,6 +593,9 @@ void CWebBrowser::GoBack()
 	}
 }
 
+/**
+ * @brief Navigates forward in the browser history if possible.
+ */
 void CWebBrowser::GoForward()
 {
 	if (m_pImpl->m_webView)
@@ -481,6 +607,9 @@ void CWebBrowser::GoForward()
 	}
 }
 
+/**
+ * @brief Disables JavaScript popups and default script dialogs.
+ */
 void CWebBrowser::DisablePopups()
 {
 	if (m_pImpl->m_webSettings)
@@ -489,6 +618,10 @@ void CWebBrowser::DisablePopups()
 	}
 }
 
+/**
+ * @brief Registers and returns the window class name for the browser host.
+ * @return Window class name.
+ */
 PCTSTR CWebBrowser::GetWindowClass()
 {
 	static PCTSTR windowClass = []
@@ -522,6 +655,14 @@ PCTSTR CWebBrowser::GetWindowClass()
 	return windowClass;
 }
 
+/**
+ * @brief Static window procedure for the browser host window.
+ * @param hWnd Window handle.
+ * @param message Message ID.
+ * @param wParam WPARAM.
+ * @param lParam LPARAM.
+ * @return LRESULT
+ */
 LRESULT CALLBACK CWebBrowser::WndProcStatic(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (auto app = (CWebBrowser*)::GetWindowLongPtr(hWnd, GWLP_USERDATA))
@@ -536,6 +677,15 @@ LRESULT CALLBACK CWebBrowser::WndProcStatic(HWND hWnd, UINT message, WPARAM wPar
 	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
+/**
+ * @brief Handles window messages for the browser host window.
+ * @param hWnd Window handle.
+ * @param message Message ID.
+ * @param wParam WPARAM.
+ * @param lParam LPARAM.
+ * @param result Pointer to LRESULT for output.
+ * @return true if message was handled, false otherwise.
+ */
 bool CWebBrowser::HandleWindowMessage(
 	HWND, UINT message, WPARAM wParam, LPARAM lParam, LRESULT* result)
 {
@@ -565,17 +715,29 @@ bool CWebBrowser::HandleWindowMessage(
 	return false;
 }
 
+/**
+ * @brief Runs a callback asynchronously on the UI thread.
+ * @param callback Callback function to run.
+ */
 void CWebBrowser::RunAsync(CallbackFunc callback)
 {
 	auto* task = new CallbackFunc(callback);
 	PostMessage(MSG_RUN_ASYNC_CALLBACK, reinterpret_cast<WPARAM>(task), 0);
 }
 
+/**
+ * @brief Checks if the WebView has been created.
+ * @return true if created, false otherwise.
+ */
 bool CWebBrowser::IsWebViewCreated() const
 {
 	return m_pImpl->m_webView != nullptr;
 }
 
+/**
+ * @brief Gets the install path for WebView2 or Edge.
+ * @return Install path as CString.
+ */
 CString CWebBrowser::GetInstallPath()
 {
 	static CString path = []
@@ -594,6 +756,11 @@ CString CWebBrowser::GetInstallPath()
 	return path;
 }
 
+/**
+ * @brief Gets the install path from the registry.
+ * @param searchWebView If true, searches for WebView2; otherwise, searches for Edge.
+ * @return Install path as CString.
+ */
 CString CWebBrowser::GetInstallPathFromRegistry(bool const searchWebView)
 {
 	CString path;
@@ -660,6 +827,11 @@ CString CWebBrowser::GetInstallPathFromRegistry(bool const searchWebView)
 	return path;
 }
 
+/**
+ * @brief Gets the install path from disk.
+ * @param searchWebView If true, searches for WebView2; otherwise, searches for Edge.
+ * @return Install path as CString.
+ */
 CString CWebBrowser::GetInstallPathFromDisk(bool const searchWebView)
 {
 	CString path =
@@ -695,6 +867,10 @@ CString CWebBrowser::GetInstallPathFromDisk(bool const searchWebView)
 	return {};
 }
 
+/**
+ * @brief Gets the user data folder for WebView2.
+ * @return User data folder as CString.
+ */
 CString CWebBrowser::GetUserDataFolder()
 {
 	TCHAR szPath[MAX_PATH]{ 0 };
@@ -704,6 +880,10 @@ CString CWebBrowser::GetUserDataFolder()
 	return CString{ szPath };
 }
 
+/**
+ * @brief Gets the currently selected text in the browser and invokes a callback with the result.
+ * @param callback Function to receive the selected text.
+ */
 void CWebBrowser::GetSelectedText(TextSelectionFunc callback)
 {
 	if (m_pImpl->m_webView != nullptr)
@@ -724,6 +904,10 @@ void CWebBrowser::GetSelectedText(TextSelectionFunc callback)
 	}
 }
 
+/**
+ * @brief Executes JavaScript code in the context of the current page.
+ * @param code JavaScript code to execute.
+ */
 void CWebBrowser::ExecuteScript(CString const& code)
 {
 	if (m_pImpl->m_webView != nullptr)
@@ -742,6 +926,10 @@ void CWebBrowser::ExecuteScript(CString const& code)
 	}
 }
 
+/**
+ * @brief Shows the print UI for the current document.
+ * @param systemDialog If true, shows the system print dialog; otherwise, shows the browser print dialog.
+ */
 void CWebBrowser::ShowPrintUI(bool const systemDialog)
 {
 	if (m_pImpl->m_webView != nullptr)
@@ -750,6 +938,11 @@ void CWebBrowser::ShowPrintUI(bool const systemDialog)
 	}
 }
 
+/**
+ * @brief Prints the current page to a PDF file.
+ * @param landscape If true, prints in landscape orientation.
+ * @param callback Callback to invoke with the result and file path.
+ */
 void CWebBrowser::PrintToPDF(bool const landscape, std::function<void(bool, CString)> callback)
 {
 	WCHAR defaultName[MAX_PATH] = L"default.pdf";

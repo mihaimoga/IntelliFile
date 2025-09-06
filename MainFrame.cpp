@@ -263,6 +263,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						SetActiveView(pActiveView->m_bIsLeftPane ? m_wndRightFileView : m_wndLeftFileView);
 						return TRUE;
 					}
+					break;
 				}
 				case VK_RETURN:
 				{
@@ -277,6 +278,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 							return TRUE;
 						}
 					}
+					break;
 				}
 				case VK_F2:
 				{
@@ -285,6 +287,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnRefresh();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F3:
 				{
@@ -293,6 +296,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnViewFile();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F4:
 				{
@@ -301,6 +305,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnEditFile();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F5:
 				{
@@ -309,6 +314,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnCopyFile();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F6:
 				{
@@ -317,6 +323,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnMoveFile();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F7:
 				{
@@ -325,6 +332,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnNewFolder();
 						return TRUE;
 					}
+					break;
 				}
 				case VK_F8:
 				{
@@ -333,6 +341,7 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 						OnDeleteFile();
 						return TRUE;
 					}
+					break;
 				}
 			}
 		}

@@ -21,10 +21,18 @@ IntelliEdit. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "CheckForUpdatesDlg.h"
 
 #include "genUp4win/genUp4win.h"
+#if _WIN64
 #ifdef _DEBUG
 #pragma comment(lib, "x64/Debug/genUp4win.lib")
 #else
 #pragma comment(lib, "x64/Release/genUp4win.lib")
+#endif
+#else
+#ifdef _DEBUG
+#pragma comment(lib, "Debug/genUp4win.lib")
+#else
+#pragma comment(lib, "Release/genUp4win.lib")
+#endif
 #endif
 
 // CCheckForUpdatesDlg dialog

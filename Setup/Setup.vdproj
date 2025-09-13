@@ -135,14 +135,14 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_8EC4F5E1D8AE64AD4FBA4139A2263A64"
-        "OwnerKey" = "8:_658A59D744C848AA84CA29835B04B972"
+        "MsmKey" = "8:_6DC08ED88FBD4144B900BEC08B67151B"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8F08E3E0379644C59895040043E342D1"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_8EC4F5E1D8AE64AD4FBA4139A2263A64"
+        "OwnerKey" = "8:_658A59D744C848AA84CA29835B04B972"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -628,6 +628,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6DC08ED88FBD4144B900BEC08B67151B"
+            {
+            "SourcePath" = "8:..\\SoftwareContentRegister.html"
+            "TargetName" = "8:SoftwareContentRegister.html"
+            "Tag" = "8:"
+            "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8EC4F5E1D8AE64AD4FBA4139A2263A64"
             {
             "SourcePath" = "8:UxTheme.dll"
@@ -646,26 +666,6 @@
             "Register" = "3:4"
             "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8F08E3E0379644C59895040043E342D1"
-            {
-            "SourcePath" = "8:..\\SoftwareContextRegister.html"
-            "TargetName" = "8:SoftwareContextRegister.html"
-            "Tag" = "8:"
-            "Folder" = "8:_C9D77BCA0344477D8B9104079C183E1E"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_919CF6BFCFBCA14B028C8901EEE14047"

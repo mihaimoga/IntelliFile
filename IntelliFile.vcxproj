@@ -480,7 +480,7 @@ echo.
     <None Include="res\viewstack.ico" />
     <None Include="res\writelarge.bmp" />
     <None Include="res\writesmall.bmp" />
-    <None Include="SoftwareContextRegister.html" />
+    <None Include="SoftwareContentRegister.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base64.h" />

@@ -1,0 +1,3 @@
+[submodule "genUp4win"]
+	path = genUp4win
+	url = https://github.com/mihaimoga/genUp4win.git

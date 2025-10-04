@@ -303,9 +303,7 @@
     <None Include="HexCtrl\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json">
       <Filter>HexCtrl\res</Filter>
     </None>
-    <None Include="SoftwareContentRegister.html">
-      <Filter>HTML Help Topics</Filter>
-    </None>
+    <None Include="SoftwareContentRegister.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">

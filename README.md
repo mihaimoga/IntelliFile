@@ -106,7 +106,7 @@ As noted in the [Contributing Rules](https://github.com/mihaimoga/IntelliFile/bl
 This open source project uses the following libraries:
 
 - René Nyffenegger's [base64](https://github.com/ReneNyffenegger/cpp-base64)
-- Armen Hakobyan's [CFolderDialog](https://www.codeproject.com/Articles/2024/CFolderDialog-Selecting-Folders)
+- Armen Hakobyan's [CFolderDialog](https://www.codeproject.com/articles/CFolderDialog-Selecting-Folders)
 - [genUp4win](https://github.com/mihaimoga/genUp4win)
 - Jovibor's [HexCtrl](https://github.com/jovibor/HexCtrl)
 - PJ Naughter's [CHLinkCtrl](https://www.naughter.com/hlinkctrl.html)
@@ -114,4 +114,4 @@ This open source project uses the following libraries:
 - [Lexilla, Scintilla, and SciTE](https://www.scintilla.org/)
 - PJ Naughter's [CScintillaCtrl, CScintillaDoc, CScintillaView](https://www.naughter.com/scintilla.html)
 - PJ Naughter's [CVersionInfo](https://www.naughter.com/versioninfo.html)
-- Mizan Rahman's [CWndResizer](https://www.codeproject.com/Articles/125068/MFC-C-Helper-Class-for-Window-Resizing)
+- Mizan Rahman's [CWndResizer](https://www.codeproject.com/articles/MFC-C-Helper-Class-for-Window-Resizing)

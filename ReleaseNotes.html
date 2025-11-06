@@ -1,232 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>IntelliFile - Release Notes</title>
-        <link rel="icon" type="image/png" href="https://www.moga.doctor/romania-flag-square-icon-256.png">
-        <link rel="apple-touch-icon" href="https://www.moga.doctor/romania-flag-square-icon-256.png">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
-    </head>
-    <body>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="https://www.moga.doctor/intellifile/" target="_blank">IntelliFile</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/graphs/contributors" target="_blank">Contributors</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/issues" target="_blank">Issues</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/discussions" target="_blank">Discussions</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/wiki" target="_blank">Wiki</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container">
-            <div class="row divide-md">
-                <div class="col-md-12 col-sm-12 divide-md text-justify" style="text-align: justify;">
-                    <h1>Release Notes</h1>
-                        <p><strong>IntelliFile</strong> is an alternative Windows version to the famous Total Commander!</p>
-                        <p>Download: <a href="https://www.moga.doctor/freeware/IntelliFileSetup.msi">https://www.moga.doctor/freeware/IntelliFileSetup.msi</a></p>
-                        <p>GitHub repo: <a href="https://github.com/mihaimoga/IntelliFile" target="_blank">https://github.com/mihaimoga/IntelliFile</a></p>
-                    <h2>Social Media</h2>
-                    <p>Please feel free to contact me if you need any further information.</p>
-                    <ul>
-                        <li><img class="img-responsive" src="https://www.moga.doctor/img/twitter.png" alt="Twitter">&nbsp;<a href="https://x.com/stefanmihaimoga" target="_blank">X/Twitter</a></li>
-                        <li><img class="img-responsive" src="https://www.moga.doctor/img/linkedin.png" alt="LinkedIn">&nbsp;<a href="https://www.linkedin.com/in/stefanmihaimoga/" target="_blank">LinkedIn</a></li>
-                        <li><img class="img-responsive" src="https://www.moga.doctor/img/facebook.png" alt="Facebook">&nbsp;<a href="https://www.facebook.com/stefanmihaimoga" target="_blank">Facebook</a></li>
-                        <li><img class="img-responsive" src="https://www.moga.doctor/img/instagram.png" alt="Instagram">&nbsp;<a href="https://www.instagram.com/stefanmihaimoga/" target="_blank">Instagram</a></li>
-                    </ul>
-
-                    <h2>History</h2>
-                    <ul>
-                        <li>Version 1.01 (May 13<sup>th</sup>, 2022): Initial release.</li>
-                        <li>Version 1.02 (May 20<sup>th</sup>, 2022): Implemented &quot;New folder&quot; functionality.</li>
-                        <li>Version 1.03 (May 23<sup>rd</sup>, 2022): Implemented &quot;Change drive&quot; functionality.</li>
-                        <li>Version 1.04 (May 24<sup>th</sup>, 2022): Implemented &quot;View text file&quot; functionality.</li>
-                        <li>Version 1.05 (May 27<sup>th</sup>, 2022):
-                            <ul>
-                                <li>Implemented &quot;View RTF file&quot; functionality;</li>
-                                <li>Implemented &quot;View XML file&quot; functionality;</li>
-                                <li>Implemented &quot;Context menu&quot; functionality.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.06 (August 21<sup>st</sup>, 2022): Added &quot;Change drive...&quot; icon.</li>
-                        <li>Version 1.07 (September 9<sup>th</sup>, 2022): Added Contributors hyperlink to AboutBox dialog.</li>
-                        <li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
-                        <li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
-                        <li>Replaced <code>NULL</code> throughout the codebase with <code>nullptr</code>.<br>
-                            Replaced <code>BOOL</code> throughout the codebase with <code>bool</code>.<br>
-                            This means that the minimum requirement for the application is now Microsoft Visual C++ 2010.</li>
-                        <li>Version 1.10 (April 25<sup>th</sup>, 2023): Added base64 encode/decode functions.</li>
-                        <li>Version 1.11 (May 13<sup>th</sup>, 2023): Added new changes suggested by Rick Dishman: Reset View, and save last folder.</li>
-                        <li>Version 1.12 (May 15<sup>th</sup>, 2023): Added rename of file name on clicking its label in MFC ListView.</li>
-                        <li>Version 1.13 (May 18<sup>th</sup>, 2023): Fixed an issue regarding editing image files reported by Rick Dishman.</li>
-                        <li>Version 1.14 (May 19<sup>th</sup>, 2023): Fixed an issue regarding statusbar reported by Rick Dishman.</li>
-                        <li>Version 1.15 (May 21<sup>st</sup>, 2023): Changed the double click implementation to open a file in EDIT mode.</li>
-                        <li>Version 1.16 (May 27<sup>th</sup>, 2023): Updated About dialog with GPLv3 notice.</li>
-                        <li>Version 1.17 (June 17<sup>th</sup>, 2023): Added quick access dialog for favorite folders.</li>
-                        <li>Version 1.18 (June 25<sup>th</sup>, 2023):
-                            <ul>
-                                <li>Implemented &quot;Command prompt&quot; functionality;</li>
-                                <li>Replaced old <code>CHyperlinkStatic</code> class with PJ Naughter's <code>CHLinkCtrl</code> library.</li>
-                            </ul>
-                            </li>
-                        <li>Version 1.19 (August 17<sup>th</sup>, 2023):
-                            <ul>
-                                <li>Implemented &quot;Switch views&quot; functionality (Switches source view with target view);</li>
-                                <li>Added social media links: Twitter, LinkedIn, Facebook, and Instagram;</li>
-                                <li>Added shortcuts to GitHub repository's Issues, Discussions, and Wiki.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.20 (August 26<sup>th</sup>, 2023):
-                            <ul>
-                                <li>Refactored CopyFile, MoveFile and DeleteFile functions.</li>
-                                <li>Changed article's download link. Updated the About dialog (email &amp; website).</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.21 (September 22<sup>nd</sup>, 2023): Switched to Visual Studio Enterprise 2022 (some changes were made in source code of the project).</li>
-                        <li>Version 1.22 (September 30<sup>th</sup>, 2023): Added SCINTILLA control to view source code with syntax highlighting.</li>
-                        <li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
-                        <li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
-                        <li>Version 1.25 (January 28<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Added ReleaseNotes.html and SoftwareContentRegister.html to GitHub repo;</li>
-                                <li>Replaced old <code>CFileDialogST</code> class with Armen Hakobyan's <code>CFolderDialog</code> library.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.26 (February 21<sup>st</sup>, 2024): Switched MFC application' theme back to native Windows.</li>
-                        <li>Version 1.27 (March 31<sup>st</sup>, 2024):
-                            <ul>
-                                <li>Updated <code>LEXILLA</code> library to version 5.3.1 and <code>SCINTILLA</code> library to version 5.4.3.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.28 (April 26<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Updated <code>LEXILLA</code> library to version 5.3.2 and <code>SCINTILLA</code> library to version 5.5.0.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.</li>
-        					</ul>
-                        </li>
-                        <li>Version 1.29 (July 21<sup>st</sup>, 2024):
-                            <ul>
-                                <li>Implemented &quot;View text file&quot; functionality for C/C++ programming language.</li>
-                                <li>Implemented selection of files with specific search pattern, size, date or contents.</li>
-                                <li>Implemented enhanced search function with full text search &amp; replace.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.30 (July 26<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Implemented &quot;View text file&quot; functionality for HTML/CSS/XML/JavaScript.</li>
-                                <li>Implemented &quot;View text file&quot; functionality for Java programming language.</li>
-                                <li>Implemented &quot;View text file&quot; functionality for Python programming language.</li>
-                                <li>Updated <code>LEXILLA</code> library to version 5.3.3 and <code>SCINTILLA</code> library to version 5.5.1.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.1. New messages wrapped include: <code>SCI_AUTOCSETSTYLE</code>, <code>SCI_AUTOCGETSTYLE</code> &amp; <code>SCI_CUTALLOWLINE</code>.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.31 (August 24<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.0 and <code>SCINTILLA</code> library to version 5.5.2.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.2. New messages wrapped include: <code>SCI_STYLESETSTRETCH</code>, <code>SCI_STYLEGETSTRETCH</code>, <code>SCI_GETUNDOSEQUENCE</code>, <code>SCI_LINEINDENT</code>, <code>SCI_LINEDEDENT</code>, <code>SCI_SETCOPYSEPARATOR</code> &amp; <code>SCI_GETCOPYSEPARATOR</code>.</blockquote></li>
-                            </ul>
-                        </li>
-						<li>Version 1.32 (September 3<sup>rd</sup>, 2024):
-                            <ul>
-                                <li>Enabled syntax highlighting for the following programming languages:
-                                    <ul>
-                                        <li>Bash</li>
-                                        <li>Batch</li>
-                                        <li>CMake</li>
-                                        <li>Groovy</li>
-                                        <li>JavaScript</li>
-                                        <li>JSON</li>
-                                        <li>Makefile</li>
-                                        <li>MATLAB</li>
-                                        <li>R</li>
-                                        <li>Rust</li>
-                                    </ul>
-                                </li>
-                                <li>Implemented <a href="https://www.moga.doctor/intellifile/" target="_blank">User Manual</a> option into Help menu.</li>
-                                <li>Implemented <strong>Check for updates...</strong> option into Help menu.</li>
-                            </ul>
+	<head>
+		<meta charset="utf-8">
+		<title>IntelliFile - Release Notes</title>
+		<link rel="icon" type="image/png" href="https://www.moga.doctor/romania-flag-square-icon-256.png">
+		<link rel="apple-touch-icon" href="https://www.moga.doctor/romania-flag-square-icon-256.png">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+			<div class="container">
+				<a class="navbar-brand" href="https://www.moga.doctor/intellifile/" target="_blank">IntelliFile</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarSupportedContent">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<li class="nav-item">
+							<a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/graphs/contributors" target="_blank">Contributors</a>
 						</li>
-                        <li>Version 1.33 (September 14<sup>th</sup>, 2024): Implemented &quot;View binary file&quot; functionality using Jovibor's <a href="https://github.com/jovibor/HexCtrl" target="_blank">HexCtrl</a> library.</li>
-                        <li>Version 1.34 (October 11<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Fixed access to Google Drive (bug reported by <em>simon mago</em>).</li>
-                                <li>Fixed access to Favorite Folders (bug reported by <em>markjuggles</em>).</li>
-                                <li>Fixed a situation when viewing a text file would result in a crash.</li>
-                                <li>Enabled syntax highlighting for TCL/TK programming language.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.35 (October 26<sup>th</sup>, 2024):
-                            <ul>
-                                <li>Implemented &quot;Play audio file&quot; functionality for AAC/M4A/MP3/MP4/WAV/WMA files.</li>
-                                <li>Implemented &quot;View image file&quot; functionality for BMP/GIF/ICO/JPG/PNG/TIF/WMF files.</li>
-                                <li>Fixed limitation to <code>_MAX_PATH</code> for long path names.</li>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.1 and <code>SCINTILLA</code> library to version 5.5.3.</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.36 (February 14<sup>th</sup>, 2025):
-                            <ul>
-                                <li>Implemented <em>Word Wrap</em> for text file viewing.</li>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.2 and <code>SCINTILLA</code> library to version 5.5.4.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>The code now includes <code>&lt;string&gt;</code> prior to <code>#including &lt;ScintillaCall.h&gt;</code>. This fixes an issue when the code is used with GSL Library 4.1.0.<br>Reworked <code>CScintillaDemoApp::LoadLibraryFromApplicationDirectory</code> to use <code>std::filesystem::path</code>.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.</blockquote></li>
-                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Updated PJ Naughter's <code>AppSettings</code> library to the latest version available.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.<br>Updated <code>GetAppSettingsFilePath</code> to use <code>std::filesystem::path</code>.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.37 (March 8<sup>th</sup>, 2025):
-                            <ul>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.3 and <code>SCINTILLA</code> library to version 5.5.5.</li>
-                                <li>Removed deprecated functions in C++17, defined in <code>&lt;codecvt&gt;</code> header.</li>
-                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Added support for Italian, Spanish, German and Greek languages.<br>Added support for Russian, Turkish, Chinese and Czech languages.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.38 (April 11<sup>th</sup>, 2025):
-                            <ul>
-                                <li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Reverted back from <code>GetTempPath2</code> to <code>GetTempPath</code> to make it compatible again with Windows 10.</blockquote></li>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.4 and <code>SCINTILLA</code> library to version 5.5.6.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.5. New messages wrapped include: <code>SCI_SETUNDOSELECTIONHISTORY</code>, <code>SCI_GETUNDOSELECTIONHISTORY</code>, <code>SCI_GETSELECTIONSERIALIZED</code> and <code>SCI_SETSELECTIONSERIALIZED</code>.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.39 (April 12<sup>th</sup>, 2025): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated <code>CScintillaCtrl:: MarkerSymbolDefined</code> method to return <code>MarkerSymbol</code>.</blockquote></li>
-                        <li>Version 1.40 (May 7<sup>th</sup>, 2025): Updated Jovibor's <code>HexCtrl</code> library to the latest version available.</li>
-                        <li>Version 1.41 (June 29<sup>th</sup>, 2025):
-                            <ul>
-                                <li>Updated <code>LEXILLA</code> library to version 5.4.5 and <code>SCINTILLA</code> library to version 5.5.7.</li>
-                                <li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.7. New messages wrapped include: <code>SCI_AUTOCSETIMAGESCALE</code>, <code>SCI_AUTOCGETIMAGESCALE</code> and <code>SCI_SCROLLVERTICAL</code>.</blockquote></li>
-                            </ul>
-                        </li>
-                        <li>Version 1.42 (October 2<sup>nd</sup>, 2025): This release focuses on system stability and reliability. No new features were introduced. Includes:
-                            <ul>
-                                <li>Fixes for known bugs.</li>
-                                <li>Security updates.</li>
-                                <li>Minor performance optimizations.</li>
-                                <li>Updated the embedded web browser (Microsoft Edge).</li>
-                                <li>Updated <code>Bootstrap</code> library to the latest version available (Release Notes &amp; Software Content Register).</li>
-                            </ul>
-                        </li>
-                        <li>Version 1.43 (TBD):
-                            <ul>
-                                <li>Updated the embedded web browser (Microsoft Edge).</li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
-    </body>
+						<li class="nav-item">
+							<a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/issues" target="_blank">Issues</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/discussions" target="_blank">Discussions</a>
+						</li>
+						<li class="nav-item">
+							<a class="nav-link" href="https://github.com/mihaimoga/IntelliFile/wiki" target="_blank">Wiki</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+
+		<div class="container">
+			<div class="row divide-md">
+				<div class="col-md-12 col-sm-12 divide-md text-justify" style="text-align: justify;">
+					<h1>Release Notes</h1>
+						<p><strong>IntelliFile</strong> is an alternative Windows version to the famous Total Commander!</p>
+						<p>Download: <a href="https://www.moga.doctor/freeware/IntelliFileSetup.msi">https://www.moga.doctor/freeware/IntelliFileSetup.msi</a></p>
+						<p>GitHub repo: <a href="https://github.com/mihaimoga/IntelliFile" target="_blank">https://github.com/mihaimoga/IntelliFile</a></p>
+					<h2>Social Media</h2>
+					<p>Please feel free to contact me if you need any further information.</p>
+					<ul>
+						<li><img class="img-responsive" src="https://www.moga.doctor/img/twitter.png" alt="Twitter">&nbsp;<a href="https://x.com/stefanmihaimoga" target="_blank">X/Twitter</a></li>
+						<li><img class="img-responsive" src="https://www.moga.doctor/img/linkedin.png" alt="LinkedIn">&nbsp;<a href="https://www.linkedin.com/in/stefanmihaimoga/" target="_blank">LinkedIn</a></li>
+						<li><img class="img-responsive" src="https://www.moga.doctor/img/facebook.png" alt="Facebook">&nbsp;<a href="https://www.facebook.com/stefanmihaimoga" target="_blank">Facebook</a></li>
+						<li><img class="img-responsive" src="https://www.moga.doctor/img/instagram.png" alt="Instagram">&nbsp;<a href="https://www.instagram.com/stefanmihaimoga/" target="_blank">Instagram</a></li>
+					</ul>
+
+					<h2>History</h2>
+					<ul>
+						<li>Version 1.01 (May 13<sup>th</sup>, 2022): Initial release.</li>
+						<li>Version 1.02 (May 20<sup>th</sup>, 2022): Implemented &quot;New folder&quot; functionality.</li>
+						<li>Version 1.03 (May 23<sup>rd</sup>, 2022): Implemented &quot;Change drive&quot; functionality.</li>
+						<li>Version 1.04 (May 24<sup>th</sup>, 2022): Implemented &quot;View text file&quot; functionality.</li>
+						<li>Version 1.05 (May 27<sup>th</sup>, 2022):
+							<ul>
+								<li>Implemented &quot;View RTF file&quot; functionality;</li>
+								<li>Implemented &quot;View XML file&quot; functionality;</li>
+								<li>Implemented &quot;Context menu&quot; functionality.</li>
+							</ul>
+						</li>
+						<li>Version 1.06 (August 21<sup>st</sup>, 2022): Added &quot;Change drive...&quot; icon.</li>
+						<li>Version 1.07 (September 9<sup>th</sup>, 2022): Added Contributors hyperlink to AboutBox dialog.</li>
+						<li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+						<li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+						<li>Replaced <code>NULL</code> throughout the codebase with <code>nullptr</code>.<br>
+							Replaced <code>BOOL</code> throughout the codebase with <code>bool</code>.<br>
+							This means that the minimum requirement for the application is now Microsoft Visual C++ 2010.</li>
+						<li>Version 1.10 (April 25<sup>th</sup>, 2023): Added base64 encode/decode functions.</li>
+						<li>Version 1.11 (May 13<sup>th</sup>, 2023): Added new changes suggested by Rick Dishman: Reset View, and save last folder.</li>
+						<li>Version 1.12 (May 15<sup>th</sup>, 2023): Added rename of file name on clicking its label in MFC ListView.</li>
+						<li>Version 1.13 (May 18<sup>th</sup>, 2023): Fixed an issue regarding editing image files reported by Rick Dishman.</li>
+						<li>Version 1.14 (May 19<sup>th</sup>, 2023): Fixed an issue regarding statusbar reported by Rick Dishman.</li>
+						<li>Version 1.15 (May 21<sup>st</sup>, 2023): Changed the double click implementation to open a file in EDIT mode.</li>
+						<li>Version 1.16 (May 27<sup>th</sup>, 2023): Updated About dialog with GPLv3 notice.</li>
+						<li>Version 1.17 (June 17<sup>th</sup>, 2023): Added quick access dialog for favorite folders.</li>
+						<li>Version 1.18 (June 25<sup>th</sup>, 2023):
+							<ul>
+								<li>Implemented &quot;Command prompt&quot; functionality;</li>
+								<li>Replaced old <code>CHyperlinkStatic</code> class with PJ Naughter's <code>CHLinkCtrl</code> library.</li>
+							</ul>
+							</li>
+						<li>Version 1.19 (August 17<sup>th</sup>, 2023):
+							<ul>
+								<li>Implemented &quot;Switch views&quot; functionality (Switches source view with target view);</li>
+								<li>Added social media links: Twitter, LinkedIn, Facebook, and Instagram;</li>
+								<li>Added shortcuts to GitHub repository's Issues, Discussions, and Wiki.</li>
+							</ul>
+						</li>
+						<li>Version 1.20 (August 26<sup>th</sup>, 2023):
+							<ul>
+								<li>Refactored CopyFile, MoveFile and DeleteFile functions.</li>
+								<li>Changed article's download link. Updated the About dialog (email &amp; website).</li>
+							</ul>
+						</li>
+						<li>Version 1.21 (September 22<sup>nd</sup>, 2023): Switched to Visual Studio Enterprise 2022 (some changes were made in source code of the project).</li>
+						<li>Version 1.22 (September 30<sup>th</sup>, 2023): Added SCINTILLA control to view source code with syntax highlighting.</li>
+						<li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
+						<li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
+						<li>Version 1.25 (January 28<sup>th</sup>, 2024):
+							<ul>
+								<li>Added ReleaseNotes.html and SoftwareContentRegister.html to GitHub repo;</li>
+								<li>Replaced old <code>CFileDialogST</code> class with Armen Hakobyan's <code>CFolderDialog</code> library.</li>
+							</ul>
+						</li>
+						<li>Version 1.26 (February 21<sup>st</sup>, 2024): Switched MFC application' theme back to native Windows.</li>
+						<li>Version 1.27 (March 31<sup>st</sup>, 2024):
+							<ul>
+								<li>Updated <code>LEXILLA</code> library to version 5.3.1 and <code>SCINTILLA</code> library to version 5.4.3.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.28 (April 26<sup>th</sup>, 2024):
+							<ul>
+								<li>Updated <code>LEXILLA</code> library to version 5.3.2 and <code>SCINTILLA</code> library to version 5.5.0.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.</li>
+							</ul>
+						</li>
+						<li>Version 1.29 (July 21<sup>st</sup>, 2024):
+							<ul>
+								<li>Implemented &quot;View text file&quot; functionality for C/C++ programming language.</li>
+								<li>Implemented selection of files with specific search pattern, size, date or contents.</li>
+								<li>Implemented enhanced search function with full text search &amp; replace.</li>
+							</ul>
+						</li>
+						<li>Version 1.30 (July 26<sup>th</sup>, 2024):
+							<ul>
+								<li>Implemented &quot;View text file&quot; functionality for HTML/CSS/XML/JavaScript.</li>
+								<li>Implemented &quot;View text file&quot; functionality for Java programming language.</li>
+								<li>Implemented &quot;View text file&quot; functionality for Python programming language.</li>
+								<li>Updated <code>LEXILLA</code> library to version 5.3.3 and <code>SCINTILLA</code> library to version 5.5.1.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.1. New messages wrapped include: <code>SCI_AUTOCSETSTYLE</code>, <code>SCI_AUTOCGETSTYLE</code> &amp; <code>SCI_CUTALLOWLINE</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.31 (August 24<sup>th</sup>, 2024):
+							<ul>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.0 and <code>SCINTILLA</code> library to version 5.5.2.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.2. New messages wrapped include: <code>SCI_STYLESETSTRETCH</code>, <code>SCI_STYLEGETSTRETCH</code>, <code>SCI_GETUNDOSEQUENCE</code>, <code>SCI_LINEINDENT</code>, <code>SCI_LINEDEDENT</code>, <code>SCI_SETCOPYSEPARATOR</code> &amp; <code>SCI_GETCOPYSEPARATOR</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.32 (September 3<sup>rd</sup>, 2024):
+							<ul>
+								<li>Enabled syntax highlighting for the following programming languages:
+									<ul>
+										<li>Bash</li>
+										<li>Batch</li>
+										<li>CMake</li>
+										<li>Groovy</li>
+										<li>JavaScript</li>
+										<li>JSON</li>
+										<li>Makefile</li>
+										<li>MATLAB</li>
+										<li>R</li>
+										<li>Rust</li>
+									</ul>
+								</li>
+								<li>Implemented <a href="https://www.moga.doctor/intellifile/" target="_blank">User Manual</a> option into Help menu.</li>
+								<li>Implemented <strong>Check for updates...</strong> option into Help menu.</li>
+							</ul>
+						</li>
+						<li>Version 1.33 (September 14<sup>th</sup>, 2024): Implemented &quot;View binary file&quot; functionality using Jovibor's <a href="https://github.com/jovibor/HexCtrl" target="_blank">HexCtrl</a> library.</li>
+						<li>Version 1.34 (October 11<sup>th</sup>, 2024):
+							<ul>
+								<li>Fixed access to Google Drive (bug reported by <em>simon mago</em>).</li>
+								<li>Fixed access to Favorite Folders (bug reported by <em>markjuggles</em>).</li>
+								<li>Fixed a situation when viewing a text file would result in a crash.</li>
+								<li>Enabled syntax highlighting for TCL/TK programming language.</li>
+							</ul>
+						</li>
+						<li>Version 1.35 (October 26<sup>th</sup>, 2024):
+							<ul>
+								<li>Implemented &quot;Play audio file&quot; functionality for AAC/M4A/MP3/MP4/WAV/WMA files.</li>
+								<li>Implemented &quot;View image file&quot; functionality for BMP/GIF/ICO/JPG/PNG/TIF/WMF files.</li>
+								<li>Fixed limitation to <code>_MAX_PATH</code> for long path names.</li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.1 and <code>SCINTILLA</code> library to version 5.5.3.</li>
+							</ul>
+						</li>
+						<li>Version 1.36 (February 14<sup>th</sup>, 2025):
+							<ul>
+								<li>Implemented <em>Word Wrap</em> for text file viewing.</li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.2 and <code>SCINTILLA</code> library to version 5.5.4.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>The code now includes <code>&lt;string&gt;</code> prior to <code>#including &lt;ScintillaCall.h&gt;</code>. This fixes an issue when the code is used with GSL Library 4.1.0.<br>Reworked <code>CScintillaDemoApp::LoadLibraryFromApplicationDirectory</code> to use <code>std::filesystem::path</code>.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.</blockquote></li>
+								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Updated PJ Naughter's <code>AppSettings</code> library to the latest version available.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.<br>Updated <code>GetAppSettingsFilePath</code> to use <code>std::filesystem::path</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.37 (March 8<sup>th</sup>, 2025):
+							<ul>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.3 and <code>SCINTILLA</code> library to version 5.5.5.</li>
+								<li>Removed deprecated functions in C++17, defined in <code>&lt;codecvt&gt;</code> header.</li>
+								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Added support for Italian, Spanish, German and Greek languages.<br>Added support for Russian, Turkish, Chinese and Czech languages.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.38 (April 11<sup>th</sup>, 2025):
+							<ul>
+								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Reverted back from <code>GetTempPath2</code> to <code>GetTempPath</code> to make it compatible again with Windows 10.</blockquote></li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.4 and <code>SCINTILLA</code> library to version 5.5.6.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.5. New messages wrapped include: <code>SCI_SETUNDOSELECTIONHISTORY</code>, <code>SCI_GETUNDOSELECTIONHISTORY</code>, <code>SCI_GETSELECTIONSERIALIZED</code> and <code>SCI_SETSELECTIONSERIALIZED</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.39 (April 12<sup>th</sup>, 2025): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated <code>CScintillaCtrl:: MarkerSymbolDefined</code> method to return <code>MarkerSymbol</code>.</blockquote></li>
+						<li>Version 1.40 (May 7<sup>th</sup>, 2025): Updated Jovibor's <code>HexCtrl</code> library to the latest version available.</li>
+						<li>Version 1.41 (June 29<sup>th</sup>, 2025):
+							<ul>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.5 and <code>SCINTILLA</code> library to version 5.5.7.</li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.7. New messages wrapped include: <code>SCI_AUTOCSETIMAGESCALE</code>, <code>SCI_AUTOCGETIMAGESCALE</code> and <code>SCI_SCROLLVERTICAL</code>.</blockquote></li>
+							</ul>
+						</li>
+						<li>Version 1.42 (October 2<sup>nd</sup>, 2025): This release focuses on system stability and reliability. No new features were introduced. Includes:
+							<ul>
+								<li>Fixes for known bugs.</li>
+								<li>Security updates.</li>
+								<li>Minor performance optimizations.</li>
+								<li>Updated the embedded web browser (Microsoft Edge).</li>
+								<li>Updated <code>Bootstrap</code> library to the latest version available (Release Notes &amp; Software Content Register).</li>
+							</ul>
+						</li>
+						<li>Version 1.43 (TBD):
+							<ul>
+								<li>Updated the embedded web browser (Microsoft Edge).</li>
+							</ul>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+	</body>
 </html>

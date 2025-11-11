@@ -65,8 +65,8 @@
 						</li>
 						<li>Version 1.06 (August 21<sup>st</sup>, 2022): Added &quot;Change drive...&quot; icon.</li>
 						<li>Version 1.07 (September 9<sup>th</sup>, 2022): Added Contributors hyperlink to AboutBox dialog.</li>
-						<li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
-						<li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available. <blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+						<li>Version 1.08 (January 23<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CVersionInfo</code> library to the latest version available.<br><blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
+						<li>Version 1.09 (January 24<sup>rd</sup>, 2023): Updated PJ Naughter's <code>CInstanceChecker</code> library to the latest version available.<br><blockquote>Updated the code to use C++ uniform initialization for all variable declarations.</blockquote></li>
 						<li>Replaced <code>NULL</code> throughout the codebase with <code>nullptr</code>.<br>
 							Replaced <code>BOOL</code> throughout the codebase with <code>bool</code>.<br>
 							This means that the minimum requirement for the application is now Microsoft Visual C++ 2010.</li>
@@ -99,8 +99,8 @@
 						</li>
 						<li>Version 1.21 (September 22<sup>nd</sup>, 2023): Switched to Visual Studio Enterprise 2022 (some changes were made in source code of the project).</li>
 						<li>Version 1.22 (September 30<sup>th</sup>, 2023): Added SCINTILLA control to view source code with syntax highlighting.</li>
-						<li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
-						<li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
+						<li>Version 1.23 (December 10<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Removed the <code>SetCallDirect</code> &amp; <code>GetCallDirect</code> methods. Instead now the <code>CScintillaCtrl</code> class will call the <code>m_DirectStatusFunction</code> if the calling thread is the same as the thread on which the Scintilla control was created. Thanks to Markus Nissl for this update.</blockquote></li>
+						<li>Version 1.24 (December 29<sup>th</sup>, 2023): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.4.1. New messages wrapped include: <code>SCI_CHANGESELECTIONMODE</code>, <code>SCI_SETMOVEEXTENDSSELECTION</code> &amp; <code>SCI_SELECTIONFROMPOINT</code>. Also updated the signatures of the following methods: <code>GetDocPointer</code>, <code>SetDocPointer</code>, <code>CreateDocument</code>, <code>AddRefDocument</code> and <code>ReleaseDocument</code>.</blockquote></li>
 						<li>Version 1.25 (January 28<sup>th</sup>, 2024):
 							<ul>
 								<li>Added ReleaseNotes.html and SoftwareContentRegister.html to GitHub repo;</li>
@@ -111,7 +111,7 @@
 						<li>Version 1.27 (March 31<sup>st</sup>, 2024):
 							<ul>
 								<li>Updated <code>LEXILLA</code> library to version 5.3.1 and <code>SCINTILLA</code> library to version 5.4.3.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.4.3. New messages wrapped include: <code>SCI_GETUNDOACTIONS</code>, <code>SCI_GETUNDOSAVEPOINT</code>, <code>SCI_SETUNDODETACH</code>, <code>SCI_SETUNDOTENTATIVE</code>, <code>SCI_SETUNDOCURRENT</code>, <code>SCI_PUSHUNDOACTIONTYPE</code>, <code>SCI_CHANGELASTUNDOACTIONTEXT</code>, <code>SCI_GETUNDOACTIONTYPE</code>, <code>SCI_GETUNDOACTIONPOSITION</code> &amp; <code>SCI_GETUNDOACTIONTEXT</code>.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.28 (April 26<sup>th</sup>, 2024):
@@ -133,13 +133,13 @@
 								<li>Implemented &quot;View text file&quot; functionality for Java programming language.</li>
 								<li>Implemented &quot;View text file&quot; functionality for Python programming language.</li>
 								<li>Updated <code>LEXILLA</code> library to version 5.3.3 and <code>SCINTILLA</code> library to version 5.5.1.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.1. New messages wrapped include: <code>SCI_AUTOCSETSTYLE</code>, <code>SCI_AUTOCGETSTYLE</code> &amp; <code>SCI_CUTALLOWLINE</code>.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.5.1. New messages wrapped include: <code>SCI_AUTOCSETSTYLE</code>, <code>SCI_AUTOCGETSTYLE</code> &amp; <code>SCI_CUTALLOWLINE</code>.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.31 (August 24<sup>th</sup>, 2024):
 							<ul>
 								<li>Updated <code>LEXILLA</code> library to version 5.4.0 and <code>SCINTILLA</code> library to version 5.5.2.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.2. New messages wrapped include: <code>SCI_STYLESETSTRETCH</code>, <code>SCI_STYLEGETSTRETCH</code>, <code>SCI_GETUNDOSEQUENCE</code>, <code>SCI_LINEINDENT</code>, <code>SCI_LINEDEDENT</code>, <code>SCI_SETCOPYSEPARATOR</code> &amp; <code>SCI_GETCOPYSEPARATOR</code>.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.5.2. New messages wrapped include: <code>SCI_STYLESETSTRETCH</code>, <code>SCI_STYLEGETSTRETCH</code>, <code>SCI_GETUNDOSEQUENCE</code>, <code>SCI_LINEINDENT</code>, <code>SCI_LINEDEDENT</code>, <code>SCI_SETCOPYSEPARATOR</code> &amp; <code>SCI_GETCOPYSEPARATOR</code>.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.32 (September 3<sup>rd</sup>, 2024):
@@ -182,31 +182,31 @@
 						<li>Version 1.36 (February 14<sup>th</sup>, 2025):
 							<ul>
 								<li>Implemented <em>Word Wrap</em> for text file viewing.</li>
-								<li>Updated <code>LEXILLA</code> library to version 5.4.2 and <code>SCINTILLA</code> library to version 5.5.4.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>The code now includes <code>&lt;string&gt;</code> prior to <code>#including &lt;ScintillaCall.h&gt;</code>. This fixes an issue when the code is used with GSL Library 4.1.0.<br>Reworked <code>CScintillaDemoApp::LoadLibraryFromApplicationDirectory</code> to use <code>std::filesystem::path</code>.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.</blockquote></li>
-								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Updated PJ Naughter's <code>AppSettings</code> library to the latest version available.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.<br>Updated <code>GetAppSettingsFilePath</code> to use <code>std::filesystem::path</code>.</blockquote></li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.2 and <code>SCINTILLA</code> library to version 5.5.4.<br><blockquote>Version 5.4.2 adds Nix lexer. Improves JavaScript, PHP, Rust, TOML, and Zig.<br>Version 5.5.4 fixes wrapping of removed lines and edge cases for moving lines. On GTK, middle click can be repeated with one value.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>The code now includes <code>&lt;string&gt;</code> prior to <code>#including &lt;ScintillaCall.h&gt;</code>. This fixes an issue when the code is used with GSL Library 4.1.0.<br>Reworked <code>CScintillaDemoApp::LoadLibraryFromApplicationDirectory</code> to use <code>std::filesystem::path</code>.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.</blockquote></li>
+								<li>Updated <code>genUp4win</code> library to the latest version available.<br><blockquote>Updated PJ Naughter's <code>AppSettings</code> library to the latest version available.<br>Updated <code>GetModuleFileName</code> calls to handle path length > <code>_MAX_PATH</code>.<br>Updated <code>GetAppSettingsFilePath</code> to use <code>std::filesystem::path</code>.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.37 (March 8<sup>th</sup>, 2025):
 							<ul>
-								<li>Updated <code>LEXILLA</code> library to version 5.4.3 and <code>SCINTILLA</code> library to version 5.5.5.</li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.3 and <code>SCINTILLA</code> library to version 5.5.5.<br><blockquote>Version 5.4.3 improves C++, Modula 3, Pascal, Python, and Ruby.<br>Version 5.5.5 can remember selection with undo and redo. Update to use DirectWrite 1.1.</blockquote></li>
 								<li>Removed deprecated functions in C++17, defined in <code>&lt;codecvt&gt;</code> header.</li>
-								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Added support for Italian, Spanish, German and Greek languages.<br>Added support for Russian, Turkish, Chinese and Czech languages.</blockquote></li>
+								<li>Updated <code>genUp4win</code> library to the latest version available.<br><blockquote>Added support for Italian, Spanish, German and Greek languages.<br>Added support for Russian, Turkish, Chinese and Czech languages.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.38 (April 11<sup>th</sup>, 2025):
 							<ul>
-								<li>Updated <code>genUp4win</code> library to the latest version available. <blockquote>Reverted back from <code>GetTempPath2</code> to <code>GetTempPath</code> to make it compatible again with Windows 10.</blockquote></li>
-								<li>Updated <code>LEXILLA</code> library to version 5.4.4 and <code>SCINTILLA</code> library to version 5.5.6.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.5. New messages wrapped include: <code>SCI_SETUNDOSELECTIONHISTORY</code>, <code>SCI_GETUNDOSELECTIONHISTORY</code>, <code>SCI_GETSELECTIONSERIALIZED</code> and <code>SCI_SETSELECTIONSERIALIZED</code>.</blockquote></li>
+								<li>Updated <code>genUp4win</code> library to the latest version available.<br><blockquote>Reverted back from <code>GetTempPath2</code> to <code>GetTempPath</code> to make it compatible again with Windows 10.</blockquote></li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.4 and <code>SCINTILLA</code> library to version 5.5.6.<br><blockquote>Version 5.4.4 fixes a problem when building for ARM64 on Windows.<br>Version 5.5.6 improves DBCS and autocompletion drawing on Win32 and improves dwell, encoding and text clipping on Qt.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.5.5. New messages wrapped include: <code>SCI_SETUNDOSELECTIONHISTORY</code>, <code>SCI_GETUNDOSELECTIONHISTORY</code>, <code>SCI_GETSELECTIONSERIALIZED</code> and <code>SCI_SETSELECTIONSERIALIZED</code>.</blockquote></li>
 							</ul>
 						</li>
-						<li>Version 1.39 (April 12<sup>th</sup>, 2025): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated <code>CScintillaCtrl:: MarkerSymbolDefined</code> method to return <code>MarkerSymbol</code>.</blockquote></li>
+						<li>Version 1.39 (April 12<sup>th</sup>, 2025): Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated <code>CScintillaCtrl:: MarkerSymbolDefined</code> method to return <code>MarkerSymbol</code>.</blockquote></li>
 						<li>Version 1.40 (May 7<sup>th</sup>, 2025): Updated Jovibor's <code>HexCtrl</code> library to the latest version available.</li>
 						<li>Version 1.41 (June 29<sup>th</sup>, 2025):
 							<ul>
-								<li>Updated <code>LEXILLA</code> library to version 5.4.5 and <code>SCINTILLA</code> library to version 5.5.7.</li>
-								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available. <blockquote>Updated class to work with Scintilla v5.5.7. New messages wrapped include: <code>SCI_AUTOCSETIMAGESCALE</code>, <code>SCI_AUTOCGETIMAGESCALE</code> and <code>SCI_SCROLLVERTICAL</code>.</blockquote></li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.5 and <code>SCINTILLA</code> library to version 5.5.7.<br><blockquote>Version 5.4.5 improves Dart, Makefile, Nix, TOML, and Zig.<br>Version 5.5.7 can prevent storing scroll position in undo selection history and adds a wrap-aware <code>SCI_SCROLLVERTICAL</code> API.</blockquote></li>
+								<li>Updated PJ Naughter's <code>CScintillaCtrl</code> library to the latest version available.<br><blockquote>Updated class to work with Scintilla v5.5.7. New messages wrapped include: <code>SCI_AUTOCSETIMAGESCALE</code>, <code>SCI_AUTOCGETIMAGESCALE</code> and <code>SCI_SCROLLVERTICAL</code>.</blockquote></li>
 							</ul>
 						</li>
 						<li>Version 1.42 (October 2<sup>nd</sup>, 2025): This release focuses on system stability and reliability. No new features were introduced. Includes:
@@ -221,7 +221,7 @@
 						<li>Version 1.43 (TBD):
 							<ul>
 								<li>Updated the embedded web browser (Microsoft Edge).</li>
-								<li>Updated <code>LEXILLA</code> library to version 5.4.6 and <code>SCINTILLA</code> library to version 5.5.8.</li>
+								<li>Updated <code>LEXILLA</code> library to version 5.4.6 and <code>SCINTILLA</code> library to version 5.5.8.<br><blockquote>Version 5.4.6 adds SINEX lexer. Improves Errorlist, Progress, and Python.<br>Version 5.5.8 changes format of <code>SCI_GETSELECTIONSERIALIZED</code> and fixes redraw after undo.</blockquote></li>
 							</ul>
 						</li>
 					</ul>

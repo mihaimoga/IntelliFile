@@ -86,6 +86,9 @@ namespace Scintilla
 
 		//Constructors / Destructors
 		CScintillaCtrl() noexcept;
+		CScintillaCtrl(const CScintillaCtrl&) = delete;
+		CScintillaCtrl(CScintillaCtrl&&) = delete;
+		~CScintillaCtrl() = default;
 
 		//Creation
 #ifdef _AFX
@@ -95,6 +98,8 @@ namespace Scintilla
 #endif //#ifdef _AFX
 
 		//Misc
+		CScintillaCtrl& operator=(const CScintillaCtrl&) = delete;
+		CScintillaCtrl& operator=(CScintillaCtrl&&) = delete;
 #ifdef _AFX
 		void PreSubclassWindow() override;
 #else

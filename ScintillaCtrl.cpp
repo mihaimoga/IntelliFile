@@ -333,6 +333,7 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
                           2. Verified the code against Scintilla v5.5.6.
          PJN / 16-03-2025 1. Updated class to work with Scintilla v5.5.7. New messages wrapped include: SCI_AUTOCSETIMAGESCALE,
                           SCI_AUTOCGETIMAGESCALE and SCI_SCROLLVERTICAL.
+         PJN / 15-11-2025 1. Verified the code against Scintilla v5.5.8.
 
 Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 

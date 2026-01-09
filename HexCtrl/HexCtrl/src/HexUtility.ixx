@@ -438,7 +438,7 @@ namespace HEXCTRL::INTERNAL::ut { //Utility methods and stuff.
 		return loc;
 	}
 
-	//Returns hInstance of a current module, whether it is a .exe or .dll.
+	//Returns hInstance of the current module, whether it is a .exe or .dll.
 	[[nodiscard]] auto GetCurrModuleHinst() -> HINSTANCE {
 		HINSTANCE hInst { };
 		::GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -446,68 +446,30 @@ namespace HEXCTRL::INTERNAL::ut { //Utility methods and stuff.
 		return hInst;
 	};
 
-	[[nodiscard]] auto GetDPIScale(HWND hWnd) -> float {
-		const auto hDC = ::GetDC(hWnd);
-		const auto iLOGPIXELSY = ::GetDeviceCaps(hDC, LOGPIXELSY);
-		::ReleaseDC(hWnd, hDC);
-		return static_cast<float>(iLOGPIXELSY) / USER_DEFAULT_SCREEN_DPI; //Scale factor for High-DPI displays.
+	//Get font points size from the size in pixels.
+	[[nodiscard]] constexpr auto FontPointsFromPixels(float flSizePixels) -> float {
+		constexpr auto flPointsInPixel = 72.F / USER_DEFAULT_SCREEN_DPI;
+		return flSizePixels * flPointsInPixel;
 	}
 
-	//iDirection == : -2 - LEFT, 1 - UP, 2 - RIGHT, -1 - DOWN.
-	[[nodiscard]] auto CreateArrowBitmap(HDC hDC, RECT rc, int iDirection, COLORREF clrBk, COLORREF clrArrow) -> HBITMAP {
-		const auto rcWidth = rc.right - rc.left;
-		const auto rcHeight = rc.bottom - rc.top;
+	//Get font pixels size from the size in points.
+	[[nodiscard]] constexpr auto FontPixelsFromPoints(float flSizePoints) -> float {
+		constexpr auto flPixelsInPoint = USER_DEFAULT_SCREEN_DPI / 72.F;
+		return flSizePoints * flPixelsInPoint;
+	}
 
-		//Make the width and height even numbers, to make it easier drawing an isosceles triangle.
-		const auto iWidth = rcWidth - (rcWidth % 2);
-		const auto iHeight = rcHeight - (rcHeight % 2);
+	//Replicates GET_X_LPARAM macro from windowsx.h.
+	[[nodiscard]] constexpr int GetXLPARAM(LPARAM lParam) {
+		return (static_cast<int>(static_cast<short>(static_cast<WORD>((static_cast<DWORD_PTR>(lParam)) & 0xFFFFU))));
+	}
 
-		POINT ptArrow[3] { }; //Arrow coordinates within the bitmap.
-		switch (iDirection) {
-		case -2: //LEFT.
-			ptArrow[0] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
-			ptArrow[1] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
-			ptArrow[2] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
-			break;
-		case 1: //UP.
-			ptArrow[0] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
-			ptArrow[1] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
-			ptArrow[2] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
-			break;
-		case 2: //RIGHT.
-			ptArrow[0] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
-			ptArrow[1] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
-			ptArrow[2] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
-			break;
-		case -1: //DOWN.
-			ptArrow[0] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
-			ptArrow[1] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
-			ptArrow[2] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
-			break;
-		default:
-			break;
-		}
-
-		const auto hdcMem = ::CreateCompatibleDC(hDC);
-		const auto hBMPArrow = ::CreateCompatibleBitmap(hDC, rcWidth, rcHeight);
-		::SelectObject(hdcMem, hBMPArrow);
-		const RECT rcFill { 0, 0, rcWidth, rcHeight };
-		::SetBkColor(hdcMem, clrBk); //SetBkColor+ExtTextOutW=FillSolidRect behavior.
-		::ExtTextOutW(hdcMem, 0, 0, ETO_OPAQUE, &rcFill, nullptr, 0, nullptr);
-		const auto hBrushArrow = ::CreateSolidBrush(clrArrow);
-		::SelectObject(hdcMem, hBrushArrow);
-		const auto hPenArrow = ::CreatePen(PS_SOLID, 1, clrArrow);
-		::SelectObject(hdcMem, hPenArrow);
-		::Polygon(hdcMem, ptArrow, 3); //Draw an arrow.
-		::DeleteObject(hBrushArrow);
-		::DeleteObject(hPenArrow);
-		::DeleteDC(hdcMem);
-
-		return hBMPArrow;
+	//Replicates GET_Y_LPARAM macro from windowsx.h.
+	[[nodiscard]] constexpr int GetYLPARAM(LPARAM lParam) {
+		return GetXLPARAM(lParam >> 16);
 	}
 }
 
-namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
+namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 	auto DefWndProc(const MSG& msg) -> LRESULT {
 		return ::DefWindowProcW(msg.hwnd, msg.message, msg.wParam, msg.lParam);
 	}
@@ -569,13 +531,101 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		return 0;
 	}
 
-	//Replicates GET_X_LPARAM macro from the windowsx.h.
-	[[nodiscard]] constexpr int GetXLPARAM(LPARAM lParam) {
-		return (static_cast<int>(static_cast<short>(static_cast<WORD>((static_cast<DWORD_PTR>(lParam)) & 0xFFFF))));
+	[[nodiscard]] auto GetDPIScaleForHWND(HWND hWnd) -> float {
+		const auto hDC = ::GetDC(hWnd);
+		const auto iLOGPIXELSY = ::GetDeviceCaps(hDC, LOGPIXELSY);
+		::ReleaseDC(hWnd, hDC);
+		return static_cast<float>(iLOGPIXELSY) / USER_DEFAULT_SCREEN_DPI; //High-DPI scale factor for window.
 	}
 
-	[[nodiscard]] constexpr int GetYLPARAM(LPARAM lParam) {
-		return GetXLPARAM(lParam >> 16);
+	//iDirection: -2:LEFT, 1:UP, 2:RIGHT, -1:DOWN.
+	[[nodiscard]] auto CreateArrowBitmap(HDC hDC, DWORD dwWidth, DWORD dwHeight, int iDirection, COLORREF clrBk, COLORREF clrArrow) -> HBITMAP {
+		//Make the width and height even numbers, to make it easier drawing an isosceles triangle.
+		const int iWidth = dwWidth - (dwWidth % 2);
+		const int iHeight = dwHeight - (dwHeight % 2);
+
+		POINT ptArrow[3] { }; //Arrow coordinates within the bitmap.
+		switch (iDirection) {
+		case -2: //LEFT.
+			ptArrow[0] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
+			ptArrow[1] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
+			ptArrow[2] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
+			break;
+		case 1: //UP.
+			ptArrow[0] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
+			ptArrow[1] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
+			ptArrow[2] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
+			break;
+		case 2: //RIGHT.
+			ptArrow[0] = { .x { iWidth / 2 }, .y { iHeight / 4 } };
+			ptArrow[1] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
+			ptArrow[2] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
+			break;
+		case -1: //DOWN.
+			ptArrow[0] = { .x { iWidth / 4 }, .y { iHeight / 2 } };
+			ptArrow[1] = { .x { iWidth - (iWidth / 4) }, .y { iHeight / 2 } };
+			ptArrow[2] = { .x { iWidth / 2 }, .y { iHeight - (iHeight / 4) } };
+			break;
+		default:
+			break;
+		}
+
+		const auto hdcMem = ::CreateCompatibleDC(hDC);
+		const auto hBMPArrow = ::CreateCompatibleBitmap(hDC, dwWidth, dwHeight);
+		::SelectObject(hdcMem, hBMPArrow);
+		const RECT rcFill { .right { static_cast<int>(dwWidth) }, .bottom { static_cast<int>(dwHeight) } };
+		::SetBkColor(hdcMem, clrBk); //SetBkColor+ExtTextOutW=FillSolidRect behavior.
+		::ExtTextOutW(hdcMem, 0, 0, ETO_OPAQUE, &rcFill, nullptr, 0, nullptr);
+		const auto hBrushArrow = ::CreateSolidBrush(clrArrow);
+		::SelectObject(hdcMem, hBrushArrow);
+		const auto hPenArrow = ::CreatePen(PS_SOLID, 1, clrArrow);
+		::SelectObject(hdcMem, hPenArrow);
+		::Polygon(hdcMem, ptArrow, 3); //Draw an arrow.
+		::DeleteObject(hBrushArrow);
+		::DeleteObject(hPenArrow);
+		::DeleteDC(hdcMem);
+
+		return hBMPArrow;
+	}
+
+	//Get 32bit ARGB bitmap with premultiplied alpha from HICON.
+	[[nodiscard]] auto BitmapFromIcon(HICON hIcon) -> HBITMAP {
+		ICONINFO ii;
+		if (::GetIconInfo(hIcon, &ii) == FALSE)
+			return { };
+
+		::DeleteObject(ii.hbmMask); //Deleting icon's BW mask bitmap.
+		BITMAP bmIconClr;
+		::GetObjectW(ii.hbmColor, sizeof(BITMAP), &bmIconClr);
+		const auto iBmpHeight = std::abs(bmIconClr.bmHeight);
+		const auto iBmpWidth = std::abs(bmIconClr.bmWidth);
+		BITMAPINFO bi { .bmiHeader { .biSize { sizeof(BITMAPINFOHEADER) }, .biWidth { iBmpWidth },
+			.biHeight { iBmpHeight }, .biPlanes { 1 }, .biBitCount { 32 }, .biCompression { BI_RGB } } };
+		RGBQUAD* pARGB { }; //Newly created DI bitmap's data pointer.
+		const auto hDCMem = ::CreateCompatibleDC(nullptr);
+		const auto hBmp32 = ::CreateDIBSection(hDCMem, &bi, DIB_RGB_COLORS, reinterpret_cast<void**>(&pARGB), nullptr, 0);
+		::GetDIBits(hDCMem, ii.hbmColor, 0, iBmpHeight, pARGB, &bi, DIB_RGB_COLORS);
+		::DeleteDC(hDCMem);
+		::DeleteObject(ii.hbmColor);
+
+		if (hBmp32 == nullptr || pARGB == nullptr)
+			return { };
+
+		const auto dwSizePx = static_cast<DWORD>(iBmpHeight * iBmpWidth);
+		if (bmIconClr.bmBitsPixel == 32) { //Premultiply alpha for all channels.
+			for (auto i = 0U; i < dwSizePx; ++i) {
+				pARGB[i].rgbBlue = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbBlue) * pARGB[i].rgbReserved / 255);
+				pARGB[i].rgbGreen = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbGreen) * pARGB[i].rgbReserved / 255);
+				pARGB[i].rgbRed = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbRed) * pARGB[i].rgbReserved / 255);
+			}
+		}
+		else { //If the icon is not 32bit, merely set bitmap alpha channel to fully opaque.
+			for (auto i = 0U; i < dwSizePx; ++i) {
+				pARGB[i].rgbReserved = 255;
+			}
+		}
+
+		return hBmp32;
 	}
 
 	class CDynLayout final {
@@ -677,9 +727,9 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		~CPoint() = default;
 		operator LPPOINT() { return this; }
 		operator const POINT*()const { return this; }
+		bool operator==(CPoint rhs)const { return x == rhs.x && y == rhs.y; }
 		bool operator==(POINT pt)const { return x == pt.x && y == pt.y; }
-		bool operator!=(POINT pt)const { return !(*this == pt); }
-		CPoint& operator=(POINT pt) { *this = pt; return *this; }
+		friend bool operator==(POINT pt, CPoint rhs) { return rhs == pt; }
 		CPoint operator+(POINT pt)const { return { x + pt.x, y + pt.y }; }
 		CPoint operator-(POINT pt)const { return { x - pt.x, y - pt.y }; }
 		void Offset(int iX, int iY) { x += iX; y += iY; }
@@ -703,10 +753,11 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		~CRect() = default;
 		operator LPRECT() { return this; }
 		operator LPCRECT()const { return this; }
+		bool operator==(CRect rhs)const { return ::EqualRect(this, rhs); }
 		bool operator==(RECT rc)const { return ::EqualRect(this, &rc); }
-		bool operator!=(RECT rc)const { return !(*this == rc); }
+		friend bool operator==(RECT rc, CRect rhs) { return rhs == rc; }
 		CRect& operator=(RECT rc) { ::CopyRect(this, &rc); return *this; }
-		[[nodiscard]] auto BottomRight()const->CPoint { return { { .x { right }, .y { bottom } } }; };
+		[[nodiscard]] auto BottomRight()const -> CPoint { return { { .x { right }, .y { bottom } } }; };
 		void DeflateRect(int x, int y) { ::InflateRect(this, -x, -y); }
 		void DeflateRect(SIZE size) { ::InflateRect(this, -size.cx, -size.cy); }
 		void DeflateRect(LPCRECT pRC) { left += pRC->left; top += pRC->top; right -= pRC->right; bottom -= pRC->bottom; }
@@ -719,7 +770,7 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		[[nodiscard]] bool PtInRect(POINT pt)const { return ::PtInRect(this, pt); }
 		void SetRect(int x1, int y1, int x2, int y2) { ::SetRect(this, x1, y1, x2, y2); }
 		void SetRectEmpty() { ::SetRectEmpty(this); }
-		[[nodiscard]] auto TopLeft()const->CPoint { return { { .x { left }, .y { top } } }; };
+		[[nodiscard]] auto TopLeft()const -> CPoint { return { { .x { left }, .y { top } } }; };
 		[[nodiscard]] int Width()const { return right - left; }
 	};
 
@@ -730,10 +781,44 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		~CDC() = default;
 		operator HDC()const { return m_hDC; }
 		void AbortDoc()const { ::AbortDoc(m_hDC); }
+		int AlphaBlend(int iX, int iY, int iWidth, int iHeight, HDC hDCSrc,
+			int iXSrc, int iYSrc, int iWidthSrc, int iHeightSrc, BYTE bSrcAlpha = 255, BYTE bAlphaFormat = AC_SRC_ALPHA)const {
+			const BLENDFUNCTION bf { .SourceConstantAlpha { bSrcAlpha }, .AlphaFormat { bAlphaFormat } };
+			return ::AlphaBlend(m_hDC, iX, iY, iWidth, iHeight, hDCSrc, iXSrc, iYSrc, iWidthSrc, iHeightSrc, bf);
+		}
+		BOOL BitBlt(int iX, int iY, int iWidth, int iHeight, HDC hDCSource, int iXSource, int iYSource, DWORD dwROP)const {
+			//When blitting from a monochrome bitmap to a color one, the black color in the monohrome bitmap 
+			//becomes the destination DC’s text color, and the white color in the monohrome bitmap 
+			//becomes the destination DC’s background color, when using SRCCOPY mode.
+			return ::BitBlt(m_hDC, iX, iY, iWidth, iHeight, hDCSource, iXSource, iYSource, dwROP);
+		}
+		[[nodiscard]] auto CreateCompatibleBitmap(int iWidth, int iHeight)const -> HBITMAP {
+			return ::CreateCompatibleBitmap(m_hDC, iWidth, iHeight);
+		}
+		[[nodiscard]] CDC CreateCompatibleDC()const { return ::CreateCompatibleDC(m_hDC); }
 		void DeleteDC()const { ::DeleteDC(m_hDC); }
-		HDC GetHDC()const { return m_hDC; }
+		bool DrawFrameControl(LPRECT pRC, UINT uType, UINT uState)const {
+			return ::DrawFrameControl(m_hDC, pRC, uType, uState);
+		}
+		bool DrawFrameControl(int iX, int iY, int iWidth, int iHeight, UINT uType, UINT uState)const {
+			RECT rc { .left { iX }, .top { iY }, .right { iX + iWidth }, .bottom { iY + iHeight } };
+			return DrawFrameControl(&rc, uType, uState);
+		}
+		void DrawImage(HBITMAP hBmp, int iX, int iY, int iWidth, int iHeight)const {
+			const auto dcMem = CreateCompatibleDC();
+			dcMem.SelectObject(hBmp);
+			BITMAP bm; ::GetObjectW(hBmp, sizeof(BITMAP), &bm);
+
+			//Only 32bit bitmaps can have alpha channel.
+			//If destination and source bitmaps do not have the same color format, 
+			//AlphaBlend converts the source bitmap to match the destination bitmap.
+			//AlphaBlend works with both, DI (DeviceIndependent) and DD (DeviceDependent), bitmaps.
+			AlphaBlend(iX, iY, iWidth, iHeight, dcMem, 0, 0, iWidth, iHeight, 255, bm.bmBitsPixel == 32 ? AC_SRC_ALPHA : 0);
+			dcMem.DeleteDC();
+		}
+		[[nodiscard]] HDC GetHDC()const { return m_hDC; }
 		void GetTextMetricsW(LPTEXTMETRICW pTM)const { ::GetTextMetricsW(m_hDC, pTM); }
-		auto SetBkColor(COLORREF clr)const->COLORREF { return ::SetBkColor(m_hDC, clr); }
+		auto SetBkColor(COLORREF clr)const -> COLORREF { return ::SetBkColor(m_hDC, clr); }
 		void DrawEdge(LPRECT pRC, UINT uEdge, UINT uFlags)const { ::DrawEdge(m_hDC, pRC, uEdge, uFlags); }
 		void DrawFocusRect(LPCRECT pRc)const { ::DrawFocusRect(m_hDC, pRc); }
 		int DrawTextW(std::wstring_view wsv, LPRECT pRect, UINT uFormat)const {
@@ -747,16 +832,23 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		void FillSolidRect(LPCRECT pRC, COLORREF clr)const {
 			::SetBkColor(m_hDC, clr); ::ExtTextOutW(m_hDC, 0, 0, ETO_OPAQUE, pRC, nullptr, 0, nullptr);
 		}
-		[[nodiscard]] auto GetClipBox()const->CRect { RECT rc; ::GetClipBox(m_hDC, &rc); return rc; }
+		[[nodiscard]] auto GetClipBox()const -> CRect { RECT rc; ::GetClipBox(m_hDC, &rc); return rc; }
 		bool LineTo(POINT pt)const { return LineTo(pt.x, pt.y); }
 		bool LineTo(int x, int y)const { return ::LineTo(m_hDC, x, y); }
 		bool MoveTo(POINT pt)const { return MoveTo(pt.x, pt.y); }
 		bool MoveTo(int x, int y)const { return ::MoveToEx(m_hDC, x, y, nullptr); }
 		bool Polygon(const POINT* pPT, int iCount)const { return ::Polygon(m_hDC, pPT, iCount); }
+		int SetDIBits(HBITMAP hBmp, UINT uStartLine, UINT uLines, const void* pBits, const BITMAPINFO* pBMI, UINT uClrUse)const {
+			return ::SetDIBits(m_hDC, hBmp, uStartLine, uLines, pBits, pBMI, uClrUse);
+		}
+		int SetDIBitsToDevice(int iX, int iY, DWORD dwWidth, DWORD dwHeight, int iXSrc, int iYSrc, UINT uStartLine, UINT uLines,
+			const void* pBits, const BITMAPINFO* pBMI, UINT uClrUse)const {
+			return ::SetDIBitsToDevice(m_hDC, iX, iY, dwWidth, dwHeight, iXSrc, iYSrc, uStartLine, uLines, pBits, pBMI, uClrUse);
+		}
 		int SetMapMode(int iMode)const { return ::SetMapMode(m_hDC, iMode); }
-		auto SetTextColor(COLORREF clr)const->COLORREF { return ::SetTextColor(m_hDC, clr); }
-		auto SetViewportOrg(int iX, int iY)const->POINT { POINT pt; ::SetViewportOrgEx(m_hDC, iX, iY, &pt); return pt; }
-		auto SelectObject(HGDIOBJ hObj)const->HGDIOBJ { return ::SelectObject(m_hDC, hObj); }
+		auto SetTextColor(COLORREF clr)const -> COLORREF { return ::SetTextColor(m_hDC, clr); }
+		auto SetViewportOrg(int iX, int iY)const -> POINT { POINT pt; ::SetViewportOrgEx(m_hDC, iX, iY, &pt); return pt; }
+		auto SelectObject(HGDIOBJ hObj)const -> HGDIOBJ { return ::SelectObject(m_hDC, hObj); }
 		int StartDocW(const DOCINFO* pDI)const { return ::StartDocW(m_hDC, pDI); }
 		int StartPage()const { return ::StartPage(m_hDC); }
 		void TextOutW(int iX, int iY, LPCWSTR pwszText, int iSize)const { ::TextOutW(m_hDC, iX, iY, pwszText, iSize); }
@@ -778,33 +870,27 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 
 	class CMemDC final : public CDC {
 	public:
-		CMemDC(HDC hDC, RECT rc);
-		~CMemDC();
+		CMemDC(HDC hDC, RECT rc) : m_hDCOrig(hDC), m_rc(rc) {
+			m_hDC = ::CreateCompatibleDC(m_hDCOrig);
+			assert(m_hDC != nullptr);
+			const auto iWidth = m_rc.right - m_rc.left;
+			const auto iHeight = m_rc.bottom - m_rc.top;
+			m_hBmp = ::CreateCompatibleBitmap(m_hDCOrig, iWidth, iHeight);
+			assert(m_hBmp != nullptr);
+			::SelectObject(m_hDC, m_hBmp);
+		}
+		~CMemDC() {
+			const auto iWidth = m_rc.right - m_rc.left;
+			const auto iHeight = m_rc.bottom - m_rc.top;
+			::BitBlt(m_hDCOrig, m_rc.left, m_rc.top, iWidth, iHeight, m_hDC, m_rc.left, m_rc.top, SRCCOPY);
+			::DeleteObject(m_hBmp);
+			::DeleteDC(m_hDC);
+		}
 	private:
 		HDC m_hDCOrig;
 		HBITMAP m_hBmp;
 		RECT m_rc;
 	};
-
-	CMemDC::CMemDC(HDC hDC, RECT rc) : m_hDCOrig(hDC), m_rc(rc)
-	{
-		m_hDC = ::CreateCompatibleDC(m_hDCOrig);
-		assert(m_hDC != nullptr);
-		const auto iWidth = m_rc.right - m_rc.left;
-		const auto iHeight = m_rc.bottom - m_rc.top;
-		m_hBmp = ::CreateCompatibleBitmap(m_hDCOrig, iWidth, iHeight);
-		assert(m_hBmp != nullptr);
-		::SelectObject(m_hDC, m_hBmp);
-	}
-
-	CMemDC::~CMemDC()
-	{
-		const auto iWidth = m_rc.right - m_rc.left;
-		const auto iHeight = m_rc.bottom - m_rc.top;
-		::BitBlt(m_hDCOrig, m_rc.left, m_rc.top, iWidth, iHeight, m_hDC, m_rc.left, m_rc.top, SRCCOPY);
-		::DeleteObject(m_hBmp);
-		::DeleteDC(m_hDC);
-	}
 
 	class CWnd {
 	public:
@@ -816,11 +902,11 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		operator HWND()const { return m_hWnd; }
 		[[nodiscard]] bool operator==(const CWnd& rhs)const { return m_hWnd == rhs.m_hWnd; }
 		[[nodiscard]] bool operator==(HWND hWnd)const { return m_hWnd == hWnd; }
-		void Attach(HWND hWnd) { assert(::IsWindow(hWnd)); m_hWnd = hWnd; }
+		void Attach(HWND hWnd) { m_hWnd = hWnd; } //Can attach to nullptr as well.
 		void CheckRadioButton(int iIDFirst, int iIDLast, int iIDCheck)const {
 			assert(IsWindow()); ::CheckRadioButton(m_hWnd, iIDFirst, iIDLast, iIDCheck);
 		}
-		[[nodiscard]] auto ChildWindowFromPoint(POINT pt)const->HWND {
+		[[nodiscard]] auto ChildWindowFromPoint(POINT pt)const -> CWnd {
 			assert(IsWindow()); return ::ChildWindowFromPoint(m_hWnd, pt);
 		}
 		void ClientToScreen(LPPOINT pPT)const { assert(IsWindow()); ::ClientToScreen(m_hWnd, pPT); }
@@ -829,7 +915,7 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		}
 		void DestroyWindow() { assert(IsWindow()); ::DestroyWindow(m_hWnd); m_hWnd = nullptr; }
 		void Detach() { m_hWnd = nullptr; }
-		[[nodiscard]] auto GetClientRect()const->CRect {
+		[[nodiscard]] auto GetClientRect()const -> CRect {
 			assert(IsWindow()); RECT rc; ::GetClientRect(m_hWnd, &rc); return rc;
 		}
 		bool EnableWindow(bool fEnable)const { assert(IsWindow()); return ::EnableWindow(m_hWnd, fEnable); }
@@ -839,28 +925,38 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 				if (::IsDlgButtonChecked(m_hWnd, iID) != 0) { return iID; }
 			} return 0;
 		}
-		[[nodiscard]] auto GetDC()const->HDC { assert(IsWindow()); return ::GetDC(m_hWnd); }
+		[[nodiscard]] auto GetDC()const -> HDC { assert(IsWindow()); return ::GetDC(m_hWnd); }
 		[[nodiscard]] int GetDlgCtrlID()const { assert(IsWindow()); return ::GetDlgCtrlID(m_hWnd); }
-		[[nodiscard]] auto GetDlgItem(int iIDCtrl)const->HWND { assert(IsWindow()); return ::GetDlgItem(m_hWnd, iIDCtrl); }
-		[[nodiscard]] auto GetHFont()const->HFONT {
+		[[nodiscard]] auto GetDlgItem(int iIDCtrl)const -> CWnd { assert(IsWindow()); return ::GetDlgItem(m_hWnd, iIDCtrl); }
+		[[nodiscard]] auto GetHFont()const -> HFONT {
 			assert(IsWindow()); return reinterpret_cast<HFONT>(::SendMessageW(m_hWnd, WM_GETFONT, 0, 0));
 		}
-		[[nodiscard]] auto GetHWND()const->HWND { return m_hWnd; }
-		[[nodiscard]] auto GetLogFont()const->std::optional<LOGFONTW> {
+		[[nodiscard]] auto GetHWND()const -> HWND { return m_hWnd; }
+		[[nodiscard]] auto GetLogFont()const -> std::optional<LOGFONTW> {
 			if (const auto hFont = GetHFont(); hFont != nullptr) {
 				LOGFONTW lf { }; ::GetObjectW(hFont, sizeof(lf), &lf); return lf;
 			}
 			return std::nullopt;
 		}
-		[[nodiscard]] auto GetParent()const->HWND { assert(IsWindow()); return ::GetParent(m_hWnd); }
-		[[nodiscard]] auto GetWindowDC()const->HDC { assert(IsWindow()); return ::GetWindowDC(m_hWnd); }
-		[[nodiscard]] auto GetWindowRect()const->CRect {
+		[[nodiscard]] auto GetParent()const -> CWnd { assert(IsWindow()); return ::GetParent(m_hWnd); }
+		[[nodiscard]] auto GetScrollInfo(bool fVert, UINT uMask = SIF_ALL)const -> SCROLLINFO {
+			assert(IsWindow()); SCROLLINFO si { .cbSize { sizeof(SCROLLINFO) }, .fMask { uMask } };
+			::GetScrollInfo(m_hWnd, fVert, &si); return si;
+		}
+		[[nodiscard]] auto GetScrollPos(bool fVert)const -> int { return GetScrollInfo(fVert, SIF_POS).nPos; }
+		[[nodiscard]] auto GetWindowDC()const -> HDC { assert(IsWindow()); return ::GetWindowDC(m_hWnd); }
+		[[nodiscard]] auto GetWindowLongPTR(int iIndex)const {
+			assert(IsWindow()); return ::GetWindowLongPtrW(m_hWnd, iIndex);
+		}
+		[[nodiscard]] auto GetWindowRect()const -> CRect {
 			assert(IsWindow()); RECT rc; ::GetWindowRect(m_hWnd, &rc); return rc;
 		}
-		[[nodiscard]] auto GetWndText()const->std::wstring {
+		[[nodiscard]] auto GetWindowStyles()const { return static_cast<DWORD>(GetWindowLongPTR(GWL_STYLE)); }
+		[[nodiscard]] auto GetWindowStylesEx()const { return static_cast<DWORD>(GetWindowLongPTR(GWL_EXSTYLE)); }
+		[[nodiscard]] auto GetWndText()const -> std::wstring {
 			assert(IsWindow()); wchar_t buff[256]; ::GetWindowTextW(m_hWnd, buff, std::size(buff)); return buff;
 		}
-		[[nodiscard]] auto GetWndTextSize()const->DWORD { assert(IsWindow()); return ::GetWindowTextLengthW(m_hWnd); }
+		[[nodiscard]] auto GetWndTextSize()const -> DWORD { assert(IsWindow()); return ::GetWindowTextLengthW(m_hWnd); }
 		void Invalidate(bool fErase)const { assert(IsWindow()); ::InvalidateRect(m_hWnd, nullptr, fErase); }
 		[[nodiscard]] bool IsDlgMessage(MSG* pMsg)const { return ::IsDialogMessageW(m_hWnd, pMsg); }
 		[[nodiscard]] bool IsNull()const { return m_hWnd == nullptr; }
@@ -874,30 +970,39 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		int MapWindowPoints(HWND hWndTo, LPRECT pRC)const {
 			assert(IsWindow()); return ::MapWindowPoints(m_hWnd, hWndTo, reinterpret_cast<LPPOINT>(pRC), 2);
 		}
-		bool RedrawWindow(LPCRECT pRC = nullptr, HRGN hrgn = nullptr,
-			UINT uFlags = RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE)const {
+		bool RedrawWindow(LPCRECT pRC = nullptr, HRGN hrgn = nullptr, UINT uFlags = RDW_INVALIDATE | RDW_UPDATENOW | RDW_ERASE)const {
 			assert(IsWindow()); return static_cast<bool>(::RedrawWindow(m_hWnd, pRC, hrgn, uFlags));
 		}
 		int ReleaseDC(HDC hDC)const { assert(IsWindow()); return ::ReleaseDC(m_hWnd, hDC); }
-		auto SetTimer(UINT_PTR uID, UINT uElapse, TIMERPROC pFN = nullptr)const->UINT_PTR {
-			assert(IsWindow()); return ::SetTimer(m_hWnd, uID, uElapse, pFN);
-		}
 		void ScreenToClient(LPPOINT pPT)const { assert(IsWindow()); ::ScreenToClient(m_hWnd, pPT); }
 		void ScreenToClient(POINT& pt)const { ScreenToClient(&pt); }
 		void ScreenToClient(LPRECT pRC)const {
 			ScreenToClient(reinterpret_cast<LPPOINT>(pRC)); ScreenToClient(reinterpret_cast<LPPOINT>(pRC) + 1);
 		}
-		auto SendMsg(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, uMsg, wParam, lParam);
+		auto SendMsg(UINT uMsg, WPARAM wParam = 0, LPARAM lParam = 0)const -> LRESULT {
+			assert(IsWindow()); return ::SendMessageW(m_hWnd, uMsg, wParam, lParam);
 		}
 		void SetActiveWindow()const { assert(IsWindow()); ::SetActiveWindow(m_hWnd); }
-		auto SetCapture()const->HWND { assert(IsWindow()); return ::SetCapture(m_hWnd); }
+		auto SetCapture()const -> CWnd { assert(IsWindow()); return ::SetCapture(m_hWnd); }
+		auto SetClassLongPTR(int iIndex, LONG_PTR dwNewLong)const -> ULONG_PTR {
+			assert(IsWindow()); return ::SetClassLongPtrW(m_hWnd, iIndex, dwNewLong);
+		}
 		void SetFocus()const { assert(IsWindow()); ::SetFocus(m_hWnd); }
 		void SetForegroundWindow()const { assert(IsWindow()); ::SetForegroundWindow(m_hWnd); }
+		void SetScrollInfo(bool fVert, const SCROLLINFO& si)const {
+			assert(IsWindow()); ::SetScrollInfo(m_hWnd, fVert, &si, TRUE);
+		}
+		void SetScrollPos(bool fVert, int iPos)const {
+			const SCROLLINFO si { .cbSize { sizeof(SCROLLINFO) }, .fMask { SIF_POS }, .nPos { iPos } };
+			SetScrollInfo(fVert, si);
+		}
+		auto SetTimer(UINT_PTR uID, UINT uElapse, TIMERPROC pFN = nullptr)const -> UINT_PTR {
+			assert(IsWindow()); return ::SetTimer(m_hWnd, uID, uElapse, pFN);
+		}
 		void SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags)const {
 			assert(IsWindow()); ::SetWindowPos(m_hWnd, hWndAfter, iX, iY, iWidth, iHeight, uFlags);
 		}
-		auto SetWndClassLong(int iIndex, LONG_PTR dwNewLong)const->ULONG_PTR {
+		auto SetWndClassLong(int iIndex, LONG_PTR dwNewLong)const -> ULONG_PTR {
 			assert(IsWindow()); return ::SetClassLongPtrW(m_hWnd, iIndex, dwNewLong);
 		}
 		void SetWndText(LPCWSTR pwszStr)const { assert(IsWindow()); ::SetWindowTextW(m_hWnd, pwszStr); }
@@ -947,7 +1052,7 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		[[nodiscard]] int GetCurSel()const {
 			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, CB_GETCURSEL, 0, 0));
 		}
-		[[nodiscard]] auto GetItemData(int iIndex)const->DWORD_PTR {
+		[[nodiscard]] auto GetItemData(int iIndex)const -> DWORD_PTR {
 			assert(IsWindow()); return ::SendMessageW(m_hWnd, CB_GETITEMDATA, iIndex, 0);
 		}
 		[[nodiscard]] bool HasString(LPCWSTR pwszStr)const { return FindStringExact(0, pwszStr) != CB_ERR; };
@@ -958,6 +1063,7 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 			return static_cast<int>(::SendMessageW(m_hWnd, CB_INSERTSTRING, iIndex, reinterpret_cast<LPARAM>(pwszStr)));
 		}
 		void LimitText(int iMaxChars)const { assert(IsWindow()); ::SendMessageW(m_hWnd, CB_LIMITTEXT, iMaxChars, 0); }
+		void ResetContent()const { assert(IsWindow()); ::SendMessageW(m_hWnd, CB_RESETCONTENT, 0, 0); }
 		void SetCueBanner(const std::wstring& wstr)const { SetCueBanner(wstr.data()); }
 		void SetCueBanner(LPCWSTR pwszText)const {
 			assert(IsWindow()); ::SendMessageW(m_hWnd, CB_SETCUEBANNER, 0, reinterpret_cast<LPARAM>(pwszText));
@@ -980,27 +1086,27 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		void GetItem(TVITEMW* pItem)const {
 			assert(IsWindow()); ::SendMessageW(m_hWnd, TVM_GETITEM, 0, reinterpret_cast<LPARAM>(pItem));
 		}
-		[[nodiscard]] auto GetItemData(HTREEITEM hItem)const->DWORD_PTR {
+		[[nodiscard]] auto GetItemData(HTREEITEM hItem)const -> DWORD_PTR {
 			TVITEMW item { .mask { TVIF_PARAM }, .hItem { hItem } }; GetItem(&item); return item.lParam;
 		}
-		[[nodiscard]] auto GetNextItem(HTREEITEM hItem, UINT uCode)const->HTREEITEM {
+		[[nodiscard]] auto GetNextItem(HTREEITEM hItem, UINT uCode)const -> HTREEITEM {
 			assert(IsWindow()); return reinterpret_cast<HTREEITEM>
 				(::SendMessageW(m_hWnd, TVM_GETNEXTITEM, uCode, reinterpret_cast<LPARAM>(hItem)));
 		}
-		[[nodiscard]] auto GetNextSiblingItem(HTREEITEM hItem)const->HTREEITEM { return GetNextItem(hItem, TVGN_NEXT); }
-		[[nodiscard]] auto GetParentItem(HTREEITEM hItem)const->HTREEITEM { return GetNextItem(hItem, TVGN_PARENT); }
-		[[nodiscard]] auto GetRootItem()const->HTREEITEM { return GetNextItem(nullptr, TVGN_ROOT); }
-		[[nodiscard]] auto GetSelectedItem()const->HTREEITEM { return GetNextItem(nullptr, TVGN_CARET); }
-		[[nodiscard]] auto HitTest(TVHITTESTINFO* pHTI)const->HTREEITEM {
+		[[nodiscard]] auto GetNextSiblingItem(HTREEITEM hItem)const -> HTREEITEM { return GetNextItem(hItem, TVGN_NEXT); }
+		[[nodiscard]] auto GetParentItem(HTREEITEM hItem)const -> HTREEITEM { return GetNextItem(hItem, TVGN_PARENT); }
+		[[nodiscard]] auto GetRootItem()const -> HTREEITEM { return GetNextItem(nullptr, TVGN_ROOT); }
+		[[nodiscard]] auto GetSelectedItem()const -> HTREEITEM { return GetNextItem(nullptr, TVGN_CARET); }
+		[[nodiscard]] auto HitTest(TVHITTESTINFO* pHTI)const -> HTREEITEM {
 			assert(IsWindow());
 			return reinterpret_cast<HTREEITEM>(::SendMessageW(m_hWnd, TVM_HITTEST, 0, reinterpret_cast<LPARAM>(pHTI)));
 		}
-		[[nodiscard]] auto HitTest(POINT pt, UINT* pFlags = nullptr)const->HTREEITEM {
+		[[nodiscard]] auto HitTest(POINT pt, UINT* pFlags = nullptr)const -> HTREEITEM {
 			TVHITTESTINFO hti { .pt { pt } }; const auto ret = HitTest(&hti);
 			if (pFlags != nullptr) { *pFlags = hti.flags; }
 			return ret;
 		}
-		auto InsertItem(LPTVINSERTSTRUCTW pTIS)const->HTREEITEM {
+		auto InsertItem(LPTVINSERTSTRUCTW pTIS)const -> HTREEITEM {
 			assert(IsWindow()); return reinterpret_cast<HTREEITEM>
 				(::SendMessageW(m_hWnd, TVM_INSERTITEM, 0, reinterpret_cast<LPARAM>(pTIS)));
 		}
@@ -1025,16 +1131,16 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		[[nodiscard]] int GetCurSel()const {
 			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, TCM_GETCURSEL, 0, 0L));
 		}
-		[[nodiscard]] auto GetItemRect(int nItem)const->CRect {
+		[[nodiscard]] auto GetItemRect(int nItem)const -> CRect {
 			assert(IsWindow());
 			RECT rc { }; ::SendMessageW(m_hWnd, TCM_GETITEMRECT, nItem, reinterpret_cast<LPARAM>(&rc));
 			return rc;
 		}
-		auto InsertItem(int iItem, TCITEMW* pItem)const->LONG {
+		auto InsertItem(int iItem, TCITEMW* pItem)const -> LONG {
 			assert(IsWindow());
 			return static_cast<LONG>(::SendMessageW(m_hWnd, TCM_INSERTITEMW, iItem, reinterpret_cast<LPARAM>(pItem)));
 		}
-		auto InsertItem(int iItem, LPCWSTR pwszStr)const->LONG {
+		auto InsertItem(int iItem, LPCWSTR pwszStr)const -> LONG {
 			TCITEMW tci { .mask { TCIF_TEXT }, .pszText { const_cast<LPWSTR>(pwszStr) } };
 			return InsertItem(iItem, &tci);
 		}
@@ -1043,7 +1149,7 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		}
 	};
 
-	class CMenu final {
+	class CMenu {
 	public:
 		CMenu() = default;
 		CMenu(HMENU hMenu) { Attach(hMenu); }
@@ -1057,47 +1163,80 @@ namespace HEXCTRL::INTERNAL::wnd { //Windows GUI related stuff.
 		void AppendSepar()const { AppendItem(MF_SEPARATOR, 0, nullptr); }
 		void AppendString(UINT_PTR uIDItem, LPCWSTR pNameItem)const { AppendItem(MF_STRING, uIDItem, pNameItem); }
 		void Attach(HMENU hMenu) { m_hMenu = hMenu; }
-		void CheckMenuItem(UINT uIDItem, bool fCheck, bool fByID = true)const {
-			assert(IsMenu()); ::CheckMenuItem(m_hMenu, uIDItem, (fCheck ? MF_CHECKED : MF_UNCHECKED) |
-				(fByID ? MF_BYCOMMAND : MF_BYPOSITION));
-		}
 		void CreatePopupMenu() { Attach(::CreatePopupMenu()); }
 		void DestroyMenu() { assert(IsMenu()); ::DestroyMenu(m_hMenu); m_hMenu = nullptr; }
 		void Detach() { m_hMenu = nullptr; }
-		void EnableMenuItem(UINT uIDItem, bool fEnable, bool fByID = true)const {
+		void EnableItem(UINT uIDItem, bool fEnable, bool fByID = true)const {
 			assert(IsMenu()); ::EnableMenuItem(m_hMenu, uIDItem, (fEnable ? MF_ENABLED : MF_GRAYED) |
 				(fByID ? MF_BYCOMMAND : MF_BYPOSITION));
 		}
-		[[nodiscard]] int GetMenuItemCount()const {
-			assert(IsMenu()); return ::GetMenuItemCount(m_hMenu);
+		[[nodiscard]] auto GetHMENU()const -> HMENU { return m_hMenu; }
+		[[nodiscard]] auto GetItemBitmap(UINT uID, bool fByID = true)const -> HBITMAP {
+			return GetItemInfo(uID, MIIM_BITMAP, fByID).hbmpItem;
 		}
-		[[nodiscard]] auto GetMenuItemID(int iPos)const->UINT {
+		[[nodiscard]] auto GetItemBitmapCheck(UINT uID, bool fByID = true)const -> HBITMAP {
+			return GetItemInfo(uID, MIIM_CHECKMARKS, fByID).hbmpChecked;
+		}
+		[[nodiscard]] auto GetItemID(int iPos)const -> UINT {
 			assert(IsMenu()); return ::GetMenuItemID(m_hMenu, iPos);
 		}
-		bool GetMenuItemInfoW(UINT uID, LPMENUITEMINFOW pMII, bool fByID = true)const {
+		bool GetItemInfo(UINT uID, LPMENUITEMINFOW pMII, bool fByID = true)const {
 			assert(IsMenu()); return ::GetMenuItemInfoW(m_hMenu, uID, !fByID, pMII) != FALSE;
 		}
-		[[nodiscard]] auto GetMenuState(UINT uID, bool fByID = true)const->UINT {
+		[[nodiscard]] auto GetItemInfo(UINT uID, UINT uMask, bool fByID = true)const -> MENUITEMINFOW {
+			MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { uMask } };
+			GetItemInfo(uID, &mii, fByID); return mii;
+		}
+		[[nodiscard]] auto GetItemState(UINT uID, bool fByID = true)const -> UINT {
 			assert(IsMenu()); return ::GetMenuState(m_hMenu, uID, fByID ? MF_BYCOMMAND : MF_BYPOSITION);
 		}
-		[[nodiscard]] auto GetMenuWstr(UINT uID, bool fByID = true)const->std::wstring {
-			assert(IsMenu()); wchar_t buff[128];
-			MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_STRING },
-				.dwTypeData { buff }, .cch { 128 } };
-			const auto ret = GetMenuItemInfoW(uID, &mii, fByID); return ret ? buff : std::wstring { };
+		[[nodiscard]] auto GetItemType(UINT uID, bool fByID = true)const -> UINT {
+			return GetItemInfo(uID, MIIM_FTYPE, fByID).fType;
 		}
-		[[nodiscard]] auto GetHMENU()const->HMENU { return m_hMenu; }
+		[[nodiscard]] auto GetItemWstr(UINT uID, bool fByID = true)const -> std::wstring {
+			wchar_t buff[128]; MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_STRING },
+				.dwTypeData { buff }, .cch { 128 } }; return GetItemInfo(uID, &mii, fByID) ? buff : std::wstring { };
+		}
+		[[nodiscard]] int GetItemsCount()const {
+			assert(IsMenu()); return ::GetMenuItemCount(m_hMenu);
+		}
 		[[nodiscard]] auto GetSubMenu(int iPos)const -> CMenu { assert(IsMenu()); return ::GetSubMenu(m_hMenu, iPos); };
-		[[nodiscard]] bool IsChecked(UINT uIDItem, bool fByID = true)const {
-			return GetMenuState(uIDItem, fByID ? MF_BYCOMMAND : MF_BYPOSITION) & MF_CHECKED;
+		[[nodiscard]] bool IsItemChecked(UINT uIDItem, bool fByID = true)const {
+			return GetItemState(uIDItem, fByID) & MF_CHECKED;
 		}
+		[[nodiscard]] bool IsItemSepar(UINT uPos)const { return GetItemState(uPos, false) & MF_SEPARATOR; }
 		[[nodiscard]] bool IsMenu()const { return ::IsMenu(m_hMenu); }
 		bool LoadMenuW(HINSTANCE hInst, LPCWSTR pwszName) { m_hMenu = ::LoadMenuW(hInst, pwszName); return IsMenu(); }
-		void SetMenuItemInfoW(UINT uItem, LPCMENUITEMINFO pMII, bool fByID = true)const {
+		bool LoadMenuW(HINSTANCE hInst, UINT uMenuID) { return LoadMenuW(hInst, MAKEINTRESOURCEW(uMenuID)); }
+		void SetItemBitmap(UINT uItem, HBITMAP hBmp, bool fByID = true)const {
+			const MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_BITMAP }, .hbmpItem { hBmp } };
+			SetItemInfo(uItem, &mii, fByID);
+		}
+		void SetItemBitmapCheck(UINT uItem, HBITMAP hBmp, bool fByID = true)const {
+			::SetMenuItemBitmaps(m_hMenu, uItem, fByID ? MF_BYCOMMAND : MF_BYPOSITION, nullptr, hBmp);
+		}
+		void SetItemCheck(UINT uIDItem, bool fCheck, bool fByID = true)const {
+			assert(IsMenu()); ::CheckMenuItem(m_hMenu, uIDItem, (fCheck ? MF_CHECKED : MF_UNCHECKED) |
+				(fByID ? MF_BYCOMMAND : MF_BYPOSITION));
+		}
+		void SetItemData(UINT uItem, ULONG_PTR dwData, bool fByID = true)const {
+			const MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_DATA }, .dwItemData { dwData } };
+			SetItemInfo(uItem, &mii, fByID);
+		}
+		void SetItemInfo(UINT uItem, LPCMENUITEMINFO pMII, bool fByID = true)const {
 			assert(IsMenu()); ::SetMenuItemInfoW(m_hMenu, uItem, !fByID, pMII);
 		}
-		void TrackPopupMenu(int iX, int iY, HWND hWndOwner, UINT uFlags = TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON)const {
-			assert(IsMenu()); ::TrackPopupMenuEx(m_hMenu, uFlags, iX, iY, hWndOwner, nullptr);
+		void SetItemType(UINT uItem, UINT uType, bool fByID = true)const {
+			const MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_FTYPE }, .fType { uType } };
+			SetItemInfo(uItem, &mii, fByID);
+		}
+		void SetItemWstr(UINT uItem, const std::wstring& wstr, bool fByID = true)const {
+			const MENUITEMINFOW mii { .cbSize { sizeof(MENUITEMINFOW) }, .fMask { MIIM_STRING },
+				.dwTypeData { const_cast<LPWSTR>(wstr.data()) } };
+			SetItemInfo(uItem, &mii, fByID);
+		}
+		BOOL TrackPopupMenu(int iX, int iY, HWND hWndOwner, UINT uFlags = TPM_LEFTALIGN | TPM_TOPALIGN | TPM_LEFTBUTTON)const {
+			assert(IsMenu()); return ::TrackPopupMenuEx(m_hMenu, uFlags, iX, iY, hWndOwner, nullptr);
 		}
 	private:
 		HMENU m_hMenu { }; //Windows menu handle.

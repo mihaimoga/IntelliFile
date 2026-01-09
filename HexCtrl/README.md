@@ -52,6 +52,7 @@
   * [IsCmdAvail](#iscmdavail)
   * [IsCreated](#iscreated)
   * [IsDataSet](#isdataset)
+  * [IsHexCharsUpper](#ishexcharsupper)
   * [IsMutable](#ismutable)
   * [IsOffsetAsHex](#isoffsetashex)
   * [IsOffsetVisible](#isoffsetvisible)
@@ -70,6 +71,7 @@
   * [SetDlgProperties](#setdlgproperties)
   * [SetFont](#setfont)
   * [SetGroupSize](#setgroupsize)
+  * [SetHexCharsCase](#sethexcharscase)
   * [SetMutable](#setmutable)
   * [SetOffsetMode](#setoffsetmode)
   * [SetPageSize](#setpagesize)
@@ -395,7 +397,7 @@ Returns the width of the **HexCtrl** bounding rectangle, i.e. the width of the d
 
 ### [](#)GetBookmarks
 ```cpp
-[[nodiscard]] auto GetBookmarks()const->IHexBookmarks*;
+[[nodiscard]] auto GetBookmarks()->IHexBookmarks*;
 ```
 Returns pointer to the [`IHexBookmarks`](#ihexbookmarks) interface, which responds for the bookmarks machinery.
 
@@ -520,7 +522,7 @@ Returns `std::vector` with the offsets and sizes of the current selection.
 
 ### [](#)GetTemplates
 ```cpp
-[[nodiscard]] auto GetTemplates()const->IHexTemplates*;
+[[nodiscard]] auto GetTemplates()->IHexTemplates*;
 ```
 Returns pointer to the internal [`IHexTemplates`](#ihextemplates) interface that is responsible for templates machinery.
 
@@ -580,6 +582,12 @@ Shows whether **HexCtrl** is created or not.
 [[nodiscard]] bool IsDataSet()const;
 ```
 Shows whether a data was set to **HexCtrl** or not
+
+### [](#)IsHexCharsUpper
+```cpp
+[[nodiscard]] bool IsHexCharsUpper()const;
+```
+Shows if hex chars printed in UPPER or lower case.
 
 ### [](#)IsMutable
 ```cpp
@@ -716,6 +724,12 @@ void SetGroupSize(DWORD dwSize);
 ```
 Sets current data grouping size in bytes.
 
+### [](#)SetHexCharsCase
+```cpp
+void SetHexCharsCase(bool fUpper);
+```
+Sets printed hex chars to an UPPER or lower case.
+
 ### [](#)SetMutable
 ```cpp
 void SetMutable(bool fMutable);
@@ -827,27 +841,34 @@ struct HEXCOLORINFO {
 ```
 
 ### [](#)HEXCOLORS
-This structure describes all **HexCtrl** colors. All these colors have their default values.
+This structure contains all colors for fonts, background, and all other visual stuff. All these colors have their default values, so you don't have to set them all during **HexCtrl** creation, if you don't want to.
 ```cpp
 struct HEXCOLORS {
-    COLORREF clrFontHex { GetSysColor(COLOR_WINDOWTEXT) };       //Hex-chunks font color.
-    COLORREF clrFontText { GetSysColor(COLOR_WINDOWTEXT) };      //Text font color.
-    COLORREF clrFontSel { GetSysColor(COLOR_HIGHLIGHTTEXT) };    //Selected hex/text font color.
-    COLORREF clrFontBkm { RGB(0, 0, 0) };                        //Bookmarks font color.
-    COLORREF clrFontDataInterp { RGB(250, 250, 250) };           //Data Interpreter text/hex font color.
-    COLORREF clrFontCaption { RGB(0, 0, 180) };                  //Caption font color
-    COLORREF clrFontInfoParam { GetSysColor(COLOR_WINDOWTEXT) }; //Font color of the Info bar parameters.
-    COLORREF clrFontInfoData { RGB(0, 0, 150) };                 //Font color of the Info bar data.
-    COLORREF clrFontCaret { RGB(255, 255, 255) };                //Caret font color.
-    COLORREF clrBk { GetSysColor(COLOR_WINDOW) };                //Background color.
-    COLORREF clrBkSel { GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
-    COLORREF clrBkBkm { RGB(240, 240, 0) };                      //Bookmarks background color.
-    COLORREF clrBkDataInterp { RGB(147, 58, 22) };               //Data Interpreter Bk color.
-    COLORREF clrBkInfoBar { GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
-    COLORREF clrBkCaret { RGB(0, 0, 255) };                      //Caret background color.
-    COLORREF clrBkCaretSel { RGB(0, 0, 200) };                   //Caret background color in selection.
-    COLORREF clrLinesMain { RGB(200, 200, 200) };                //Main window and pages lines color.
-    COLORREF clrLinesTempl { RGB(75, 75, 75) };                  //Templates data confining lines color.
+    COLORREF clrFontCaption { RGB(0, 0, 180) };                    //Caption font color
+    COLORREF clrFontHex { ::GetSysColor(COLOR_WINDOWTEXT) };       //Hex-chunks font color.
+    COLORREF clrFontText { ::GetSysColor(COLOR_WINDOWTEXT) };      //Text font color.
+    COLORREF clrFontOffset { RGB(0, 0, 180) };                     //Offset font color.
+    COLORREF clrFontSel { ::GetSysColor(COLOR_HIGHLIGHTTEXT) };    //Selected hex/text font color.
+    COLORREF clrFontBkm { ::GetSysColor(COLOR_WINDOWTEXT) };       //Bookmarks font color.
+    COLORREF clrFontDataInterp { ::GetSysColor(COLOR_HIGHLIGHTTEXT) }; //Data Interpreter text/hex font color.
+    COLORREF clrFontInfoParam { ::GetSysColor(COLOR_WINDOWTEXT) }; //Font color of the Info bar parameters.
+    COLORREF clrFontInfoData { RGB(0, 0, 180) };                   //Font color of the Info bar data.
+    COLORREF clrFontCaret { ::GetSysColor(COLOR_HIGHLIGHTTEXT) };  //Caret font color.
+    COLORREF clrBk { ::GetSysColor(COLOR_WINDOW) };                //Whole client area background color.
+    COLORREF clrBkHex { ::GetSysColor(COLOR_WINDOW) };             //Hex area background color.
+    COLORREF clrBkText { ::GetSysColor(COLOR_WINDOW) };            //Text area background color.
+    COLORREF clrBkOffset { ::GetSysColor(COLOR_WINDOW) };          //Offset area background color.
+    COLORREF clrBkSel { ::GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
+    COLORREF clrBkBkm { RGB(240, 240, 0) };                        //Bookmarks background color.
+    COLORREF clrBkDataInterp { RGB(147, 58, 22) };                 //Data Interpreter Bk color.
+    COLORREF clrBkInfoBar { ::GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
+    COLORREF clrBkCaret { RGB(0, 0, 255) };                        //Caret background color.
+    COLORREF clrBkCaretSel { RGB(0, 0, 200) };                     //Caret background color in selection.
+    COLORREF clrLinesMain { ::GetSysColor(COLOR_SCROLLBAR) };      //Main window and pages lines color.
+    COLORREF clrLinesTempl { ::GetSysColor(COLOR_WINDOWTEXT) };    //Templates data confining lines color.
+    COLORREF clrScrollBar { ::GetSysColor(COLOR_3DFACE) };         //Scrollbar color.
+    COLORREF clrScrollThumb { ::GetSysColor(COLOR_SCROLLBAR) };    //Scrollbar thumb color.
+    COLORREF clrScrollArrow { ::GetSysColor(COLOR_GRAYTEXT) };     //Scrollbar arrow color.
 };
 using PCHEXCOLORS = const HEXCOLORS*;
 ```

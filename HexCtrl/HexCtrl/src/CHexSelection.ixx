@@ -16,12 +16,12 @@ namespace HEXCTRL::INTERNAL {
 	class CHexSelection final {
 	public:
 		void ClearAll();
-		[[nodiscard]] auto GetData()const->VecSpan;
-		[[nodiscard]] auto GetLineLength()const->DWORD; //Length of the selected line. Used in block selection (with Alt).
-		[[nodiscard]] auto GetOffsetByIndex(ULONGLONG ullIndex)const->ULONGLONG; //Retrieves selection's offset by index [0...GetSelSize())
-		[[nodiscard]] auto GetSelEnd()const->ULONGLONG;
-		[[nodiscard]] auto GetSelSize()const->ULONGLONG;
-		[[nodiscard]] auto GetSelStart()const->ULONGLONG;
+		[[nodiscard]] auto GetData()const -> VecSpan;
+		[[nodiscard]] auto GetLineLength()const -> DWORD; //Length of the selected line. Used in block selection (with Alt).
+		[[nodiscard]] auto GetOffsetByIndex(ULONGLONG ullIndex)const -> ULONGLONG; //Retrieves selection's offset by index [0...GetSelSize())
+		[[nodiscard]] auto GetSelEnd()const -> ULONGLONG;
+		[[nodiscard]] auto GetSelSize()const -> ULONGLONG;
+		[[nodiscard]] auto GetSelStart()const -> ULONGLONG;
 		[[nodiscard]] bool HasSelection()const;
 		[[nodiscard]] bool HasSelHighlight()const;
 		[[nodiscard]] bool HasContiguousSel()const; //Has contiguous selection, not multiline with Alt.
@@ -31,7 +31,7 @@ namespace HEXCTRL::INTERNAL {
 		void SetMarkStartEnd(ULONGLONG ullOffset);
 		void SetSelection(const VecSpan& vecSel, bool fHighlight);     //Set a selection or selection highlight.
 	private:
-		VecSpan m_vecSelection;    //Selection data.
+		VecSpan m_vecSelection; //Selection data.
 		VecSpan m_vecSelHighlight; //Selection highlight data.
 		ULONGLONG m_ullMarkStartEnd { (std::numeric_limits<std::uint64_t>::max)() };
 	};

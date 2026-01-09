@@ -268,27 +268,31 @@ namespace HEXCTRL {
 	* HEXCOLORS: HexCtrl internal colors.                                                       *
 	********************************************************************************************/
 	struct HEXCOLORS {
-		COLORREF clrFontHex { GetSysColor(COLOR_WINDOWTEXT) };       //Hex-chunks font color.
-		COLORREF clrFontText { GetSysColor(COLOR_WINDOWTEXT) };      //Text font color.
-		COLORREF clrFontSel { GetSysColor(COLOR_HIGHLIGHTTEXT) };    //Selected hex/text font color.
-		COLORREF clrFontBkm { RGB(0, 0, 0) };                        //Bookmarks font color.
-		COLORREF clrFontDataInterp { RGB(250, 250, 250) };           //Data Interpreter text/hex font color.
-		COLORREF clrFontCaption { RGB(0, 0, 180) };                  //Caption font color
-		COLORREF clrFontInfoParam { GetSysColor(COLOR_WINDOWTEXT) }; //Font color of the Info bar parameters.
-		COLORREF clrFontInfoData { RGB(0, 0, 150) };                 //Font color of the Info bar data.
-		COLORREF clrFontCaret { RGB(255, 255, 255) };                //Caret font color.
-		COLORREF clrBk { GetSysColor(COLOR_WINDOW) };                //Background color.
-		COLORREF clrBkSel { GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
-		COLORREF clrBkBkm { RGB(240, 240, 0) };                      //Bookmarks background color.
-		COLORREF clrBkDataInterp { RGB(147, 58, 22) };               //Data Interpreter Bk color.
-		COLORREF clrBkInfoBar { GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
-		COLORREF clrBkCaret { RGB(0, 0, 255) };                      //Caret background color.
-		COLORREF clrBkCaretSel { RGB(0, 0, 200) };                   //Caret background color in selection.
-		COLORREF clrLinesMain { RGB(200, 200, 200) };                //Main window and pages lines color.
-		COLORREF clrLinesTempl { RGB(75, 75, 75) };                  //Templates data confining lines color.
-		COLORREF clrScrollBar { RGB(241, 241, 241) };                //Scrollbar color.
-		COLORREF clrScrollThumb { RGB(200, 200, 200) };              //Scrollbar thumb color.
-		COLORREF clrScrollArrow { RGB(110, 110, 110) };              //Scrollbar arrow color.
+		COLORREF clrFontCaption { RGB(0, 0, 180) };                    //Caption font color
+		COLORREF clrFontHex { ::GetSysColor(COLOR_WINDOWTEXT) };       //Hex-chunks font color.
+		COLORREF clrFontText { ::GetSysColor(COLOR_WINDOWTEXT) };      //Text font color.
+		COLORREF clrFontOffset { RGB(0, 0, 180) };                     //Offset font color.
+		COLORREF clrFontSel { ::GetSysColor(COLOR_HIGHLIGHTTEXT) };    //Selected hex/text font color.
+		COLORREF clrFontBkm { ::GetSysColor(COLOR_WINDOWTEXT) };       //Bookmarks font color.
+		COLORREF clrFontDataInterp { ::GetSysColor(COLOR_HIGHLIGHTTEXT) }; //Data Interpreter text/hex font color.
+		COLORREF clrFontInfoParam { ::GetSysColor(COLOR_WINDOWTEXT) }; //Font color of the Info bar parameters.
+		COLORREF clrFontInfoData { RGB(0, 0, 180) };                   //Font color of the Info bar data.
+		COLORREF clrFontCaret { ::GetSysColor(COLOR_HIGHLIGHTTEXT) };  //Caret font color.
+		COLORREF clrBk { ::GetSysColor(COLOR_WINDOW) };                //Whole client area background color.
+		COLORREF clrBkHex { ::GetSysColor(COLOR_WINDOW) };             //Hex area background color.
+		COLORREF clrBkText { ::GetSysColor(COLOR_WINDOW) };            //Text area background color.
+		COLORREF clrBkOffset { ::GetSysColor(COLOR_WINDOW) };          //Offset area background color.
+		COLORREF clrBkSel { ::GetSysColor(COLOR_HIGHLIGHT) };          //Background color of the selected Hex/Text.
+		COLORREF clrBkBkm { RGB(240, 240, 0) };                        //Bookmarks background color.
+		COLORREF clrBkDataInterp { RGB(147, 58, 22) };                 //Data Interpreter Bk color.
+		COLORREF clrBkInfoBar { ::GetSysColor(COLOR_3DFACE) };         //Background color of the bottom Info bar.
+		COLORREF clrBkCaret { RGB(0, 0, 255) };                        //Caret background color.
+		COLORREF clrBkCaretSel { RGB(0, 0, 200) };                     //Caret background color in selection.
+		COLORREF clrLinesMain { ::GetSysColor(COLOR_SCROLLBAR) };      //Main window and pages lines color.
+		COLORREF clrLinesTempl { ::GetSysColor(COLOR_WINDOWTEXT) };    //Templates data confining lines color.
+		COLORREF clrScrollBar { ::GetSysColor(COLOR_3DFACE) };         //Scrollbar color.
+		COLORREF clrScrollThumb { ::GetSysColor(COLOR_SCROLLBAR) };    //Scrollbar thumb color.
+		COLORREF clrScrollArrow { ::GetSysColor(COLOR_GRAYTEXT) };     //Scrollbar arrow color.
 	};
 	using PCHEXCOLORS = const HEXCOLORS*;
 
@@ -406,45 +410,46 @@ namespace HEXCTRL {
 		IHexCtrl& operator=(IHexCtrl&&) = delete;
 		virtual ~IHexCtrl() = default;
 		virtual void ClearData() = 0; //Clears all data from HexCtrl's view (not touching data itself).
-		virtual bool Create(const HEXCREATE& hcs) = 0;                       //Main initialization method.
-		virtual bool CreateDialogCtrl(UINT uCtrlID, HWND hWndParent) = 0;    //Сreates custom dialog control.
-		virtual void Delete() = 0;                                           //IHexCtrl object deleter.
-		virtual void DestroyWindow() = 0;                                    //Destroy HexCtrl window.
-		virtual void ExecuteCmd(EHexCmd eCmd) = 0;                           //Execute a command within HexCtrl.
-		[[nodiscard]] virtual auto GetActualWidth()const->int = 0;           //Working area actual width.
-		[[nodiscard]] virtual auto GetBookmarks()const->IHexBookmarks* = 0;  //Get Bookmarks interface.
-		[[nodiscard]] virtual auto GetCacheSize()const->DWORD = 0;           //Returns VirtualData mode cache size.
-		[[nodiscard]] virtual auto GetCapacity()const->DWORD = 0;            //Current capacity.
-		[[nodiscard]] virtual auto GetCaretPos()const->ULONGLONG = 0;        //Caret position.
-		[[nodiscard]] virtual auto GetCharsExtraSpace()const->DWORD = 0;     //Get extra space between chars, in pixels.
-		[[nodiscard]] virtual auto GetCodepage()const->int = 0;              //Get current codepage ID.
-		[[nodiscard]] virtual auto GetColors()const->const HEXCOLORS & = 0;  //All current colors.
-		[[nodiscard]] virtual auto GetData(HEXSPAN hss)const->SpanByte = 0;  //Get pointer to data offset, no matter what mode HexCtrl works in.
-		[[nodiscard]] virtual auto GetDataSize()const->ULONGLONG = 0;        //Get currently set data size.
-		[[nodiscard]] virtual auto GetDateInfo()const->std::tuple<DWORD, wchar_t> = 0; //Get date format and separator info.
-		[[nodiscard]] virtual auto GetDlgItemHandle(EHexDlgItem eItem)const->HWND = 0; //Dialogs' items.
-		[[nodiscard]] virtual auto GetFont(bool fMain = true)const->LOGFONTW = 0; //Get current main/infobar font.
-		[[nodiscard]] virtual auto GetGroupSize()const->DWORD = 0;           //Retrieves current data grouping size.
-		[[nodiscard]] virtual auto GetMenuHandle()const->HMENU = 0;          //Context menu handle.
-		[[nodiscard]] virtual auto GetOffset(ULONGLONG ullOffset, bool fGetVirt)const->ULONGLONG = 0; //Offset<->VirtOffset conversion.
-		[[nodiscard]] virtual auto GetPagesCount()const->ULONGLONG = 0;      //Get count of pages.
-		[[nodiscard]] virtual auto GetPagePos()const->ULONGLONG = 0;         //Get a page number that the cursor stays at.
-		[[nodiscard]] virtual auto GetPageSize()const->DWORD = 0;            //Current page size.
-		[[nodiscard]] virtual auto GetScrollRatio()const->std::tuple<float, bool> = 0; //Get current scroll ratio.
-		[[nodiscard]] virtual auto GetSelection()const->VecSpan = 0;         //Get current selection.
-		[[nodiscard]] virtual auto GetTemplates()const->IHexTemplates* = 0;  //Get Templates interface.
-		[[nodiscard]] virtual auto GetUnprintableChar()const->wchar_t = 0;   //Get unprintable replacement character.
-		[[nodiscard]] virtual auto GetWndHandle(EHexWnd eWnd, bool fCreate = true)const->HWND = 0; //Get HWND of internal window/dialogs.
+		virtual bool Create(const HEXCREATE& hcs) = 0;                         //Main initialization method.
+		virtual bool CreateDialogCtrl(UINT uCtrlID, HWND hWndParent) = 0;      //Сreates custom dialog control.
+		virtual void Delete() = 0;                                             //IHexCtrl object deleter.
+		virtual void DestroyWindow() = 0;                                      //Destroy HexCtrl window.
+		virtual void ExecuteCmd(EHexCmd eCmd) = 0;                             //Execute a command within HexCtrl.
+		[[nodiscard]] virtual auto GetActualWidth()const -> int = 0;           //Working area actual width.
+		[[nodiscard]] virtual auto GetBookmarks() -> IHexBookmarks* = 0;       //Get Bookmarks interface.
+		[[nodiscard]] virtual auto GetCacheSize()const -> DWORD = 0;           //Returns VirtualData mode cache size.
+		[[nodiscard]] virtual auto GetCapacity()const -> DWORD = 0;            //Current capacity.
+		[[nodiscard]] virtual auto GetCaretPos()const -> ULONGLONG = 0;        //Caret position.
+		[[nodiscard]] virtual auto GetCharsExtraSpace()const -> DWORD = 0;     //Get extra space between chars, in pixels.
+		[[nodiscard]] virtual auto GetCodepage()const -> int = 0;              //Get current codepage ID.
+		[[nodiscard]] virtual auto GetColors()const -> const HEXCOLORS & = 0;  //All current colors.
+		[[nodiscard]] virtual auto GetData(HEXSPAN hss)const -> SpanByte = 0;  //Get pointer to data offset, no matter what mode HexCtrl works in.
+		[[nodiscard]] virtual auto GetDataSize()const -> ULONGLONG = 0;        //Get currently set data size.
+		[[nodiscard]] virtual auto GetDateInfo()const -> std::tuple<DWORD, wchar_t> = 0; //Get date format and separator info.
+		[[nodiscard]] virtual auto GetDlgItemHandle(EHexDlgItem eItem)const -> HWND = 0; //Dialogs' items.
+		[[nodiscard]] virtual auto GetFont(bool fMain = true)const -> LOGFONTW = 0; //Get current main/infobar font.
+		[[nodiscard]] virtual auto GetGroupSize()const -> DWORD = 0;           //Retrieves current data grouping size.
+		[[nodiscard]] virtual auto GetMenuHandle()const -> HMENU = 0;          //Context menu handle.
+		[[nodiscard]] virtual auto GetOffset(ULONGLONG ullOffset, bool fGetVirt)const -> ULONGLONG = 0; //Offset<->VirtOffset conversion.
+		[[nodiscard]] virtual auto GetPagesCount()const -> ULONGLONG = 0;      //Get count of pages.
+		[[nodiscard]] virtual auto GetPagePos()const -> ULONGLONG = 0;         //Get a page number that the cursor stays at.
+		[[nodiscard]] virtual auto GetPageSize()const -> DWORD = 0;            //Current page size.
+		[[nodiscard]] virtual auto GetScrollRatio()const -> std::tuple<float, bool> = 0; //Get current scroll ratio.
+		[[nodiscard]] virtual auto GetSelection()const -> VecSpan = 0;         //Get current selection.
+		[[nodiscard]] virtual auto GetTemplates() -> IHexTemplates* = 0;       //Get Templates interface.
+		[[nodiscard]] virtual auto GetUnprintableChar()const -> wchar_t = 0;   //Get unprintable replacement character.
+		[[nodiscard]] virtual auto GetWndHandle(EHexWnd eWnd, bool fCreate = true)const -> HWND = 0; //Get HWND of internal window/dialogs.
 		virtual void GoToOffset(ULONGLONG ullOffset, int iPosAt = 0) = 0;    //Go to the given offset.
 		[[nodiscard]] virtual bool HasInfoBar()const = 0;      //Is InfoBar currently visible?
 		[[nodiscard]] virtual bool HasSelection()const = 0;    //Does currently have any selection or not.
-		[[nodiscard]] virtual auto HitTest(POINT pt, bool fScreen = true)const->std::optional<HEXHITTEST> = 0; //HitTest given point.
+		[[nodiscard]] virtual auto HitTest(POINT pt, bool fScreen = true)const -> std::optional<HEXHITTEST> = 0; //HitTest given point.
 		[[nodiscard]] virtual bool IsCmdAvail(EHexCmd eCmd)const = 0; //Is given Cmd currently available (can be executed)?
 		[[nodiscard]] virtual bool IsCreated()const = 0;       //Shows whether HexCtrl is created or not.
 		[[nodiscard]] virtual bool IsDataSet()const = 0;       //Shows whether a data was set to HexCtrl or not.
+		[[nodiscard]] virtual bool IsHexCharsUpper()const = 0; //Is hex-chars printed in UPPER or lower case.
 		[[nodiscard]] virtual bool IsMutable()const = 0;       //Is data mutable or not.
 		[[nodiscard]] virtual bool IsOffsetAsHex()const = 0;   //Are offsets shown as Hex or as Decimal.
-		[[nodiscard]] virtual auto IsOffsetVisible(ULONGLONG ullOffset)const->HEXVISION = 0; //Ensures that the given offset is visible.
+		[[nodiscard]] virtual auto IsOffsetVisible(ULONGLONG ullOffset)const -> HEXVISION = 0; //Ensures that the given offset is visible.
 		[[nodiscard]] virtual bool IsVirtual()const = 0;       //Is working in VirtualData or default mode.		
 		virtual void ModifyData(const HEXMODIFY& hms) = 0;     //Main routine to modify data in IsMutable()==true mode.
 		[[nodiscard]] virtual bool PreTranslateMsg(MSG* pMsg) = 0;
@@ -460,6 +465,7 @@ namespace HEXCTRL {
 		virtual void SetDlgProperties(EHexWnd eWnd, std::uint64_t u64Flags) = 0; //Properties for the internal dialogs.
 		virtual void SetFont(const LOGFONTW& lf, bool fMain = true) = 0; //Set main/infobar font.
 		virtual void SetGroupSize(DWORD dwSize) = 0;           //Set data grouping size.
+		virtual void SetHexCharsCase(bool fUpper) = 0;         //Set printed hex-chars to an UPPER or lower case.
 		virtual void SetMutable(bool fMutable) = 0;            //Enable or disable mutable/editable mode.
 		virtual void SetOffsetMode(bool fHex) = 0;             //Set offset being shown as Hex or as Decimal.
 		virtual void SetPageSize(DWORD dwSize, std::wstring_view wsvName = L"Page") = 0; //Set page size and name to draw the lines in-between.
@@ -508,4 +514,5 @@ namespace HEXCTRL {
 
 //Manifest for the Comctl32.dll v6. Must be here, in header, to pick up v6 for the .dll as well.
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#pragma comment(lib, "Msimg32")
 }

@@ -296,11 +296,11 @@
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="README.md" />
-    <None Include="packages.config" />
     <None Include="SoftwareContentRegister.html" />
     <None Include="HexCtrl\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json">
       <Filter>HexCtrl\res</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">

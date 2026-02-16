@@ -316,9 +316,11 @@ void CFileView::ResizeListCtrl()
 					theApp.WriteInt(_T("Attr"), nAttr);
 
 					const int nName = rectClient.Width() - (nSize + nDate + nAttr);
+					hdItem.mask = HDI_WIDTH;
 					if (pHeaderCtrl.GetItem(0, &hdItem))
 					{
 						hdItem.cxy = nName;
+						hdItem.mask = HDI_WIDTH;
 						if (pHeaderCtrl.SetItem(0, &hdItem))
 						{
 							GetListCtrl().Invalidate();

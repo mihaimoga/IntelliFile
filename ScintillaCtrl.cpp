@@ -334,8 +334,11 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 16-03-2025 1. Updated class to work with Scintilla v5.5.7. New messages wrapped include: SCI_AUTOCSETIMAGESCALE,
                           SCI_AUTOCGETIMAGESCALE and SCI_SCROLLVERTICAL.
          PJN / 15-11-2025 1. Verified the code against Scintilla v5.5.8.
+         PJN / 28-02-2026 1. Updated copyright details.
+                          2. Updated class to work with Scintilla v5.6.0. New messages wrapped include: SCI_GETDRAGDROPENABLED 
+                          & SCI_SETDRAGDROPENABLED.
 
-Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2026 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -5646,6 +5649,16 @@ Line CScintillaCtrl::LineFromIndexPosition(_In_ Position pos, _In_ LineCharacter
 Position CScintillaCtrl::IndexPositionFromLine(_In_ Line line, _In_ LineCharacterIndexType lineCharacterIndex)
 {
 	return static_cast<Position>(Call(static_cast<UINT>(Message::IndexPositionFromLine), static_cast<WPARAM>(line), static_cast<LPARAM>(lineCharacterIndex)));
+}
+
+BOOL CScintillaCtrl::GetDragDropEnabled()
+{
+	return static_cast<BOOL>(Call(static_cast<UINT>(Message::GetDragDropEnabled), 0, 0));
+}
+
+void CScintillaCtrl::SetDragDropEnabled(_In_ BOOL dragDropEnabled)
+{
+	Call(static_cast<UINT>(Message::SetDragDropEnabled), static_cast<WPARAM>(dragDropEnabled), 0);
 }
 
 void CScintillaCtrl::StartRecord()

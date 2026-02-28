@@ -3,7 +3,7 @@ Module : ScintillaCtrl.h
 Purpose: Defines the interface for an MFC wrapper class for the Scintilla edit control (www.scintilla.org)
 Created: PJN / 19-03-2004
 
-Copyright (c) 2004 - 2025 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
+Copyright (c) 2004 - 2026 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
 All rights reserved.
 
@@ -88,7 +88,12 @@ namespace Scintilla
 		CScintillaCtrl() noexcept;
 		CScintillaCtrl(const CScintillaCtrl&) = delete;
 		CScintillaCtrl(CScintillaCtrl&&) = delete;
+#ifdef _AFX
+#pragma warning(suppress: 26443)
+		~CScintillaCtrl() override = default;
+#else
 		~CScintillaCtrl() = default;
+#endif //#ifdef _AFX
 
 		//Creation
 #ifdef _AFX
@@ -1033,6 +1038,8 @@ namespace Scintilla
 		void ReleaseLineCharacterIndex(_In_ LineCharacterIndexType lineCharacterIndex);
 		[[nodiscard]] Line LineFromIndexPosition(_In_ Position pos, _In_ LineCharacterIndexType lineCharacterIndex);
 		[[nodiscard]] Position IndexPositionFromLine(_In_ Line line, _In_ LineCharacterIndexType lineCharacterIndex);
+		[[nodiscard]] BOOL GetDragDropEnabled();
+		void SetDragDropEnabled(_In_ BOOL dragDropEnabled);
 		void StartRecord();
 		void StopRecord();
 		[[nodiscard]] int GetLexer();

@@ -301,6 +301,7 @@
       <Filter>HexCtrl\res</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="IntelliFile.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">
@@ -596,6 +597,7 @@
     <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp">
       <Filter>HexCtrl\res</Filter>
     </Image>
+    <Image Include="IntelliFile.png" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />

@@ -6,8 +6,8 @@
 ****************************************************************************************/
 module;
 #include <SDKDDKVer.h>
-#include "../res/HexCtrlRes.h"
 #include "../HexCtrl.h"
+#include "res/HexCtrlRes.h"
 #include <Windows.h>
 #include <commctrl.h>
 #include <format>
@@ -40,6 +40,7 @@ namespace HEXCTRL::INTERNAL {
 		auto OnCommand(const MSG& msg) -> INT_PTR;
 		auto OnDestroy() -> INT_PTR;
 		auto OnInitDialog(const MSG& msg) -> INT_PTR;
+		auto OnMouseActivate(const MSG& msg) -> INT_PTR;
 		void OnOK();
 		void UpdateComboMode();
 	private:
@@ -110,6 +111,7 @@ auto CHexDlgGoTo::ProcessMsg(const MSG& msg)->INT_PTR
 	case WM_COMMAND: return OnCommand(msg);
 	case WM_DESTROY: return OnDestroy();
 	case WM_INITDIALOG: return OnInitDialog(msg);
+	case WM_MOUSEACTIVATE: return OnMouseActivate(msg);
 	default:
 		return 0;
 	}
@@ -230,16 +232,12 @@ bool CHexDlgGoTo::IsNoEsc()const
 
 auto CHexDlgGoTo::OnActivate(const MSG& msg)->INT_PTR
 {
-	const auto pHexCtrl = GetHexCtrl();
-	if (pHexCtrl == nullptr || !pHexCtrl->IsCreated() || !pHexCtrl->IsDataSet())
-		return FALSE;
-
-	const auto nState = LOWORD(msg.wParam);
-	if (nState == WA_ACTIVE || nState == WA_CLICKACTIVE) {
+	if (const auto pHex = GetHexCtrl();
+		pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet() && LOWORD(msg.wParam) == WA_ACTIVE) {
 		UpdateComboMode();
 	}
 
-	return FALSE; //Default handler.
+	return 0;
 }
 
 void CHexDlgGoTo::OnCancel()
@@ -300,6 +298,15 @@ auto CHexDlgGoTo::OnInitDialog(const MSG& msg)->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgGoTo::OnMouseActivate([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	if (const auto pHex = GetHexCtrl(); pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet()) {
+		UpdateComboMode();
+	}
+
+	return MA_ACTIVATE;
+}
+
 void CHexDlgGoTo::OnOK()
 {
 	GoTo(true);
@@ -314,7 +321,7 @@ void CHexDlgGoTo::UpdateComboMode()
 	using enum EGoMode;
 
 	if (fShouldHavePages != fHasPages) {
-		m_WndCmbMode.SetRedraw(FALSE);
+		m_WndCmbMode.SetRedraw(false);
 		if (fShouldHavePages) {
 			auto iIndex = m_WndCmbMode.AddString(L"Page");
 			m_WndCmbMode.SetItemData(iIndex, static_cast<DWORD_PTR>(MODE_PAGE));
@@ -336,7 +343,7 @@ void CHexDlgGoTo::UpdateComboMode()
 				m_fRepeat = false;
 			}
 		}
-		m_WndCmbMode.SetRedraw(TRUE);
+		m_WndCmbMode.SetRedraw(true);
 		m_WndCmbMode.RedrawWindow();
 	}
 }

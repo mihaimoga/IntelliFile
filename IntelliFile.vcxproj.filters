@@ -22,22 +22,16 @@
       <Extensions>htm;html</Extensions>
     </Filter>
     <Filter Include="HexCtrl">
-      <UniqueIdentifier>{946659a3-2208-446b-8846-02862c40ad01}</UniqueIdentifier>
+      <UniqueIdentifier>{777aa984-b366-449f-95ac-9346bd441eb1}</UniqueIdentifier>
     </Filter>
     <Filter Include="HexCtrl\src">
-      <UniqueIdentifier>{47ab6957-46b3-44c1-846e-373806f3ca26}</UniqueIdentifier>
+      <UniqueIdentifier>{4b49c5fa-d07a-4393-b03d-8561675f315e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HexCtrl\res">
-      <UniqueIdentifier>{45f36e07-45c4-4e2c-ba54-78fa6996b666}</UniqueIdentifier>
+    <Filter Include="HexCtrl\src\res">
+      <UniqueIdentifier>{29410385-fe3b-489e-9a60-412af3d34313}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HexCtrl\dep">
-      <UniqueIdentifier>{d84cd87d-7932-4bfc-8952-c1b719f11bf2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HexCtrl\dep\ListEx">
-      <UniqueIdentifier>{16795f42-a7ef-4a2d-984c-0ac55e05ffca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="HexCtrl\dep\StrToNum">
-      <UniqueIdentifier>{ad107ca0-dc9c-4e39-a10f-3daf67c04bfe}</UniqueIdentifier>
+    <Filter Include="HexCtrl\src\dep">
+      <UniqueIdentifier>{31c94a4f-3072-433d-920e-358319588aef}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -297,11 +291,11 @@
     <None Include="CONTRIBUTING.md" />
     <None Include="README.md" />
     <None Include="SoftwareContentRegister.html" />
-    <None Include="HexCtrl\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json">
-      <Filter>HexCtrl\res</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="IntelliFile.html" />
+    <None Include="HexCtrl\HexCtrl\src\res\IDJ_HEXCTRL_KEYBIND.json">
+      <Filter>HexCtrl\src\res</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">
@@ -406,8 +400,8 @@
     <ClInclude Include="HexCtrl\HexCtrl\HexCtrl.h">
       <Filter>HexCtrl</Filter>
     </ClInclude>
-    <ClInclude Include="HexCtrl\HexCtrl\res\HexCtrlRes.h">
-      <Filter>HexCtrl\res</Filter>
+    <ClInclude Include="HexCtrl\HexCtrl\src\res\HexCtrlRes.h">
+      <Filter>HexCtrl\src\res</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -540,19 +534,19 @@
     <ClCompile Include="HexCtrl\HexCtrl\src\CHexCtrl.ixx">
       <Filter>HexCtrl\src</Filter>
     </ClCompile>
-    <ClCompile Include="HexCtrl\HexCtrl\dep\ListEx\ListEx.ixx">
-      <Filter>HexCtrl\dep\ListEx</Filter>
+    <ClCompile Include="HexCtrl\HexCtrl\src\dep\HexCtrl_ListEx.ixx">
+      <Filter>HexCtrl\src\dep</Filter>
     </ClCompile>
-    <ClCompile Include="HexCtrl\HexCtrl\dep\StrToNum\StrToNum.ixx">
-      <Filter>HexCtrl\dep\StrToNum</Filter>
+    <ClCompile Include="HexCtrl\HexCtrl\src\dep\HexCtrl_StrToNum.ixx">
+      <Filter>HexCtrl\src\dep</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="IntelliFile.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-    <ResourceCompile Include="HexCtrl\HexCtrl\res\HexCtrl.rc">
-      <Filter>HexCtrl\res</Filter>
+    <ResourceCompile Include="HexCtrl\HexCtrl\src\res\HexCtrl.rc">
+      <Filter>HexCtrl\src\res</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
@@ -567,37 +561,34 @@
     <Image Include="res\ribbon.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_BKMS.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_DATAINTERP.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_FONTCHOOSE.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_GROUP.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_LOGO.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_MODIFY.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
-    <Image Include="HexCtrl\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp">
-      <Filter>HexCtrl\res</Filter>
-    </Image>
     <Image Include="IntelliFile.png" />
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_BKMS.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_FONTCHOOSE.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_GROUP.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_LOGO.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_MODIFY.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
+    <Image Include="HexCtrl\HexCtrl\src\res\IDB_HEXCTRL_SEARCH.bmp">
+      <Filter>HexCtrl\src\res</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(MSBuildThisFileDirectory)..\..\natvis\wil.natvis" />

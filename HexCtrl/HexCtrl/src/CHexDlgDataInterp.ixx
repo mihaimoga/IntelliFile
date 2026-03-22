@@ -6,8 +6,8 @@
 ****************************************************************************************/
 module;
 #include <SDKDDKVer.h>
-#include "../res/HexCtrlRes.h"
 #include "../HexCtrl.h"
+#include "res/HexCtrlRes.h"
 #include <Windows.h>
 #include <commctrl.h>
 #include <bit>
@@ -23,6 +23,7 @@ namespace HEXCTRL::INTERNAL {
 		void ClearData();
 		void CreateDlg()const;
 		void DestroyDlg();
+		void DisableHighlight();
 		[[nodiscard]] auto GetDlgItemHandle(EHexDlgItem eItem)const -> HWND;
 		[[nodiscard]] auto GetHighlightSize()const -> DWORD;
 		[[nodiscard]] auto GetHWND()const -> HWND;
@@ -32,12 +33,13 @@ namespace HEXCTRL::INTERNAL {
 		[[nodiscard]] auto ProcessMsg(const MSG& msg) -> INT_PTR;
 		void SetDlgProperties(std::uint64_t u64Flags);
 		void ShowWindow(int iCmdShow);
-		void UpdateData();
+		void UpdateData(); //Public method with window visibility check.
 	private:
 		struct LISTDATA; union UMSDOSDateTime; union UDTTM; enum class EName : std::uint8_t;
 		[[nodiscard]] auto GetCurrFieldName()const -> EName;
 		[[nodiscard]] auto GetCurrFieldSize()const -> std::uint8_t;
 		[[nodiscard]] auto GetFieldSize(EName eName)const -> std::uint8_t;
+		[[nodiscard]] auto GetHexCtrl()const -> IHexCtrl*;
 		[[nodiscard]] auto GetListData(EName eName) -> LISTDATA*; //Non-const overload.
 		[[nodiscard]] auto GetListData(EName eName)const -> const LISTDATA*; //Const overload.
 		[[nodiscard]] auto GetListData(int iItem) -> LISTDATA*;
@@ -51,9 +53,12 @@ namespace HEXCTRL::INTERNAL {
 		auto OnClose() -> INT_PTR;
 		auto OnCommand(const MSG& msg) -> INT_PTR;
 		auto OnDestroy() -> INT_PTR;
+		auto OnDPIChanged(const MSG& msg) -> INT_PTR;
 		auto OnDrawItem(const MSG& msg) -> INT_PTR;
+		auto OnGetDPIScaledSize(const MSG& msg) -> INT_PTR;
 		auto OnInitDialog(const MSG& msg) -> INT_PTR;
 		auto OnMeasureItem(const MSG& msg) -> INT_PTR;
+		auto OnMouseActivate(const MSG& msg) -> INT_PTR;
 		auto OnNotify(const MSG& msg) -> INT_PTR;
 		void OnNotifyListEditBegin(NMHDR* pNMHDR);
 		void OnNotifyListGetColor(NMHDR* pNMHDR);
@@ -104,6 +109,8 @@ namespace HEXCTRL::INTERNAL {
 		void ShowValueASCII(SpanCByte spn);
 		void ShowValueUTF8(SpanCByte spn);
 		void ShowValueUTF16(SpanCByte spn);
+		void UpdateDateTimeFormat();
+		void UpdateListData(); //Internal method without any window checks.
 	private:
 		HINSTANCE m_hInstRes { };
 		GDIUT::CWnd m_Wnd;
@@ -197,6 +204,14 @@ void CHexDlgDataInterp::DestroyDlg()
 	}
 }
 
+void CHexDlgDataInterp::DisableHighlight()
+{
+	if (HasHighlight()) {
+		SetHighlightSize(0);
+		RedrawHexCtrl();
+	}
+}
+
 auto CHexDlgDataInterp::GetDlgItemHandle(EHexDlgItem eItem)const->HWND
 {
 	if (!m_Wnd.IsWindow()) {
@@ -252,9 +267,12 @@ auto CHexDlgDataInterp::ProcessMsg(const MSG& msg)->INT_PTR
 	case WM_COMMAND: return OnCommand(msg);
 	case WM_CLOSE: return OnClose();
 	case WM_DESTROY: return OnDestroy();
+	case WM_DPICHANGED: return OnDPIChanged(msg);
 	case WM_DRAWITEM: return OnDrawItem(msg);
+	case WM_GETDPISCALEDSIZE: return OnGetDPIScaledSize(msg);
 	case WM_INITDIALOG: return OnInitDialog(msg);
 	case WM_MEASUREITEM: return OnMeasureItem(msg);
+	case WM_MOUSEACTIVATE: return OnMouseActivate(msg);
 	case WM_NOTIFY: return OnNotify(msg);
 	case WM_SIZE: return OnSize(msg);
 	default:
@@ -274,7 +292,6 @@ void CHexDlgDataInterp::ShowWindow(int iCmdShow)
 	}
 
 	m_Wnd.ShowWindow(iCmdShow);
-	UpdateData();
 }
 
 void CHexDlgDataInterp::UpdateData()
@@ -283,42 +300,7 @@ void CHexDlgDataInterp::UpdateData()
 		return;
 	}
 
-	if (!m_pHexCtrl->IsDataSet()) {
-		ClearData();
-		return;
-	}
-
-	const auto ullOffset = m_ullOffset = m_pHexCtrl->GetCaretPos();
-	const auto ullDataSize = m_pHexCtrl->GetDataSize();
-	const auto dwlGetSize = ullOffset + 16 <= ullDataSize ? 16U : (ullOffset + 8 <= ullDataSize ?
-		8U : (ullOffset + 4 <= ullDataSize ? 4U : (ullOffset + 3 <= ullDataSize ?
-			3U : (ullOffset + 2 <= ullDataSize ? 2U : (ullOffset + 1 <= ullDataSize ? 1U : 0U)))));
-	const auto spnData = m_pHexCtrl->GetData({ .ullOffset { ullOffset }, .ullSize { dwlGetSize } });
-	ShowValueInt8(spnData);
-	ShowValueUInt8(spnData);
-	ShowValueInt16(spnData);
-	ShowValueUInt16(spnData);
-	ShowValueInt32(spnData);
-	ShowValueUInt32(spnData);
-	ShowValueFloat(spnData);
-	ShowValueTime32(spnData);
-	ShowValueMSDOSTIME(spnData);
-	ShowValueMSDTTMTIME(spnData);
-	ShowValueInt64(spnData);
-	ShowValueUInt64(spnData);
-	ShowValueDouble(spnData);
-	ShowValueTime64(spnData);
-	ShowValueFILETIME(spnData);
-	ShowValueOLEDATETIME(spnData);
-	ShowValueJAVATIME(spnData);
-	ShowValueSYSTEMTIME(spnData);
-	ShowValueGUID(spnData);
-	ShowValueGUIDTIME(spnData);
-	ShowValueASCII(spnData);
-	ShowValueUTF8(spnData);
-	ShowValueUTF16(spnData);
-	ShowValueBinary();
-	m_ListEx.RedrawWindow();
+	UpdateListData();
 }
 
 
@@ -337,6 +319,11 @@ auto CHexDlgDataInterp::GetCurrFieldSize()const->std::uint8_t
 auto CHexDlgDataInterp::GetFieldSize(EName eName)const->std::uint8_t
 {
 	return GetListData(eName)->u8Size;
+}
+
+auto CHexDlgDataInterp::GetHexCtrl()const->IHexCtrl*
+{
+	return m_pHexCtrl;
 }
 
 auto CHexDlgDataInterp::GetListData(EName eName)->LISTDATA*
@@ -371,24 +358,13 @@ bool CHexDlgDataInterp::IsShowAsHex()const
 
 auto CHexDlgDataInterp::OnActivate(const MSG& msg)->INT_PTR
 {
-	if (m_pHexCtrl == nullptr || !m_pHexCtrl->IsCreated())
-		return FALSE;
-
-	const auto nState = LOWORD(msg.wParam);
-	if (nState == WA_ACTIVE || nState == WA_CLICKACTIVE) {
-		const auto [dwFormat, wchSepar] = m_pHexCtrl->GetDateInfo();
-		m_dwDateFormat = dwFormat;
-		m_wchDateSepar = wchSepar;
-		const auto wstrTitle = L"Date/Time format is: " + ut::GetDateFormatString(m_dwDateFormat, m_wchDateSepar);
-		m_Wnd.SetWndText(wstrTitle); //Update dialog title to reflect current date format.
-		UpdateData();
-	}
-	else {
-		SetHighlightSize(0); //Remove data highlighting when dialog window is inactive.
-		RedrawHexCtrl();
+	if (const auto pHex = GetHexCtrl();
+		pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet() && LOWORD(msg.wParam) == WA_ACTIVE) {
+		UpdateDateTimeFormat();
+		UpdateListData();
 	}
 
-	return FALSE; //Default handler.
+	return 0;
 }
 
 void CHexDlgDataInterp::OnCancel()
@@ -401,12 +377,18 @@ void CHexDlgDataInterp::OnCancel()
 
 void CHexDlgDataInterp::OnCheckHex()
 {
-	UpdateData();
+	UpdateListData();
+
+	//To ensure that data is highlighted in the HexCtrl, even if check-box was clicked on inactive dialog.
+	SetHighlightSize(GetCurrFieldSize());
+	RedrawHexCtrl();
 }
 
 void CHexDlgDataInterp::OnCheckBigEndian()
 {
-	UpdateData();
+	UpdateListData();
+
+	//To ensure that data is highlighted in the HexCtrl, even if check-box was clicked on inactive dialog.
 	SetHighlightSize(GetCurrFieldSize());
 	RedrawHexCtrl();
 }
@@ -443,6 +425,12 @@ auto CHexDlgDataInterp::OnDestroy()->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgDataInterp::OnDPIChanged([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	m_DynLayout.Enable(true);
+	return 0;
+}
+
 auto CHexDlgDataInterp::OnDrawItem(const MSG& msg)->INT_PTR
 {
 	const auto pDIS = reinterpret_cast<LPDRAWITEMSTRUCT>(msg.lParam);
@@ -451,6 +439,17 @@ auto CHexDlgDataInterp::OnDrawItem(const MSG& msg)->INT_PTR
 	}
 
 	return TRUE;
+}
+
+auto CHexDlgDataInterp::OnGetDPIScaledSize([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	//This message is sent to top-level windows with a DPI_AWARENESS_CONTEXT
+	//of Per Monitor v2 before a WM_DPICHANGED message is sent.
+	//We use it to temporarily disable all dynamic layout resizes,
+	//to re-enable it later in the WM_DPICHANGED handler.
+
+	m_DynLayout.Enable(false);
+	return 0;
 }
 
 auto CHexDlgDataInterp::OnInitDialog(const MSG& msg)->INT_PTR
@@ -482,8 +481,9 @@ auto CHexDlgDataInterp::OnInitDialog(const MSG& msg)->INT_PTR
 
 	m_ListEx.Create({ .hWndParent { m_Wnd }, .uID { IDC_HEXCTRL_DATAINTERP_LIST }, .fDialogCtrl { true } });
 	m_ListEx.SetExtendedStyle(LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT);
-	m_ListEx.InsertColumn(0, L"Data type", LVCFMT_LEFT, 143);
-	m_ListEx.InsertColumn(1, L"Value", LVCFMT_LEFT, 240, -1, LVCFMT_LEFT, true);
+	const auto flDPIScale = GDIUT::GetDPIScaleForHWND(m_ListEx);
+	m_ListEx.InsertColumn(0, L"Data type", LVCFMT_LEFT, std::lround(143 * flDPIScale));
+	m_ListEx.InsertColumn(1, L"Value", LVCFMT_LEFT, std::lround(240 * flDPIScale), -1, LVCFMT_LEFT, true);
 	m_ListEx.SetItemCountEx(static_cast<int>(m_vecData.size()), LVSICF_NOSCROLL);
 
 	m_DynLayout.SetHost(m_Wnd);
@@ -491,6 +491,9 @@ auto CHexDlgDataInterp::OnInitDialog(const MSG& msg)->INT_PTR
 	m_DynLayout.AddItem(IDC_HEXCTRL_DATAINTERP_CHK_HEX, GDIUT::CDynLayout::MoveVert(100), GDIUT::CDynLayout::SizeNone());
 	m_DynLayout.AddItem(IDC_HEXCTRL_DATAINTERP_CHK_BE, GDIUT::CDynLayout::MoveVert(100), GDIUT::CDynLayout::SizeNone());
 	m_DynLayout.Enable(true);
+
+	UpdateDateTimeFormat();
+	UpdateListData();
 
 	return TRUE;
 }
@@ -503,6 +506,16 @@ auto CHexDlgDataInterp::OnMeasureItem(const MSG& msg)->INT_PTR
 	}
 
 	return TRUE;
+}
+
+auto CHexDlgDataInterp::OnMouseActivate([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	if (const auto pHex = GetHexCtrl(); pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet()) {
+		UpdateDateTimeFormat();
+		UpdateListData();
+	}
+
+	return MA_ACTIVATE;
 }
 
 auto CHexDlgDataInterp::OnNotify(const MSG& msg)->INT_PTR
@@ -697,7 +710,7 @@ void CHexDlgDataInterp::OnNotifyListSetData(NMHDR* pNMHDR)
 		::MessageBoxW(m_Wnd, L"Wrong data format or out of range.", L"Data error...", MB_ICONERROR);
 	}
 
-	UpdateData();
+	UpdateListData();
 	SetHighlightSize(GetCurrFieldSize());
 	RedrawHexCtrl();
 }
@@ -1759,4 +1772,55 @@ void CHexDlgDataInterp::ShowValueUTF16(SpanCByte spn)
 	pListUTF16->wstrValue = std::format(L"{} (U+{:04X})", buff, u64CP);
 	pListUTF16->fAllowEdit = m_pHexCtrl->IsMutable();
 	pListUTF16->u8Size = u8UTF16Bytes;
+}
+
+void CHexDlgDataInterp::UpdateDateTimeFormat()
+{
+	const auto [dwFormat, wchSepar] = GetHexCtrl()->GetDateInfo();
+	m_dwDateFormat = dwFormat;
+	m_wchDateSepar = wchSepar;
+	const auto wstrTitle = L"Date/Time format is: " + ut::GetDateFormatString(m_dwDateFormat, m_wchDateSepar);
+	m_Wnd.SetWndText(wstrTitle); //Update dialog title to reflect current date format.
+	m_ListEx.RedrawWindow();
+}
+
+void CHexDlgDataInterp::UpdateListData()
+{
+	const auto pHex = GetHexCtrl();
+	if (!pHex->IsDataSet()) {
+		ClearData();
+		return;
+	}
+
+	const auto ullOffset = m_ullOffset = pHex->GetCaretPos();
+	const auto ullDataSize = pHex->GetDataSize();
+	const auto dwlGetSize = ullOffset + 16 <= ullDataSize ? 16U : (ullOffset + 8 <= ullDataSize ?
+		8U : (ullOffset + 4 <= ullDataSize ? 4U : (ullOffset + 3 <= ullDataSize ?
+			3U : (ullOffset + 2 <= ullDataSize ? 2U : (ullOffset + 1 <= ullDataSize ? 1U : 0U)))));
+	const auto spnData = pHex->GetData({ .ullOffset { ullOffset }, .ullSize { dwlGetSize } });
+	ShowValueInt8(spnData);
+	ShowValueUInt8(spnData);
+	ShowValueInt16(spnData);
+	ShowValueUInt16(spnData);
+	ShowValueInt32(spnData);
+	ShowValueUInt32(spnData);
+	ShowValueFloat(spnData);
+	ShowValueTime32(spnData);
+	ShowValueMSDOSTIME(spnData);
+	ShowValueMSDTTMTIME(spnData);
+	ShowValueInt64(spnData);
+	ShowValueUInt64(spnData);
+	ShowValueDouble(spnData);
+	ShowValueTime64(spnData);
+	ShowValueFILETIME(spnData);
+	ShowValueOLEDATETIME(spnData);
+	ShowValueJAVATIME(spnData);
+	ShowValueSYSTEMTIME(spnData);
+	ShowValueGUID(spnData);
+	ShowValueGUIDTIME(spnData);
+	ShowValueASCII(spnData);
+	ShowValueUTF8(spnData);
+	ShowValueUTF16(spnData);
+	ShowValueBinary();
+	m_ListEx.RedrawWindow();
 }

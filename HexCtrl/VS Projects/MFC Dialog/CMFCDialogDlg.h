@@ -15,13 +15,13 @@ private:
 	bool OnHexGetColor(HEXCOLORINFO& hci)override;
 	BOOL OnInitDialog()override;
 	void DoDataExchange(CDataExchange* pDX)override;
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnSetRndData();
 	afx_msg void OnBnFileOpen();
 	afx_msg void OnBnClearData();
 	afx_msg void OnClose();
+	auto OnDPIChanged(WPARAM wParam, LPARAM lParam) -> LRESULT;
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	auto OnGetDPIScaledSize(WPARAM wParam, LPARAM lParam) -> LRESULT;
 	BOOL OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)override;
 	afx_msg void OnBnPopup();
 	afx_msg void OnChkRW();
@@ -40,7 +40,6 @@ private:
 	IHexCtrlPtr m_pHexPopup { CreateHexCtrl() };
 	HEXDATA m_hds;
 	std::unique_ptr<std::byte[]> m_pData;
-	HICON m_hIcon;
 	bool m_fFileOpen { false };
 	HANDLE m_hFile { };
 	HANDLE m_hMapObject { };

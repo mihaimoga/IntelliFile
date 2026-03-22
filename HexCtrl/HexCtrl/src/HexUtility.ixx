@@ -23,8 +23,10 @@ module;
 #include <vector>
 export module HEXCTRL:HexUtility;
 
-export import StrToNum;
-export import ListEx;
+#pragma comment(lib, "MSImg32") //AlphaBlend.
+
+export import HexCtrl_StrToNum;
+export import HexCtrl_ListEx;
 
 namespace HEXCTRL::INTERNAL::ut { //Utility methods and stuff.
 	//Time calculation constants and structs.
@@ -282,9 +284,9 @@ namespace HEXCTRL::INTERNAL::ut { //Utility methods and stuff.
 
 			//Extract two current wchars and pass it to StringToNum as wstring.
 			const std::size_t nOffsetCurr = it - wsv.begin();
-			const auto nSize = nOffsetCurr + 2 <= wsv.size() ? 2 : 1;
-			if (const auto optNumber = stn::StrToUInt8(wsv.substr(nOffsetCurr, nSize), 16); optNumber) {
-				it += nSize;
+			const auto iSize = nOffsetCurr + 2 <= wsv.size() ? 2 : 1;
+			if (const auto optNumber = stn::StrToUInt8(wsv.substr(nOffsetCurr, iSize), 16); optNumber) {
+				it += iSize;
 				strHexTmp += *optNumber;
 			}
 			else
@@ -446,26 +448,14 @@ namespace HEXCTRL::INTERNAL::ut { //Utility methods and stuff.
 		return hInst;
 	};
 
-	//Get font points size from the size in pixels.
-	[[nodiscard]] constexpr auto FontPointsFromPixels(float flSizePixels) -> float {
-		constexpr auto flPointsInPixel = 72.F / USER_DEFAULT_SCREEN_DPI;
-		return flSizePixels * flPointsInPixel;
-	}
-
-	//Get font pixels size from the size in points.
-	[[nodiscard]] constexpr auto FontPixelsFromPoints(float flSizePoints) -> float {
-		constexpr auto flPixelsInPoint = USER_DEFAULT_SCREEN_DPI / 72.F;
-		return flSizePoints * flPixelsInPoint;
-	}
-
 	//Replicates GET_X_LPARAM macro from windowsx.h.
 	[[nodiscard]] constexpr int GetXLPARAM(LPARAM lParam) {
-		return (static_cast<int>(static_cast<short>(static_cast<WORD>((static_cast<DWORD_PTR>(lParam)) & 0xFFFFU))));
+		return static_cast<int>(static_cast<short>(static_cast<DWORD_PTR>(lParam) & 0xFFFFU));
 	}
 
 	//Replicates GET_Y_LPARAM macro from windowsx.h.
 	[[nodiscard]] constexpr int GetYLPARAM(LPARAM lParam) {
-		return GetXLPARAM(lParam >> 16);
+		return GetXLPARAM(static_cast<DWORD_PTR>(lParam) >> 16);
 	}
 }
 
@@ -531,14 +521,31 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		return 0;
 	}
 
-	[[nodiscard]] auto GetDPIScaleForHWND(HWND hWnd) -> float {
-		const auto hDC = ::GetDC(hWnd);
-		const auto iLOGPIXELSY = ::GetDeviceCaps(hDC, LOGPIXELSY);
-		::ReleaseDC(hWnd, hDC);
-		return static_cast<float>(iLOGPIXELSY) / USER_DEFAULT_SCREEN_DPI; //High-DPI scale factor for window.
+	[[nodiscard]] auto GetDPIForHWND(HWND hWnd) -> UINT {
+		//const auto hDC = ::GetDC(hWnd);
+		//const auto iLOGPIXELSY = ::GetDeviceCaps(hDC, LOGPIXELSY);
+		//::ReleaseDC(hWnd, hDC);
+		const auto iLOGPIXELSY = ::GetDpiForWindow(hWnd); //Available only since "Windows 10, version 1607".
+		return iLOGPIXELSY;
 	}
 
-	//iDirection: -2:LEFT, 1:UP, 2:RIGHT, -1:DOWN.
+	[[nodiscard]] auto GetDPIScaleForHWND(HWND hWnd) -> float {
+		return static_cast<float>(GetDPIForHWND(hWnd)) / USER_DEFAULT_SCREEN_DPI; //High-DPI scale factor for window.
+	}
+
+	//Get GDI font size in points from the size in pixels.
+	[[nodiscard]] auto FontPointsFromPixels(long iSizePixels) -> float {
+		constexpr auto flPointsInPixel = 72.F / USER_DEFAULT_SCREEN_DPI;
+		return std::abs(iSizePixels) * flPointsInPixel;
+	}
+
+	//Get GDI font size in pixels from the size in points.
+	[[nodiscard]] auto FontPixelsFromPoints(float flSizePoints) -> long {
+		constexpr auto flPixelsInPoint = USER_DEFAULT_SCREEN_DPI / 72.F;
+		return std::lround(flSizePoints * flPixelsInPoint);
+	}
+
+	//iDirection: 1:UP, -1:DOWN, -2:LEFT, 2:RIGHT.
 	[[nodiscard]] auto CreateArrowBitmap(HDC hDC, DWORD dwWidth, DWORD dwHeight, int iDirection, COLORREF clrBk, COLORREF clrArrow) -> HBITMAP {
 		//Make the width and height even numbers, to make it easier drawing an isosceles triangle.
 		const int iWidth = dwWidth - (dwWidth % 2);
@@ -588,86 +595,55 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		return hBMPArrow;
 	}
 
-	//Get 32bit ARGB bitmap with premultiplied alpha from HICON.
-	[[nodiscard]] auto BitmapFromIcon(HICON hIcon) -> HBITMAP {
-		ICONINFO ii;
-		if (::GetIconInfo(hIcon, &ii) == FALSE)
-			return { };
-
-		::DeleteObject(ii.hbmMask); //Deleting icon's BW mask bitmap.
-		BITMAP bmIconClr;
-		::GetObjectW(ii.hbmColor, sizeof(BITMAP), &bmIconClr);
-		const auto iBmpHeight = std::abs(bmIconClr.bmHeight);
-		const auto iBmpWidth = std::abs(bmIconClr.bmWidth);
-		BITMAPINFO bi { .bmiHeader { .biSize { sizeof(BITMAPINFOHEADER) }, .biWidth { iBmpWidth },
-			.biHeight { iBmpHeight }, .biPlanes { 1 }, .biBitCount { 32 }, .biCompression { BI_RGB } } };
-		RGBQUAD* pARGB { }; //Newly created DI bitmap's data pointer.
-		const auto hDCMem = ::CreateCompatibleDC(nullptr);
-		const auto hBmp32 = ::CreateDIBSection(hDCMem, &bi, DIB_RGB_COLORS, reinterpret_cast<void**>(&pARGB), nullptr, 0);
-		::GetDIBits(hDCMem, ii.hbmColor, 0, iBmpHeight, pARGB, &bi, DIB_RGB_COLORS);
-		::DeleteDC(hDCMem);
-		::DeleteObject(ii.hbmColor);
-
-		if (hBmp32 == nullptr || pARGB == nullptr)
-			return { };
-
-		const auto dwSizePx = static_cast<DWORD>(iBmpHeight * iBmpWidth);
-		if (bmIconClr.bmBitsPixel == 32) { //Premultiply alpha for all channels.
-			for (auto i = 0U; i < dwSizePx; ++i) {
-				pARGB[i].rgbBlue = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbBlue) * pARGB[i].rgbReserved / 255);
-				pARGB[i].rgbGreen = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbGreen) * pARGB[i].rgbReserved / 255);
-				pARGB[i].rgbRed = static_cast<BYTE>(static_cast<DWORD>(pARGB[i].rgbRed) * pARGB[i].rgbReserved / 255);
-			}
-		}
-		else { //If the icon is not 32bit, merely set bitmap alpha channel to fully opaque.
-			for (auto i = 0U; i < dwSizePx; ++i) {
-				pARGB[i].rgbReserved = 255;
-			}
-		}
-
-		return hBmp32;
-	}
-
 	class CDynLayout final {
 	public:
-		//Ratio settings, for how much to move or resize an item when parent is resized.
-		struct ItemRatio { float m_flXRatio { }; float m_flYRatio { }; };
+		//Ratio settings, for how much to move or to resize child item when parent is resized.
+		struct ItemRatio {
+			[[nodiscard]] bool IsNull()const { return flXRatio == 0.F && flYRatio == 0.F; };
+			float flXRatio { }; float flYRatio { };
+		};
 		struct MoveRatio : public ItemRatio { }; //To differentiate move from size in the AddItem.
 		struct SizeRatio : public ItemRatio { };
 
+		CDynLayout() = default;
+		CDynLayout(HWND hWndHost) : m_hWndHost(hWndHost) { }
 		void AddItem(int iIDItem, MoveRatio move, SizeRatio size);
+		void AddItem(HWND hWndItem, MoveRatio move, SizeRatio size);
 		void Enable(bool fTrack);
-		void OnSize(int iWidth, int iHeight)const; //Should be hooked into the host window WM_SIZE handler.
+		bool LoadFromResource(HINSTANCE hInstRes, const wchar_t* pwszNameResource);
+		bool LoadFromResource(HINSTANCE hInstRes, UINT uNameResource);
+		void OnSize(int iWidth, int iHeight)const; //Should be hooked into the host window's WM_SIZE handler.
 		void RemoveAll() { m_vecItems.clear(); }
 		void SetHost(HWND hWnd) { assert(hWnd != nullptr); m_hWndHost = hWnd; }
 
 		//Static helper methods to use in the AddItem.
 		[[nodiscard]] static MoveRatio MoveNone() { return { }; }
 		[[nodiscard]] static MoveRatio MoveHorz(int iXRatio) {
-			iXRatio = std::clamp(iXRatio, 0, 100); return { { .m_flXRatio { iXRatio / 100.F } } };
+			return { { .flXRatio { ToFlRatio(iXRatio) } } };
 		}
 		[[nodiscard]] static MoveRatio MoveVert(int iYRatio) {
-			iYRatio = std::clamp(iYRatio, 0, 100); return { { .m_flYRatio { iYRatio / 100.F } } };
+			return { { .flYRatio { ToFlRatio(iYRatio) } } };
 		}
 		[[nodiscard]] static MoveRatio MoveHorzAndVert(int iXRatio, int iYRatio) {
-			iXRatio = std::clamp(iXRatio, 0, 100); iYRatio = std::clamp(iYRatio, 0, 100);
-			return { { .m_flXRatio { iXRatio / 100.F }, .m_flYRatio { iYRatio / 100.F } } };
+			return { { .flXRatio { ToFlRatio(iXRatio) }, .flYRatio { ToFlRatio(iYRatio) } } };
 		}
 		[[nodiscard]] static SizeRatio SizeNone() { return { }; }
 		[[nodiscard]] static SizeRatio SizeHorz(int iXRatio) {
-			iXRatio = std::clamp(iXRatio, 0, 100); return { { .m_flXRatio { iXRatio / 100.F } } };
+			return { { .flXRatio { ToFlRatio(iXRatio) } } };
 		}
 		[[nodiscard]] static SizeRatio SizeVert(int iYRatio) {
-			iYRatio = std::clamp(iYRatio, 0, 100); return { { .m_flYRatio { iYRatio / 100.F } } };
+			return { { .flYRatio { ToFlRatio(iYRatio) } } };
 		}
 		[[nodiscard]] static SizeRatio SizeHorzAndVert(int iXRatio, int iYRatio) {
-			iXRatio = std::clamp(iXRatio, 0, 100); iYRatio = std::clamp(iYRatio, 0, 100);
-			return { { .m_flXRatio { iXRatio / 100.F }, .m_flYRatio { iYRatio / 100.F } } };
+			return { { .flXRatio { ToFlRatio(iXRatio) }, .flYRatio { ToFlRatio(iYRatio) } } };
 		}
 	private:
+		[[nodiscard]] static auto ToFlRatio(int iRatio) -> float {
+			return std::clamp(iRatio, 0, 100) / 100.F;
+		}
 		struct ItemData {
 			HWND hWnd { };   //Item window.
-			RECT rcOrig { }; //Item original client area rect after EnableTrack(true).
+			RECT rcOrig { }; //Item original window rect after EnableTrack(true).
 			MoveRatio move;  //How much to move the item.
 			SizeRatio size;  //How much to resize the item.
 		};
@@ -678,11 +654,18 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 	};
 
 	void CDynLayout::AddItem(int iIDItem, MoveRatio move, SizeRatio size) {
-		const auto hWnd = ::GetDlgItem(m_hWndHost, iIDItem);
-		assert(hWnd != nullptr);
-		if (hWnd != nullptr) {
-			m_vecItems.emplace_back(ItemData { .hWnd { hWnd }, .move { move }, .size { size } });
-		}
+		AddItem(::GetDlgItem(m_hWndHost, iIDItem), move, size);
+	}
+
+	void CDynLayout::AddItem(HWND hWndItem, MoveRatio move, SizeRatio size) {
+		assert(hWndItem != nullptr);
+		if (hWndItem == nullptr)
+			return;
+
+		if (move.IsNull() && size.IsNull())
+			return;
+
+		m_vecItems.emplace_back(ItemData { .hWnd { hWndItem }, .move { move }, .size { size } });
 	}
 
 	void CDynLayout::Enable(bool fTrack) {
@@ -697,6 +680,59 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		}
 	}
 
+	bool CDynLayout::LoadFromResource(HINSTANCE hInstRes, const wchar_t* pwszNameResource) {
+		assert(pwszNameResource != nullptr);
+		if (pwszNameResource == nullptr)
+			return false;
+
+		assert(m_hWndHost != nullptr);
+		if (m_hWndHost == nullptr)
+			return false;
+
+		const auto hDlgLayout = ::FindResourceW(hInstRes, pwszNameResource, L"AFX_DIALOG_LAYOUT");
+		if (hDlgLayout == nullptr) { //No such resource found in the hInstRes.
+			return false;
+		}
+
+		const auto hResData = ::LoadResource(hInstRes, hDlgLayout);
+		assert(hResData != nullptr);
+		if (hResData == nullptr)
+			return false;
+
+		const auto pResData = ::LockResource(hResData);
+		assert(pResData != nullptr);
+		if (pResData == nullptr)
+			return false;
+
+		const auto dwSizeRes = ::SizeofResource(hInstRes, hDlgLayout);
+		const auto* pDataBegin = reinterpret_cast<WORD*>(pResData);
+		const auto* const pDataEnd = reinterpret_cast<WORD*>(reinterpret_cast<std::byte*>(pResData) + dwSizeRes);
+
+		assert(*pDataBegin == 0);
+		if (*pDataBegin != 0) //First WORD must be zero, it's a header (version number).
+			return false;
+
+		++pDataBegin; //Past first WORD is the actual data.
+		auto hWndChild = ::GetWindow(m_hWndHost, GW_CHILD); //First child window in the host window.
+		while (pDataBegin + 4 <= pDataEnd) { //Actual AFX_DIALOG_LAYOUT data.
+			if (hWndChild == nullptr)
+				break;
+
+			const auto wXMoveRatio = *pDataBegin++;
+			const auto wYMoveRatio = *pDataBegin++;
+			const auto wXSizeRatio = *pDataBegin++;
+			const auto wYSizeRatio = *pDataBegin++;
+			AddItem(hWndChild, MoveHorzAndVert(wXMoveRatio, wYMoveRatio), SizeHorzAndVert(wXSizeRatio, wYSizeRatio));
+			hWndChild = ::GetWindow(hWndChild, GW_HWNDNEXT);
+		}
+
+		return true;
+	}
+
+	bool CDynLayout::LoadFromResource(HINSTANCE hInstRes, UINT uNameResource) {
+		return LoadFromResource(hInstRes, MAKEINTRESOURCEW(uNameResource));
+	}
+
 	void CDynLayout::OnSize(int iWidth, int iHeight)const {
 		if (!m_fTrack)
 			return;
@@ -708,12 +744,12 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 
 		const auto hDWP = ::BeginDeferWindowPos(static_cast<int>(m_vecItems.size()));
 		for (const auto& [hWnd, rc, move, size] : m_vecItems) {
-			const auto iNewLeft = static_cast<int>(rc.left + (iDeltaX * move.m_flXRatio));
-			const auto iNewTop = static_cast<int>(rc.top + (iDeltaY * move.m_flYRatio));
+			const auto iNewLeft = static_cast<int>(rc.left + (iDeltaX * move.flXRatio));
+			const auto iNewTop = static_cast<int>(rc.top + (iDeltaY * move.flYRatio));
 			const auto iOrigWidth = rc.right - rc.left;
 			const auto iOrigHeight = rc.bottom - rc.top;
-			const auto iNewWidth = static_cast<int>(iOrigWidth + (iDeltaX * size.m_flXRatio));
-			const auto iNewHeight = static_cast<int>(iOrigHeight + (iDeltaY * size.m_flYRatio));
+			const auto iNewWidth = static_cast<int>(iOrigWidth + (iDeltaX * size.flXRatio));
+			const auto iNewHeight = static_cast<int>(iOrigHeight + (iDeltaY * size.flYRatio));
 			::DeferWindowPos(hDWP, hWnd, nullptr, iNewLeft, iNewTop, iNewWidth, iNewHeight, SWP_NOZORDER | SWP_NOACTIVATE);
 		}
 		::EndDeferWindowPos(hDWP);
@@ -740,16 +776,13 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 	public:
 		CRect() : RECT { } { }
 		CRect(int iLeft, int iTop, int iRight, int iBottom) : RECT { .left { iLeft }, .top { iTop },
-			.right { iRight }, .bottom { iBottom } } {
-		}
+			.right { iRight }, .bottom { iBottom } } { }
 		CRect(RECT rc) { ::CopyRect(this, &rc); }
 		CRect(LPCRECT pRC) { ::CopyRect(this, pRC); }
 		CRect(POINT pt, SIZE size) : RECT { .left { pt.x }, .top { pt.y }, .right { pt.x + size.cx },
-			.bottom { pt.y + size.cy } } {
-		}
+			.bottom { pt.y + size.cy } } { }
 		CRect(POINT topLeft, POINT botRight) : RECT { .left { topLeft.x }, .top { topLeft.y },
-			.right { botRight.x }, .bottom { botRight.y } } {
-		}
+			.right { botRight.x }, .bottom { botRight.y } } { }
 		~CRect() = default;
 		operator LPRECT() { return this; }
 		operator LPCRECT()const { return this; }
@@ -849,7 +882,7 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		auto SetTextColor(COLORREF clr)const -> COLORREF { return ::SetTextColor(m_hDC, clr); }
 		auto SetViewportOrg(int iX, int iY)const -> POINT { POINT pt; ::SetViewportOrgEx(m_hDC, iX, iY, &pt); return pt; }
 		auto SelectObject(HGDIOBJ hObj)const -> HGDIOBJ { return ::SelectObject(m_hDC, hObj); }
-		int StartDocW(const DOCINFO* pDI)const { return ::StartDocW(m_hDC, pDI); }
+		int StartDocW(const DOCINFOW* pDI)const { return ::StartDocW(m_hDC, pDI); }
 		int StartPage()const { return ::StartPage(m_hDC); }
 		void TextOutW(int iX, int iY, LPCWSTR pwszText, int iSize)const { ::TextOutW(m_hDC, iX, iY, pwszText, iSize); }
 		void TextOutW(int iX, int iY, std::wstring_view wsv)const {
@@ -897,8 +930,8 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		CWnd() = default;
 		CWnd(HWND hWnd) { Attach(hWnd); }
 		~CWnd() = default;
+		CWnd& operator=(HWND hWnd) { Attach(hWnd); return *this; };
 		CWnd& operator=(CWnd) = delete;
-		CWnd& operator=(HWND) = delete;
 		operator HWND()const { return m_hWnd; }
 		[[nodiscard]] bool operator==(const CWnd& rhs)const { return m_hWnd == rhs.m_hWnd; }
 		[[nodiscard]] bool operator==(HWND hWnd)const { return m_hWnd == hWnd; }
@@ -929,7 +962,7 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		[[nodiscard]] int GetDlgCtrlID()const { assert(IsWindow()); return ::GetDlgCtrlID(m_hWnd); }
 		[[nodiscard]] auto GetDlgItem(int iIDCtrl)const -> CWnd { assert(IsWindow()); return ::GetDlgItem(m_hWnd, iIDCtrl); }
 		[[nodiscard]] auto GetHFont()const -> HFONT {
-			assert(IsWindow()); return reinterpret_cast<HFONT>(::SendMessageW(m_hWnd, WM_GETFONT, 0, 0));
+			assert(IsWindow()); return reinterpret_cast<HFONT>(SendMsg(WM_GETFONT, 0, 0));
 		}
 		[[nodiscard]] auto GetHWND()const -> HWND { return m_hWnd; }
 		[[nodiscard]] auto GetLogFont()const -> std::optional<LOGFONTW> {
@@ -1007,7 +1040,7 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		}
 		void SetWndText(LPCWSTR pwszStr)const { assert(IsWindow()); ::SetWindowTextW(m_hWnd, pwszStr); }
 		void SetWndText(const std::wstring& wstr)const { SetWndText(wstr.data()); }
-		void SetRedraw(bool fRedraw)const { assert(IsWindow()); ::SendMessageW(m_hWnd, WM_SETREDRAW, fRedraw, 0); }
+		void SetRedraw(bool fRedraw)const { assert(IsWindow()); SendMsg(WM_SETREDRAW, fRedraw, 0); }
 		bool ShowWindow(int iCmdShow)const { assert(IsWindow()); return ::ShowWindow(m_hWnd, iCmdShow); }
 		[[nodiscard]] static auto FromHandle(HWND hWnd) -> CWnd { return hWnd; }
 		[[nodiscard]] static auto GetFocus() -> CWnd { return ::GetFocus(); }
@@ -1017,18 +1050,18 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 
 	class CWndBtn final : public CWnd {
 	public:
-		[[nodiscard]] bool IsChecked()const { assert(IsWindow()); return ::SendMessageW(m_hWnd, BM_GETCHECK, 0, 0); }
+		[[nodiscard]] bool IsChecked()const { assert(IsWindow()); return SendMsg(BM_GETCHECK, 0, 0); }
 		void SetBitmap(HBITMAP hBmp)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, BM_SETIMAGE, IMAGE_BITMAP, reinterpret_cast<LPARAM>(hBmp));
+			assert(IsWindow()); SendMsg(BM_SETIMAGE, IMAGE_BITMAP, reinterpret_cast<LPARAM>(hBmp));
 		}
-		void SetCheck(bool fCheck)const { assert(IsWindow()); ::SendMessageW(m_hWnd, BM_SETCHECK, fCheck, 0); }
+		void SetCheck(bool fCheck)const { assert(IsWindow()); SendMsg(BM_SETCHECK, fCheck, 0); }
 	};
 
 	class CWndEdit final : public CWnd {
 	public:
 		void SetCueBanner(LPCWSTR pwszText, bool fDrawIfFocus = false)const {
 			assert(IsWindow());
-			::SendMessageW((m_hWnd), EM_SETCUEBANNER, static_cast<WPARAM>(fDrawIfFocus), reinterpret_cast<LPARAM>(pwszText));
+			SendMsg(EM_SETCUEBANNER, static_cast<WPARAM>(fDrawIfFocus), reinterpret_cast<LPARAM>(pwszText));
 		}
 	};
 
@@ -1037,40 +1070,40 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		int AddString(const std::wstring& wstr)const { return AddString(wstr.data()); }
 		int AddString(LPCWSTR pwszStr)const {
 			assert(IsWindow());
-			return static_cast<int>(::SendMessageW(m_hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(pwszStr)));
+			return static_cast<int>(SendMsg(CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(pwszStr)));
 		}
 		int DeleteString(int iIndex)const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, CB_DELETESTRING, iIndex, 0));
+			assert(IsWindow()); return static_cast<int>(SendMsg(CB_DELETESTRING, iIndex, 0));
 		}
 		[[nodiscard]] int FindStringExact(int iIndex, LPCWSTR pwszStr)const {
 			assert(IsWindow());
-			return static_cast<int>(::SendMessageW(m_hWnd, CB_FINDSTRINGEXACT, iIndex, reinterpret_cast<LPARAM>(pwszStr)));
+			return static_cast<int>(SendMsg(CB_FINDSTRINGEXACT, iIndex, reinterpret_cast<LPARAM>(pwszStr)));
 		}
 		[[nodiscard]] int GetCount()const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, CB_GETCOUNT, 0, 0));
+			assert(IsWindow()); return static_cast<int>(SendMsg(CB_GETCOUNT, 0, 0));
 		}
 		[[nodiscard]] int GetCurSel()const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, CB_GETCURSEL, 0, 0));
+			assert(IsWindow()); return static_cast<int>(SendMsg(CB_GETCURSEL, 0, 0));
 		}
 		[[nodiscard]] auto GetItemData(int iIndex)const -> DWORD_PTR {
-			assert(IsWindow()); return ::SendMessageW(m_hWnd, CB_GETITEMDATA, iIndex, 0);
+			assert(IsWindow()); return SendMsg(CB_GETITEMDATA, iIndex, 0);
 		}
 		[[nodiscard]] bool HasString(LPCWSTR pwszStr)const { return FindStringExact(0, pwszStr) != CB_ERR; };
 		[[nodiscard]] bool HasString(const std::wstring& wstr)const { return HasString(wstr.data()); };
 		int InsertString(int iIndex, const std::wstring& wstr)const { return InsertString(iIndex, wstr.data()); }
 		int InsertString(int iIndex, LPCWSTR pwszStr)const {
 			assert(IsWindow());
-			return static_cast<int>(::SendMessageW(m_hWnd, CB_INSERTSTRING, iIndex, reinterpret_cast<LPARAM>(pwszStr)));
+			return static_cast<int>(SendMsg(CB_INSERTSTRING, iIndex, reinterpret_cast<LPARAM>(pwszStr)));
 		}
-		void LimitText(int iMaxChars)const { assert(IsWindow()); ::SendMessageW(m_hWnd, CB_LIMITTEXT, iMaxChars, 0); }
-		void ResetContent()const { assert(IsWindow()); ::SendMessageW(m_hWnd, CB_RESETCONTENT, 0, 0); }
+		void LimitText(int iMaxChars)const { assert(IsWindow()); SendMsg(CB_LIMITTEXT, iMaxChars, 0); }
+		void ResetContent()const { assert(IsWindow()); SendMsg(CB_RESETCONTENT, 0, 0); }
 		void SetCueBanner(const std::wstring& wstr)const { SetCueBanner(wstr.data()); }
 		void SetCueBanner(LPCWSTR pwszText)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, CB_SETCUEBANNER, 0, reinterpret_cast<LPARAM>(pwszText));
+			assert(IsWindow()); SendMsg(CB_SETCUEBANNER, 0, reinterpret_cast<LPARAM>(pwszText));
 		}
-		void SetCurSel(int iIndex)const { assert(IsWindow()); ::SendMessageW(m_hWnd, CB_SETCURSEL, iIndex, 0); }
+		void SetCurSel(int iIndex)const { assert(IsWindow()); SendMsg(CB_SETCURSEL, iIndex, 0); }
 		void SetItemData(int iIndex, DWORD_PTR dwData)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, CB_SETITEMDATA, iIndex, static_cast<LPARAM>(dwData));
+			assert(IsWindow()); SendMsg(CB_SETITEMDATA, iIndex, static_cast<LPARAM>(dwData));
 		}
 	};
 
@@ -1078,20 +1111,20 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 	public:
 		void DeleteAllItems()const { DeleteItem(TVI_ROOT); };
 		void DeleteItem(HTREEITEM hItem)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, TVM_DELETEITEM, 0, reinterpret_cast<LPARAM>(hItem));
+			assert(IsWindow()); SendMsg(TVM_DELETEITEM, 0, reinterpret_cast<LPARAM>(hItem));
 		}
 		void Expand(HTREEITEM hItem, UINT uCode)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, TVM_EXPAND, uCode, reinterpret_cast<LPARAM>(hItem));
+			assert(IsWindow()); SendMsg(TVM_EXPAND, uCode, reinterpret_cast<LPARAM>(hItem));
 		}
 		void GetItem(TVITEMW* pItem)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, TVM_GETITEM, 0, reinterpret_cast<LPARAM>(pItem));
+			assert(IsWindow()); SendMsg(TVM_GETITEM, 0, reinterpret_cast<LPARAM>(pItem));
 		}
 		[[nodiscard]] auto GetItemData(HTREEITEM hItem)const -> DWORD_PTR {
 			TVITEMW item { .mask { TVIF_PARAM }, .hItem { hItem } }; GetItem(&item); return item.lParam;
 		}
 		[[nodiscard]] auto GetNextItem(HTREEITEM hItem, UINT uCode)const -> HTREEITEM {
 			assert(IsWindow()); return reinterpret_cast<HTREEITEM>
-				(::SendMessageW(m_hWnd, TVM_GETNEXTITEM, uCode, reinterpret_cast<LPARAM>(hItem)));
+				(SendMsg(TVM_GETNEXTITEM, uCode, reinterpret_cast<LPARAM>(hItem)));
 		}
 		[[nodiscard]] auto GetNextSiblingItem(HTREEITEM hItem)const -> HTREEITEM { return GetNextItem(hItem, TVGN_NEXT); }
 		[[nodiscard]] auto GetParentItem(HTREEITEM hItem)const -> HTREEITEM { return GetNextItem(hItem, TVGN_PARENT); }
@@ -1099,7 +1132,7 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		[[nodiscard]] auto GetSelectedItem()const -> HTREEITEM { return GetNextItem(nullptr, TVGN_CARET); }
 		[[nodiscard]] auto HitTest(TVHITTESTINFO* pHTI)const -> HTREEITEM {
 			assert(IsWindow());
-			return reinterpret_cast<HTREEITEM>(::SendMessageW(m_hWnd, TVM_HITTEST, 0, reinterpret_cast<LPARAM>(pHTI)));
+			return reinterpret_cast<HTREEITEM>(SendMsg(TVM_HITTEST, 0, reinterpret_cast<LPARAM>(pHTI)));
 		}
 		[[nodiscard]] auto HitTest(POINT pt, UINT* pFlags = nullptr)const -> HTREEITEM {
 			TVHITTESTINFO hti { .pt { pt } }; const auto ret = HitTest(&hti);
@@ -1108,48 +1141,48 @@ namespace HEXCTRL::INTERNAL::GDIUT { //Windows GDI related stuff.
 		}
 		auto InsertItem(LPTVINSERTSTRUCTW pTIS)const -> HTREEITEM {
 			assert(IsWindow()); return reinterpret_cast<HTREEITEM>
-				(::SendMessageW(m_hWnd, TVM_INSERTITEM, 0, reinterpret_cast<LPARAM>(pTIS)));
+				(SendMsg(TVM_INSERTITEM, 0, reinterpret_cast<LPARAM>(pTIS)));
 		}
 		void SelectItem(HTREEITEM hItem)const {
-			assert(IsWindow()); ::SendMessageW(m_hWnd, TVM_SELECTITEM, TVGN_CARET, reinterpret_cast<LPARAM>(hItem));
+			assert(IsWindow()); SendMsg(TVM_SELECTITEM, TVGN_CARET, reinterpret_cast<LPARAM>(hItem));
 		}
 	};
 
 	class CWndProgBar final : public CWnd {
 	public:
 		int SetPos(int iPos)const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, PBM_SETPOS, iPos, 0UL));
+			assert(IsWindow()); return static_cast<int>(SendMsg(PBM_SETPOS, iPos, 0UL));
 		}
 		void SetRange(int iLower, int iUpper)const {
 			assert(IsWindow());
-			::SendMessageW(m_hWnd, PBM_SETRANGE32, static_cast<WPARAM>(iLower), static_cast<LPARAM>(iUpper));
+			SendMsg(PBM_SETRANGE32, static_cast<WPARAM>(iLower), static_cast<LPARAM>(iUpper));
 		}
 	};
 
 	class CWndTab final : public CWnd {
 	public:
 		[[nodiscard]] int GetCurSel()const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, TCM_GETCURSEL, 0, 0L));
+			assert(IsWindow()); return static_cast<int>(SendMsg(TCM_GETCURSEL, 0, 0L));
 		}
 		[[nodiscard]] auto GetItemRect(int nItem)const -> CRect {
 			assert(IsWindow());
-			RECT rc { }; ::SendMessageW(m_hWnd, TCM_GETITEMRECT, nItem, reinterpret_cast<LPARAM>(&rc));
+			RECT rc { }; SendMsg(TCM_GETITEMRECT, nItem, reinterpret_cast<LPARAM>(&rc));
 			return rc;
 		}
 		auto InsertItem(int iItem, TCITEMW* pItem)const -> LONG {
 			assert(IsWindow());
-			return static_cast<LONG>(::SendMessageW(m_hWnd, TCM_INSERTITEMW, iItem, reinterpret_cast<LPARAM>(pItem)));
+			return static_cast<LONG>(SendMsg(TCM_INSERTITEMW, iItem, reinterpret_cast<LPARAM>(pItem)));
 		}
 		auto InsertItem(int iItem, LPCWSTR pwszStr)const -> LONG {
 			TCITEMW tci { .mask { TCIF_TEXT }, .pszText { const_cast<LPWSTR>(pwszStr) } };
 			return InsertItem(iItem, &tci);
 		}
 		int SetCurSel(int iItem)const {
-			assert(IsWindow()); return static_cast<int>(::SendMessageW(m_hWnd, TCM_SETCURSEL, iItem, 0L));
+			assert(IsWindow()); return static_cast<int>(SendMsg(TCM_SETCURSEL, iItem, 0L));
 		}
 	};
 
-	class CMenu {
+	class CMenu final {
 	public:
 		CMenu() = default;
 		CMenu(HMENU hMenu) { Attach(hMenu); }

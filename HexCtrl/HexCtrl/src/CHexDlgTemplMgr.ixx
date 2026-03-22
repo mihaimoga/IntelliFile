@@ -6,9 +6,9 @@
 ****************************************************************************************/
 module;
 #include <SDKDDKVer.h>
-#include "../dep/rapidjson/rapidjson-amalgam.h"
-#include "../res/HexCtrlRes.h"
 #include "../HexCtrl.h"
+#include "dep/rapidjson-amalgam.h"
+#include "res/HexCtrlRes.h"
 #include <Windows.h>
 #include <ShObjIdl.h>
 #include <commctrl.h>
@@ -68,6 +68,7 @@ namespace HEXCTRL::INTERNAL {
 		static auto CALLBACK TreeSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 			UINT_PTR uIdSubclass, DWORD_PTR dwRefData)->LRESULT;
 	private:
+		void CreateArrows();
 		[[nodiscard]] auto GetAppliedFromItem(HTREEITEM hTreeItem) -> PCTEMPLAPPLIED;
 		[[nodiscard]] auto GetHexCtrl()const -> IHexCtrl*;
 		[[nodiscard]] auto GetIDForNewTemplate()const -> int;
@@ -91,11 +92,14 @@ namespace HEXCTRL::INTERNAL {
 		void OnCheckMin();
 		auto OnClose() -> INT_PTR;
 		auto OnDestroy() -> INT_PTR;
+		auto OnDPIChanged(const MSG& msg) -> INT_PTR;
 		auto OnDrawItem(const MSG& msg) -> INT_PTR;
+		auto OnGetDPIScaledSize(const MSG& msg) -> INT_PTR;
 		auto OnInitDialog(const MSG& msg) -> INT_PTR;
 		auto OnLButtonDown(const MSG& msg) -> INT_PTR;
 		auto OnLButtonUp(const MSG& msg) -> INT_PTR;
 		auto OnMeasureItem(const MSG& msg) -> INT_PTR;
+		auto OnMouseActivate(const MSG& msg) -> INT_PTR;
 		auto OnMouseMove(const MSG& msg) -> INT_PTR;
 		auto OnNotify(const MSG& msg) -> INT_PTR;
 		void OnNotifyListDblClick(NMHDR* pNMHDR);
@@ -138,6 +142,7 @@ namespace HEXCTRL::INTERNAL {
 		void ShowListDataGUID(LPWSTR pwsz, GUID stGUID, bool fShouldSwap)const;
 		[[nodiscard]] auto TreeItemFromListItem(int iListItem)const -> HTREEITEM;
 		void UnloadTemplate(int iTemplateID)override; //Unload/remove loaded template from memory.
+		void UpdateDateTimeFormat();
 		void UpdateStaticText();
 	private:
 		enum EListColumns : std::int8_t {
@@ -170,7 +175,6 @@ namespace HEXCTRL::INTERNAL {
 		HBITMAP m_hBmpMax { };             //Bitmap for the max checkbox.
 		std::uint64_t m_u64Flags { };      //Data from SetDlgProperties.
 		DWORD m_dwDateFormat { };          //Date format.
-		int m_iDynLayoutMinY { };          //For DynamicLayout::SetMinSize.
 		wchar_t m_wchDateSepar { };        //Date separator.
 		bool m_fCurInSplitter { };         //Indicates that mouse cursor is in the splitter area.
 		bool m_fLMDownResize { };          //Left mouse pressed in splitter area to resize.
@@ -442,11 +446,14 @@ auto CHexDlgTemplMgr::ProcessMsg(const MSG& msg)->INT_PTR
 	case WM_COMMAND: return OnCommand(msg);
 	case WM_CTLCOLORSTATIC: return OnCtlClrStatic(msg);
 	case WM_DESTROY: return OnDestroy();
+	case WM_DPICHANGED: return OnDPIChanged(msg);
 	case WM_DRAWITEM: return OnDrawItem(msg);
+	case WM_GETDPISCALEDSIZE: return OnGetDPIScaledSize(msg);
 	case WM_INITDIALOG: return OnInitDialog(msg);
 	case WM_LBUTTONDOWN: return OnLButtonDown(msg);
 	case WM_LBUTTONUP: return OnLButtonUp(msg);
 	case WM_MEASUREITEM: return OnMeasureItem(msg);
+	case WM_MOUSEACTIVATE: return OnMouseActivate(msg);
 	case WM_MOUSEMOVE: return OnMouseMove(msg);
 	case WM_NOTIFY: return OnNotify(msg);
 	case WM_SIZE: return OnSize(msg);
@@ -497,6 +504,19 @@ void CHexDlgTemplMgr::UpdateData()
 
 
 //Private methods.
+
+void CHexDlgTemplMgr::CreateArrows()
+{
+	const auto hDC = m_WndBtnMin.GetDC();
+	const auto iWidth = m_WndBtnMin.GetWindowRect().Width();
+	const auto iHeight = m_WndBtnMin.GetWindowRect().Height();
+	::DeleteObject(m_hBmpMin);
+	::DeleteObject(m_hBmpMax);
+	m_hBmpMin = GDIUT::CreateArrowBitmap(hDC, iWidth, iHeight, 1, ::GetSysColor(COLOR_3DFACE), ::GetSysColor(COLOR_GRAYTEXT));
+	m_hBmpMax = GDIUT::CreateArrowBitmap(hDC, iWidth, iHeight, -1, ::GetSysColor(COLOR_3DFACE), ::GetSysColor(COLOR_GRAYTEXT));
+	m_WndBtnMin.ReleaseDC(hDC);
+	m_WndBtnMin.SetBitmap(IsMinimized() ? m_hBmpMax : m_hBmpMin);
+}
 
 auto CHexDlgTemplMgr::GetAppliedFromItem(HTREEITEM hTreeItem)->PCTEMPLAPPLIED
 {
@@ -561,17 +581,12 @@ bool CHexDlgTemplMgr::IsSwapEndian()const
 
 auto CHexDlgTemplMgr::OnActivate(const MSG& msg)->INT_PTR
 {
-	if (m_pHexCtrl == nullptr || !m_pHexCtrl->IsCreated())
-		return FALSE;
-
-	const auto nState = LOWORD(msg.wParam);
-	if (nState == WA_ACTIVE || nState == WA_CLICKACTIVE) {
-		const auto [dwFormat, wchSepar] = m_pHexCtrl->GetDateInfo();
-		m_dwDateFormat = dwFormat;
-		m_wchDateSepar = wchSepar;
+	if (const auto pHex = GetHexCtrl();
+		pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet() && LOWORD(msg.wParam) == WA_ACTIVE) {
+		UpdateDateTimeFormat();
 	}
 
-	return FALSE; //Default handler.
+	return 0;
 }
 
 void CHexDlgTemplMgr::OnBnLoadTemplate()
@@ -707,8 +722,7 @@ void CHexDlgTemplMgr::OnCheckMin()
 
 	//Top Group Box rect.
 	const auto iHeightGRB = m_Wnd.GetDlgItem(IDC_HEXCTRL_TEMPLMGR_GRB_TOP).GetClientRect().Height();
-	auto hdwp = ::BeginDeferWindowPos(static_cast<int>(std::size(arrIDsToMove) + std::size(arrIDsToResize),
-		+std::size(arrIDsToHide)));
+	auto hdwp = ::BeginDeferWindowPos(static_cast<int>(std::size(arrIDsToMove) + std::size(arrIDsToResize) + std::size(arrIDsToHide)));
 	for (const auto id : arrIDsToHide) { //Hiding.
 		hdwp = ::DeferWindowPos(hdwp, m_Wnd.GetDlgItem(id), nullptr, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE
 			| (fMinimize ? SWP_HIDEWINDOW : SWP_SHOWWINDOW));
@@ -730,6 +744,7 @@ void CHexDlgTemplMgr::OnCheckMin()
 		hdwp = ::DeferWindowPos(hdwp, hWnd, nullptr, rcWnd.left, rcWnd.top, rcWnd.Width(),
 			rcWnd.Height(), SWP_NOZORDER | SWP_NOACTIVATE);
 	}
+
 	m_DynLayout.Enable(false); //Otherwise DynamicLayout won't know that all dynamic windows have changed.
 	::EndDeferWindowPos(hdwp);
 	m_DynLayout.Enable(true);
@@ -826,6 +841,14 @@ auto CHexDlgTemplMgr::OnDestroy()->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgTemplMgr::OnDPIChanged([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	CreateArrows();
+	m_DynLayout.Enable(true);
+
+	return 0;
+}
+
 auto CHexDlgTemplMgr::OnDrawItem(const MSG& msg)->INT_PTR
 {
 	const auto pDIS = reinterpret_cast<LPDRAWITEMSTRUCT>(msg.lParam);
@@ -834,6 +857,17 @@ auto CHexDlgTemplMgr::OnDrawItem(const MSG& msg)->INT_PTR
 	}
 
 	return TRUE;
+}
+
+auto CHexDlgTemplMgr::OnGetDPIScaledSize([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	//This message is sent to top-level windows with a DPI_AWARENESS_CONTEXT
+	//of Per Monitor v2 before a WM_DPICHANGED message is sent.
+	//We use it to temporarily disable all dynamic layout resizes,
+	//to re-enable it later in the WM_DPICHANGED handler.
+
+	m_DynLayout.Enable(false);
+	return 0;
 }
 
 auto CHexDlgTemplMgr::OnInitDialog(const MSG& msg)->INT_PTR
@@ -850,17 +884,18 @@ auto CHexDlgTemplMgr::OnInitDialog(const MSG& msg)->INT_PTR
 	m_WndCmbTempl.Attach(m_Wnd.GetDlgItem(IDC_HEXCTRL_TEMPLMGR_COMBO_TEMPLATES));
 	m_WndTree.Attach(m_Wnd.GetDlgItem(IDC_HEXCTRL_TEMPLMGR_TREE));
 
-	m_ListEx.Create({ .hWndParent { m_Wnd }, .uID { IDC_HEXCTRL_TEMPLMGR_LIST }, .dwSizeFontList { 10 },
-		.dwSizeFontHdr { 10 }, .fDialogCtrl { true } });
+	m_ListEx.Create({ .hWndParent { m_Wnd }, .uID { IDC_HEXCTRL_TEMPLMGR_LIST }, .flSizeFontList { 10.F },
+		.flSizeFontHdr { 10.F }, .fDialogCtrl { true } });
 	m_ListEx.SetExtendedStyle(LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT);
-	m_ListEx.InsertColumn(COL_TYPE, L"Type", LVCFMT_LEFT, 85);
-	m_ListEx.InsertColumn(COL_NAME, L"Name", LVCFMT_LEFT, 200);
-	m_ListEx.InsertColumn(COL_OFFSET, L"Offset", LVCFMT_LEFT, 50);
-	m_ListEx.InsertColumn(COL_SIZE, L"Size", LVCFMT_LEFT, 50);
-	m_ListEx.InsertColumn(COL_DATA, L"Data", LVCFMT_LEFT, 120, -1, LVCFMT_LEFT, true);
-	m_ListEx.InsertColumn(COL_ENDIAN, L"Endianness", LVCFMT_CENTER, 75, -1, LVCFMT_CENTER);
-	m_ListEx.InsertColumn(COL_DESCR, L"Description", LVCFMT_LEFT, 100, -1, LVCFMT_LEFT, true);
-	m_ListEx.InsertColumn(COL_COLORS, L"Colors", LVCFMT_LEFT, 57);
+	const auto flDPIScale = GDIUT::GetDPIScaleForHWND(m_ListEx);
+	m_ListEx.InsertColumn(COL_TYPE, L"Type", LVCFMT_LEFT, std::lround(85 * flDPIScale));
+	m_ListEx.InsertColumn(COL_NAME, L"Name", LVCFMT_LEFT, std::lround(200 * flDPIScale));
+	m_ListEx.InsertColumn(COL_OFFSET, L"Offset", LVCFMT_LEFT, std::lround(50 * flDPIScale));
+	m_ListEx.InsertColumn(COL_SIZE, L"Size", LVCFMT_LEFT, std::lround(50 * flDPIScale));
+	m_ListEx.InsertColumn(COL_DATA, L"Data", LVCFMT_LEFT, std::lround(120 * flDPIScale), -1, LVCFMT_LEFT, true);
+	m_ListEx.InsertColumn(COL_ENDIAN, L"Endianness", LVCFMT_CENTER, std::lround(75 * flDPIScale), -1, LVCFMT_CENTER);
+	m_ListEx.InsertColumn(COL_DESCR, L"Description", LVCFMT_LEFT, std::lround(100 * flDPIScale), -1, LVCFMT_LEFT, true);
+	m_ListEx.InsertColumn(COL_COLORS, L"Colors", LVCFMT_LEFT, std::lround(57 * flDPIScale));
 
 	using enum EMenuID;
 	m_MenuHdr.CreatePopupMenu();
@@ -890,10 +925,6 @@ auto CHexDlgTemplMgr::OnInitDialog(const MSG& msg)->INT_PTR
 	m_WndBtnHglSel.SetCheck(IsHglSel());
 	m_WndBtnHex.SetCheck(IsShowAsHex());
 
-	auto rcTree = m_WndTree.GetWindowRect();
-	m_Wnd.ScreenToClient(rcTree);
-	m_iDynLayoutMinY = rcTree.top + 5;
-
 	m_DynLayout.SetHost(m_Wnd);
 	m_DynLayout.AddItem(IDC_HEXCTRL_TEMPLMGR_LIST, GDIUT::CDynLayout::MoveNone(), GDIUT::CDynLayout::SizeHorzAndVert(100, 100));
 	m_DynLayout.AddItem(IDC_HEXCTRL_TEMPLMGR_TREE, GDIUT::CDynLayout::MoveNone(), GDIUT::CDynLayout::SizeVert(100));
@@ -908,13 +939,8 @@ auto CHexDlgTemplMgr::OnInitDialog(const MSG& msg)->INT_PTR
 		OnTemplateLoadUnload(pTemplate->iTemplateID, true);
 	}
 
-	const auto hDC = m_WndBtnMin.GetDC();
-	const auto iWidth = m_WndBtnMin.GetWindowRect().Width();
-	const auto iHeight = m_WndBtnMin.GetWindowRect().Height();
-	m_hBmpMin = GDIUT::CreateArrowBitmap(hDC, iWidth, iHeight, 1, ::GetSysColor(COLOR_3DFACE), ::GetSysColor(COLOR_GRAYTEXT));
-	m_hBmpMax = GDIUT::CreateArrowBitmap(hDC, iWidth, iHeight, -1, ::GetSysColor(COLOR_3DFACE), ::GetSysColor(COLOR_GRAYTEXT));
-	m_WndBtnMin.ReleaseDC(hDC);
-	m_WndBtnMin.SetBitmap(m_hBmpMin); //Set the min arrow bitmap to the min-max checkbox.
+	CreateArrows();
+	UpdateDateTimeFormat();
 
 	return TRUE;
 }
@@ -949,16 +975,24 @@ auto CHexDlgTemplMgr::OnMeasureItem(const MSG& msg)->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgTemplMgr::OnMouseActivate([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	if (const auto pHex = GetHexCtrl(); pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet()) {
+		UpdateDateTimeFormat();
+	}
+
+	return MA_ACTIVATE;
+}
+
 auto CHexDlgTemplMgr::OnMouseMove(const MSG& msg)->INT_PTR
 {
 	constexpr auto iResAreaHalfWidth = 15;       //Area where cursor turns into resizable (IDC_SIZEWE).
 	constexpr auto iWidthBetweenTreeAndList = 1; //Width between tree and list after resizing.
 	constexpr auto iMinTreeWidth = 100;          //Tree control minimum allowed width.
 	static const auto hCurResize = static_cast<HCURSOR>(::LoadImageW(nullptr, IDC_SIZEWE, IMAGE_CURSOR, 0, 0, LR_SHARED));
-	static const auto hCurArrow = static_cast<HCURSOR>(::LoadImageW(nullptr, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED));
 	const POINT pt { .x { ut::GetXLPARAM(msg.lParam) }, .y { ut::GetYLPARAM(msg.lParam) } };
-	const auto hWndList = GDIUT::CWnd::FromHandle(m_ListEx.GetHWND());
-	auto rcList = hWndList.GetWindowRect();
+	const auto wndList = GDIUT::CWnd::FromHandle(m_ListEx.GetHWND());
+	auto rcList = wndList.GetWindowRect();
 	m_Wnd.ScreenToClient(rcList);
 
 	if (m_fLMDownResize) {
@@ -970,7 +1004,7 @@ auto CHexDlgTemplMgr::OnMouseMove(const MSG& msg)->INT_PTR
 			auto hdwp = ::BeginDeferWindowPos(2); //Simultaneously resizing list and tree.
 			hdwp = ::DeferWindowPos(hdwp, m_WndTree, nullptr, rcTree.left, rcTree.top,
 				rcTree.Width(), rcTree.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
-			hdwp = ::DeferWindowPos(hdwp, hWndList, nullptr, rcList.left, rcList.top,
+			hdwp = ::DeferWindowPos(hdwp, wndList, nullptr, rcList.left, rcList.top,
 				rcList.Width(), rcList.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
 			::EndDeferWindowPos(hdwp);
 		}
@@ -985,7 +1019,6 @@ auto CHexDlgTemplMgr::OnMouseMove(const MSG& msg)->INT_PTR
 		}
 		else {
 			m_fCurInSplitter = false;
-			::SetCursor(hCurArrow);
 			::ReleaseCapture();
 		}
 	}
@@ -1058,7 +1091,7 @@ void CHexDlgTemplMgr::OnNotifyListEditBegin(NMHDR* pNMHDR)
 	}
 }
 
-void CHexDlgTemplMgr::OnNotifyListEnterPressed(NMHDR* /*pNMHDR*/)
+void CHexDlgTemplMgr::OnNotifyListEnterPressed([[maybe_unused]] NMHDR* pNMHDR)
 {
 	const auto uSelected = m_ListEx.GetSelectedCount();
 	if (uSelected != 1)
@@ -1285,7 +1318,7 @@ void CHexDlgTemplMgr::OnNotifyListGetDispInfo(NMHDR* pNMHDR)
 	}
 }
 
-void CHexDlgTemplMgr::OnNotifyListHdrRClick(NMHDR* /*pNMHDR*/)
+void CHexDlgTemplMgr::OnNotifyListHdrRClick([[maybe_unused]] NMHDR* pNMHDR)
 {
 	POINT ptCur;
 	::GetCursorPos(&ptCur);
@@ -1302,9 +1335,8 @@ void CHexDlgTemplMgr::OnNotifyListItemChanged(NMHDR* pNMHDR)
 	m_WndTree.SelectItem(TreeItemFromListItem(iItem));
 }
 
-void CHexDlgTemplMgr::OnNotifyListRClick(NMHDR* /*pNMHDR*/)
-{
-}
+void CHexDlgTemplMgr::OnNotifyListRClick([[maybe_unused]] NMHDR* pNMHDR)
+{ }
 
 void CHexDlgTemplMgr::OnNotifyListSetData(NMHDR* pNMHDR)
 {
@@ -1510,7 +1542,7 @@ void CHexDlgTemplMgr::OnNotifyTreeItemChanged(NMHDR* pNMHDR)
 	m_fListGuardEvent = false;
 }
 
-void CHexDlgTemplMgr::OnNotifyTreeRClick(NMHDR* /*pNMHDR*/)
+void CHexDlgTemplMgr::OnNotifyTreeRClick([[maybe_unused]] NMHDR* pNMHDR)
 {
 	POINT pt;
 	::GetCursorPos(&pt);
@@ -2070,6 +2102,14 @@ void CHexDlgTemplMgr::UnloadTemplate(int iTemplateID)
 	SetDlgButtonsState();
 }
 
+void CHexDlgTemplMgr::UpdateDateTimeFormat()
+{
+	const auto [dwFormat, wchSepar] = GetHexCtrl()->GetDateInfo();
+	m_dwDateFormat = dwFormat;
+	m_wchDateSepar = wchSepar;
+	m_ListEx.RedrawWindow();
+}
+
 void CHexDlgTemplMgr::UpdateStaticText()
 {
 	std::wstring wstrOffset;
@@ -2386,7 +2426,7 @@ auto CHexDlgTemplMgr::JSONColors(const rapidjson::Value& value, const char* pszC
 }
 
 auto CHexDlgTemplMgr::TreeSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass,
-	DWORD_PTR /*dwRefData*/)->LRESULT
+	 [[maybe_unused]] DWORD_PTR dwRefData)->LRESULT
 {
 	switch (uMsg) {
 	case WM_KILLFOCUS:

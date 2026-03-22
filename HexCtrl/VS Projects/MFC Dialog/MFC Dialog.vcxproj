@@ -180,6 +180,8 @@
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
+    <ManifestResourceCompile />
+    <ManifestResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -216,6 +218,8 @@
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
+    <ManifestResourceCompile />
+    <ManifestResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -252,6 +256,8 @@
     <Manifest>
       <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
     </Manifest>
+    <ManifestResourceCompile />
+    <ManifestResourceCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -383,22 +389,6 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\HexCtrl\dep\ListEx\ListEx.ixx">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\HexCtrl\dep\StrToNum\StrToNum.ixx">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\..\HexCtrl\src\CHexDlgBkmMgr.ixx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -463,6 +453,22 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\dep\HexCtrl_ListEx.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\HexCtrl\src\dep\HexCtrl_StrToNum.ixx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -472,7 +478,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClInclude Include="..\..\HexCtrl\HexCtrl.h" />
-    <ClInclude Include="..\..\HexCtrl\res\HexCtrlRes.h" />
     <ClCompile Include="..\..\HexCtrl\src\CHexSelection.ixx">
       <FileType>Document</FileType>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -500,6 +505,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClInclude Include="..\..\HexCtrl\src\res\HexCtrlRes.h" />
     <ClInclude Include="CMFCDialogApp.h" />
     <ClInclude Include="CMFCDialogDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -518,25 +524,27 @@
     <ClCompile Include="CMFCDialogDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\..\HexCtrl\res\HexCtrl.rc" />
+    <ResourceCompile Include="..\..\HexCtrl\src\res\HexCtrl.rc" />
     <ResourceCompile Include="MFCDialog.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\HexCtrl\res\IDJ_HEXCTRL_KEYBIND.json" />
+    <None Include="..\..\HexCtrl\src\res\IDJ_HEXCTRL_KEYBIND.json" />
     <None Include="res\MFCDialog.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_BKMS.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_DATAINTERP.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_FONTCHOOSE.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_GROUP.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_LOGO.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp" />
-    <Image Include="..\..\HexCtrl\res\IDB_HEXCTRL_SEARCH.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_BKMS.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_FONTCHOOSE.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_GROUP.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_LOGO.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_MODIFY.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp" />
+    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_SEARCH.bmp" />
     <Image Include="res\MFCDialog.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include=".manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

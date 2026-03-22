@@ -24,28 +24,26 @@
 #define HEXCTRLAPI __declspec(dllexport)
 #else //^^^ HEXCTRL_DYNAMIC_LIB_EXPORT / vvv !HEXCTRL_DYNAMIC_LIB_EXPORT
 #define HEXCTRLAPI __declspec(dllimport)
-
 #ifdef _M_IX86
 #ifdef _DEBUG
-#define HEXCTRL_LIBNAME(x) x"x86D.lib"
+#define HEXCTRL_LIBNAME "HexCtrlx86D.lib"
 #else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME(x) x"x86.lib"
+#define HEXCTRL_LIBNAME "HexCtrlx86.lib"
 #endif //^^^ !_DEBUG
 #elif defined(_M_X64) //^^^ _M_IX86 / vvv _M_X64
 #ifdef _DEBUG
-#define HEXCTRL_LIBNAME(x) x"x64D.lib"
+#define HEXCTRL_LIBNAME "HexCtrlx64D.lib"
 #else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME(x) x"x64.lib"
+#define HEXCTRL_LIBNAME "HexCtrlx64.lib"
 #endif //^^^ !_DEBUG
 #elif defined(_M_ARM64) //^^^ _M_X64 / vvv _M_ARM64
 #ifdef _DEBUG
-#define HEXCTRL_LIBNAME(x) x"ARM64D.lib"
+#define HEXCTRL_LIBNAME "HexCtrlARM64D.lib"
 #else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME(x) x"ARM64.lib"
+#define HEXCTRL_LIBNAME "HexCtrlARM64.lib"
 #endif //^^^ _DEBUG
 #endif //^^^ _M_ARM64
-
-#pragma comment(lib, HEXCTRL_LIBNAME("HexCtrl"))
+#pragma comment(lib, HEXCTRL_LIBNAME)
 #endif //^^^ !HEXCTRL_DYNAMIC_LIB_EXPORT
 #else //^^^ HEXCTRL_DYNAMIC_LIB / vvv !HEXCTRL_DYNAMIC_LIB
 #define	HEXCTRLAPI
@@ -53,8 +51,8 @@
 
 namespace HEXCTRL {
 	constexpr auto HEXCTRL_VERSION_MAJOR = 3;
-	constexpr auto HEXCTRL_VERSION_MINOR = 7;
-	constexpr auto HEXCTRL_VERSION_PATCH = 2;
+	constexpr auto HEXCTRL_VERSION_MINOR = 8;
+	constexpr auto HEXCTRL_VERSION_PATCH = 0;
 
 	using SpanByte = std::span<std::byte>;
 	using SpanCByte = std::span<const std::byte>;
@@ -76,7 +74,7 @@ namespace HEXCTRL {
 		CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG, CMD_APPEAR_FONTINC,
 		CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC, CMD_PRINT_DLG, CMD_ABOUT_DLG,
 		CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,
-		CMD_SCROLL_PAGEUP, CMD_SCROLL_PAGEDOWN,
+		CMD_SCROLL_CURSOR, CMD_SCROLL_PAGEUP, CMD_SCROLL_PAGEDOWN,
 		CMD_TEMPL_APPLYCURR, CMD_TEMPL_DISAPPLY, CMD_TEMPL_DISAPPALL, CMD_TEMPL_DLG_MGR
 	};
 
@@ -514,5 +512,4 @@ namespace HEXCTRL {
 
 //Manifest for the Comctl32.dll v6. Must be here, in header, to pick up v6 for the .dll as well.
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#pragma comment(lib, "Msimg32")
 }

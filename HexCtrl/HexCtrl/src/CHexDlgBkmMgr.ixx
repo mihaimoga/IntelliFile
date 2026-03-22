@@ -6,8 +6,8 @@
 ****************************************************************************************/
 module;
 #include <SDKDDKVer.h>
-#include "../res/HexCtrlRes.h"
 #include "../HexCtrl.h"
+#include "res/HexCtrlRes.h"
 #include <Windows.h>
 #include <commctrl.h>
 #include <algorithm>
@@ -47,7 +47,6 @@ namespace HEXCTRL::INTERNAL {
 		void SetDlgProperties(std::uint64_t u64Flags);
 		void SetVirtual(IHexBookmarks* pVirtBkm);
 		void ShowWindow(int iCmdShow);
-		void SortData(int iColumn, bool fAscending);
 		void Update(ULONGLONG ullID, const HEXBKM& bkm);
 	private:
 		enum class EMenuID : std::uint16_t;
@@ -59,10 +58,13 @@ namespace HEXCTRL::INTERNAL {
 		auto OnCommand(const MSG& msg) -> INT_PTR;
 		void OnCheckHex();
 		auto OnDestroy() -> INT_PTR;
+		auto OnDPIChanged(const MSG& msg) -> INT_PTR;
 		auto OnDrawItem(const MSG& msg) -> INT_PTR;
+		auto OnGetDPIScaledSize(const MSG& msg) -> INT_PTR;
 		auto OnInitDialog(const MSG& msg) -> INT_PTR;
 		auto OnMeasureItem(const MSG& msg) -> INT_PTR;
 		auto OnNotify(const MSG& msg) -> INT_PTR;
+		void OnNotifyListColumnClick();
 		void OnNotifyListDblClick(NMHDR* pNMHDR);
 		void OnNotifyListGetColor(NMHDR* pNMHDR);
 		void OnNotifyListGetDispInfo(NMHDR* pNMHDR);
@@ -71,7 +73,6 @@ namespace HEXCTRL::INTERNAL {
 		void OnNotifyListSetData(NMHDR* pNMHDR);
 		auto OnSize(const MSG& msg) -> INT_PTR;
 		void RemoveBookmark(std::uint64_t ullID);
-		void SortBookmarks();
 		void UpdateListCount(bool fPreserveSelected = false);
 	private:
 		HINSTANCE m_hInstRes { };
@@ -308,7 +309,9 @@ auto CHexDlgBkmMgr::ProcessMsg(const MSG& msg)->INT_PTR
 	case WM_CLOSE: return OnClose();
 	case WM_COMMAND: return OnCommand(msg);
 	case WM_DESTROY: return OnDestroy();
+	case WM_DPICHANGED: return OnDPIChanged(msg);
 	case WM_DRAWITEM: return OnDrawItem(msg);
+	case WM_GETDPISCALEDSIZE: return OnGetDPIScaledSize(msg);
 	case WM_INITDIALOG: return OnInitDialog(msg);
 	case WM_MEASUREITEM: return OnMeasureItem(msg);
 	case WM_NOTIFY: return OnNotify(msg);
@@ -402,42 +405,6 @@ void CHexDlgBkmMgr::ShowWindow(int iCmdShow)
 	}
 
 	m_Wnd.ShowWindow(iCmdShow);
-}
-
-void CHexDlgBkmMgr::SortData(int iColumn, bool fAscending)
-{
-	//iColumn is column number in CHexDlgBkmMgr::m_ListEx.
-	std::sort(m_vecBookmarks.begin(), m_vecBookmarks.end(),
-		[iColumn, fAscending](const HEXBKM& st1, const HEXBKM& st2) {
-			int iCompare { };
-			switch (iColumn) {
-			case 0:
-				break;
-			case 1: //Offset.
-				if (!st1.vecSpan.empty() && !st2.vecSpan.empty()) {
-					const auto ullOffset1 = st1.vecSpan.front().ullOffset;
-					const auto ullOffset2 = st2.vecSpan.front().ullOffset;
-					iCompare = ullOffset1 != ullOffset2 ? (ullOffset1 < ullOffset2 ? -1 : 1) : 0;
-				}
-				break;
-			case 2: //Size.
-				if (!st1.vecSpan.empty() && !st2.vecSpan.empty()) {
-					auto ullSize1 = std::reduce(st1.vecSpan.begin(), st1.vecSpan.end(), 0ULL,
-						[](auto ullTotal, const HEXSPAN& ref) { return ullTotal + ref.ullSize; });
-					auto ullSize2 = std::reduce(st2.vecSpan.begin(), st2.vecSpan.end(), 0ULL,
-						[](auto ullTotal, const HEXSPAN& ref) { return ullTotal + ref.ullSize; });
-					iCompare = ullSize1 != ullSize2 ? (ullSize1 < ullSize2 ? -1 : 1) : 0;
-				}
-				break;
-			case 3: //Description.
-				iCompare = st1.wstrDesc.compare(st2.wstrDesc);
-				break;
-			default:
-				break;
-			}
-
-			return fAscending ? iCompare < 0 : iCompare > 0;
-	});
 }
 
 void CHexDlgBkmMgr::Update(ULONGLONG ullID, const HEXBKM& bkm)
@@ -557,6 +524,12 @@ auto CHexDlgBkmMgr::OnDestroy()->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgBkmMgr::OnDPIChanged([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	m_DynLayout.Enable(true);
+	return 0;
+}
+
 auto CHexDlgBkmMgr::OnDrawItem(const MSG& msg)->INT_PTR
 {
 	const auto pDIS = reinterpret_cast<LPDRAWITEMSTRUCT>(msg.lParam);
@@ -567,21 +540,32 @@ auto CHexDlgBkmMgr::OnDrawItem(const MSG& msg)->INT_PTR
 	return TRUE;
 }
 
+auto CHexDlgBkmMgr::OnGetDPIScaledSize([[maybe_unused]] const MSG& msg)->INT_PTR
+{
+	//This message is sent to top-level windows with a DPI_AWARENESS_CONTEXT
+	//of Per Monitor v2 before a WM_DPICHANGED message is sent.
+	//We use it to temporarily disable all dynamic layout resizes,
+	//to re-enable it later in the WM_DPICHANGED handler.
+
+	m_DynLayout.Enable(false);
+	return 0;
+}
+
 auto CHexDlgBkmMgr::OnInitDialog(const MSG& msg)->INT_PTR
 {
 	m_Wnd.Attach(msg.hwnd);
 	m_WndBtnHex.Attach(m_Wnd.GetDlgItem(IDC_HEXCTRL_BKMMGR_CHK_HEX));
 
-	m_ListEx.Create({ .hWndParent { m_Wnd }, .uID { IDC_HEXCTRL_BKMMGR_LIST }, .dwSizeFontList { 10 },
-		.dwSizeFontHdr { 10 }, .fDialogCtrl { true } });
+	m_ListEx.Create({ .hWndParent { m_Wnd }, .uID { IDC_HEXCTRL_BKMMGR_LIST }, .flSizeFontList { 10.F },
+		.flSizeFontHdr { 10.F }, .fDialogCtrl { true }, .fSortable { true } });
 	m_ListEx.SetExtendedStyle(LVS_EX_HEADERDRAGDROP | LVS_EX_FULLROWSELECT);
-	m_ListEx.SetSortable(true);
-	m_ListEx.InsertColumn(0, L"№", LVCFMT_LEFT, 40);
-	m_ListEx.InsertColumn(1, L"Offset", LVCFMT_LEFT, 80, -1, 0, true);
-	m_ListEx.InsertColumn(2, L"Size", LVCFMT_LEFT, 50, -1, 0, true);
-	m_ListEx.InsertColumn(3, L"Description", LVCFMT_LEFT, 250, -1, 0, true);
-	m_ListEx.InsertColumn(4, L"Bk", LVCFMT_LEFT, 40);
-	m_ListEx.InsertColumn(5, L"Text", LVCFMT_LEFT, 40);
+	const auto flDPIScale = GDIUT::GetDPIScaleForHWND(m_ListEx);
+	m_ListEx.InsertColumn(0, L"№", LVCFMT_LEFT, std::lround(40 * flDPIScale));
+	m_ListEx.InsertColumn(1, L"Offset", LVCFMT_LEFT, std::lround(80 * flDPIScale), -1, 0, true);
+	m_ListEx.InsertColumn(2, L"Size", LVCFMT_LEFT, std::lround(50 * flDPIScale), -1, 0, true);
+	m_ListEx.InsertColumn(3, L"Description", LVCFMT_LEFT, std::lround(250 * flDPIScale), -1, 0, true);
+	m_ListEx.InsertColumn(4, L"Bk", LVCFMT_LEFT, std::lround(40 * flDPIScale));
+	m_ListEx.InsertColumn(5, L"Text", LVCFMT_LEFT, std::lround(40 * flDPIScale));
 
 	m_menuList.CreatePopupMenu();
 	m_menuList.AppendString(static_cast<UINT_PTR>(EMenuID::IDM_BKMMGR_REMOVE), L"Remove");
@@ -616,19 +600,64 @@ auto CHexDlgBkmMgr::OnNotify(const MSG& msg)->INT_PTR
 	switch (pNMHDR->idFrom) {
 	case IDC_HEXCTRL_BKMMGR_LIST:
 		switch (pNMHDR->code) {
+		case LVN_COLUMNCLICK: OnNotifyListColumnClick(); break;
 		case LVN_GETDISPINFOW: OnNotifyListGetDispInfo(pNMHDR); break;
 		case LVN_ITEMCHANGED: OnNotifyListItemChanged(pNMHDR); break;
 		case NM_DBLCLK: OnNotifyListDblClick(pNMHDR); break;
 		case NM_RCLICK: OnNotifyListRClick(pNMHDR); break;
 		case LISTEX::LISTEX_MSG_GETCOLOR: OnNotifyListGetColor(pNMHDR); break;
 		case LISTEX::LISTEX_MSG_SETDATA: OnNotifyListSetData(pNMHDR); break;
-		case LVN_COLUMNCLICK: if (!IsVirtual()) { SortBookmarks(); }return TRUE;
 		default: break;
 		}
 	default: break;
 	}
 
 	return TRUE;
+}
+
+void CHexDlgBkmMgr::OnNotifyListColumnClick()
+{
+	if (IsVirtual())
+		return;
+
+	//Sort bookmarks according to a clicked column.
+	const auto iColumn = m_ListEx.GetSortColumn();
+	const auto fAscending = m_ListEx.GetSortAscending();
+	std::sort(m_vecBookmarks.begin(), m_vecBookmarks.end(),
+		[iColumn, fAscending](const HEXBKM& st1, const HEXBKM& st2) {
+			int iCompare { };
+			switch (iColumn) {
+			case 0:
+				break;
+			case 1: //Offset.
+				if (!st1.vecSpan.empty() && !st2.vecSpan.empty()) {
+					const auto ullOffset1 = st1.vecSpan.front().ullOffset;
+					const auto ullOffset2 = st2.vecSpan.front().ullOffset;
+					iCompare = ullOffset1 != ullOffset2 ? (ullOffset1 < ullOffset2 ? -1 : 1) : 0;
+				}
+				break;
+			case 2: //Size.
+				if (!st1.vecSpan.empty() && !st2.vecSpan.empty()) {
+					auto ullSize1 = std::reduce(st1.vecSpan.begin(), st1.vecSpan.end(), 0ULL,
+						[](auto ullTotal, const HEXSPAN& ref) { return ullTotal + ref.ullSize; });
+					auto ullSize2 = std::reduce(st2.vecSpan.begin(), st2.vecSpan.end(), 0ULL,
+						[](auto ullTotal, const HEXSPAN& ref) { return ullTotal + ref.ullSize; });
+					iCompare = ullSize1 != ullSize2 ? (ullSize1 < ullSize2 ? -1 : 1) : 0;
+				}
+				break;
+			case 3: //Description.
+				iCompare = st1.wstrDesc.compare(st2.wstrDesc);
+				break;
+			default:
+				break;
+			}
+
+			return fAscending ? iCompare < 0 : iCompare > 0;
+	});
+
+	if (::IsWindow(m_ListEx.GetHWND())) {
+		m_ListEx.RedrawWindow();
+	}
 }
 
 void CHexDlgBkmMgr::OnNotifyListDblClick(NMHDR* pNMHDR)
@@ -826,16 +855,6 @@ void CHexDlgBkmMgr::RemoveBookmark(std::uint64_t ullID)
 	if (const auto it = std::find_if(m_vecBookmarks.begin(), m_vecBookmarks.end(),
 		[ullID](const HEXBKM& ref) { return ullID == ref.ullID; }); it != m_vecBookmarks.end()) {
 		m_vecBookmarks.erase(it);
-	}
-}
-
-void CHexDlgBkmMgr::SortBookmarks()
-{
-	//Sort bookmarks according to clicked column.
-	SortData(m_ListEx.GetSortColumn(), m_ListEx.GetSortAscending());
-
-	if (::IsWindow(m_ListEx.GetHWND())) {
-		m_ListEx.RedrawWindow();
 	}
 }
 

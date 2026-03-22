@@ -3,7 +3,7 @@
 #include "Resource.h"
 #include <filesystem>
 #include <random>
-import StrToNum;
+import HexCtrl_StrToNum;
 
 namespace stn = HEXCTRL::stn;
 
@@ -15,6 +15,8 @@ constexpr const auto WstrTextRO { L"Random data: RO" };
 constexpr const auto WstrTextRW { L"Random data: RW" };
 
 BEGIN_MESSAGE_MAP(CMFCDialogDlg, CDialogEx)
+	ON_MESSAGE(WM_DPICHANGED, &CMFCDialogDlg::OnDPIChanged)
+	ON_MESSAGE(WM_GETDPISCALEDSIZE, &CMFCDialogDlg::OnGetDPIScaledSize)
 	ON_WM_CLOSE()
 	ON_BN_CLICKED(IDC_SETDATARND, &CMFCDialogDlg::OnBnSetRndData)
 	ON_BN_CLICKED(IDC_CLEARDATA, &CMFCDialogDlg::OnBnClearData)
@@ -22,15 +24,9 @@ BEGIN_MESSAGE_MAP(CMFCDialogDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_HEXPOPUP, &CMFCDialogDlg::OnBnPopup)
 	ON_BN_CLICKED(IDC_CHK_RW, &CMFCDialogDlg::OnChkRW)
 	ON_WM_DROPFILES()
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
 
-CMFCDialogDlg::CMFCDialogDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_HEXCTRL_SAMPLE, pParent)
-{
-	m_hIcon = AfxGetApp()->LoadIconW(IDR_MAINFRAME);
-}
+CMFCDialogDlg::CMFCDialogDlg(CWnd* pParent) : CDialogEx(IDD_HEXCTRL_SAMPLE, pParent) { }
 
 void CMFCDialogDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -46,8 +42,9 @@ BOOL CMFCDialogDlg::OnInitDialog()
 
 	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
-	SetIcon(m_hIcon, TRUE);	 //Set big icon
-	SetIcon(m_hIcon, FALSE); //Set small icon
+	const auto hIcon = AfxGetApp()->LoadIconW(IDR_MAINFRAME);
+	SetIcon(hIcon, TRUE);  //Set big icon
+	SetIcon(hIcon, FALSE); //Set small icon
 	m_editDataSize.SetWindowTextW(L"0x4000");
 	m_chkRW.SetCheck(BST_CHECKED);
 
@@ -61,15 +58,15 @@ BOOL CMFCDialogDlg::OnInitDialog()
 	m_pHexDlg->CreateDialogCtrl(IDC_MY_HEX, m_hWnd);
 	m_pHexDlg->SetScrollRatio(2, true); //Two lines scroll with mouse-wheel.
 	m_pHexDlg->SetPageSize(64);
-	//	m_pHexDlg->SetDlgProperties(EHexWnd::DLG_CODEPAGE, HEXCTRL_FLAG_DLG_NOESC);
-	//	m_pHexDlg->SetCharsExtraSpace(2);
+	//m_pHexDlg->SetDlgProperties(EHexWnd::DLG_CODEPAGE, HEXCTRL_FLAG_DLG_NOESC);
+	//m_pHexDlg->SetCharsExtraSpace(2);
 
 	LoadTemplates(&*m_pHexDlg);
 	//OnBnSetRndData();
 	//m_pHexDlg->ExecuteCmd(EHexCmd::CMD_BKM_DLG_MGR);
 
-//	m_hds.pHexVirtColors = this;
-//	m_hds.fHighLatency = true;
+	//m_hds.pHexVirtColors = this;
+	//m_hds.fHighLatency = true;
 
 	m_chkLnk.SetCheck(BST_CHECKED);
 
@@ -77,39 +74,9 @@ BOOL CMFCDialogDlg::OnInitDialog()
 		FileOpen(m_wstrStartupFile, IsLnk());
 	}
 
-	if (const auto pDL = GetDynamicLayout(); pDL != nullptr) {
-		pDL->SetMinSize({ 0, 0 });
-	}
+	GetDynamicLayout()->SetMinSize({ 0, 0 });
 
 	return TRUE;
-}
-
-void CMFCDialogDlg::OnPaint()
-{
-	if (IsIconic()) {
-		CPaintDC dc(this);
-
-		SendMessageW(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
-
-		// Center icon in client rectangle
-		const auto cxIcon = GetSystemMetrics(SM_CXICON);
-		const auto cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		const auto x = (rect.Width() - cxIcon + 1) / 2;
-		const auto y = (rect.Height() - cyIcon + 1) / 2;
-
-		// Draw the icon
-		dc.DrawIcon(x, y, m_hIcon);
-	}
-	else {
-		CDialogEx::OnPaint();
-	}
-}
-
-HCURSOR CMFCDialogDlg::OnQueryDragIcon()
-{
-	return static_cast<HCURSOR>(m_hIcon);
 }
 
 void CMFCDialogDlg::OnBnClearData()
@@ -207,6 +174,16 @@ void CMFCDialogDlg::OnClose()
 	CDialogEx::OnClose();
 }
 
+auto CMFCDialogDlg::OnDPIChanged(WPARAM /*wParam*/, LPARAM /*lParam*/)->LRESULT
+{
+	const auto ret = CDialogEx::Default();
+	EnableDynamicLayout(TRUE);
+	LoadDynamicLayoutResource(MAKEINTRESOURCEW(IDD_HEXCTRL_SAMPLE));
+	GetDynamicLayout()->SetMinSize({ 0, 0 });
+
+	return ret;
+}
+
 void CMFCDialogDlg::OnDropFiles(HDROP hDropInfo)
 {
 	PVOID pOldValue;
@@ -223,6 +200,13 @@ void CMFCDialogDlg::OnDropFiles(HDROP hDropInfo)
 
 	CDialogEx::OnDropFiles(hDropInfo);
 	Wow64RevertWow64FsRedirection(pOldValue);
+}
+
+auto CMFCDialogDlg::OnGetDPIScaledSize(WPARAM /*wParam*/, LPARAM /*lParam*/)->LRESULT
+{
+	EnableDynamicLayout(FALSE);
+
+	return CDialogEx::Default();
 }
 
 BOOL CMFCDialogDlg::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)

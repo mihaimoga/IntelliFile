@@ -24,8 +24,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "genUp4win", "genUp4win\genU
 		{19CCA8B8-46B9-4609-B7CE-198DA19F07BD} = {19CCA8B8-46B9-4609-B7CE-198DA19F07BD}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample MFC Dialog", "HexCtrl\VS Projects\MFC Dialog\MFC Dialog.vcxproj", "{780C336D-23D1-4A79-A0DA-E6296E63C8A0}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -96,18 +94,6 @@ Global
 		{B404DF9B-63E6-4D23-8116-A0C28B9DA2A7}.Release|Win32.Build.0 = Release|Win32
 		{B404DF9B-63E6-4D23-8116-A0C28B9DA2A7}.Release|x64.ActiveCfg = Release|x64
 		{B404DF9B-63E6-4D23-8116-A0C28B9DA2A7}.Release|x64.Build.0 = Release|x64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|ARM64.Build.0 = Debug|ARM64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|Win32.Build.0 = Debug|Win32
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|x64.ActiveCfg = Debug|x64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Debug|x64.Build.0 = Debug|x64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|ARM64.ActiveCfg = Release|ARM64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|ARM64.Build.0 = Release|ARM64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|Win32.ActiveCfg = Release|Win32
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|Win32.Build.0 = Release|Win32
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|x64.ActiveCfg = Release|x64
-		{780C336D-23D1-4A79-A0DA-E6296E63C8A0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

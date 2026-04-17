@@ -107,7 +107,7 @@ This open source project uses the following libraries:
 
 - René Nyffenegger's [base64](https://github.com/ReneNyffenegger/cpp-base64)
 - Armen Hakobyan's [CFolderDialog](https://www.codeproject.com/articles/CFolderDialog-Selecting-Folders)
-- [genUp4win](https://github.com/mihaimoga/genUp4win)
+- Stefan-Mihai MOGA's [genUp4win](https://github.com/mihaimoga/genUp4win)
 - Jovibor's [HexCtrl](https://github.com/jovibor/HexCtrl)
 - PJ Naughter's [CHLinkCtrl](https://www.naughter.com/hlinkctrl.html)
 - PJ Naughter's [CInstanceChecker](https://www.naughter.com/sinstance.html)

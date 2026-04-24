@@ -132,7 +132,7 @@ CCheckForUpdatesDlg* g_dlgCheckForUpdates = nullptr;
  * @param Unused status code parameter (reserved for future use).
  * @param strMessage Status message to display to the user.
  */
-void UI_Callback(int, const std::wstring& strMessage)
+void UI_Callback(int, const std::wstring& strMessage, const int& nProgress)
 {
 	// Check if dialog still exists (may be null if dialog was closed)
 	if (g_dlgCheckForUpdates != nullptr)
@@ -141,7 +141,12 @@ void UI_Callback(int, const std::wstring& strMessage)
 		g_dlgCheckForUpdates->m_ctrlStatusMessage.SetWindowText(strMessage.c_str());
 		// Force immediate repaint to show the message
 		g_dlgCheckForUpdates->m_ctrlStatusMessage.UpdateWindow();
+		// Update progress bar position (0-100)
+		g_dlgCheckForUpdates->m_ctrlProgress.SetPos(nProgress);
+		// Force immediate repaint of progress bar
+		g_dlgCheckForUpdates->m_ctrlProgress.UpdateWindow();
 	}
+	TRACE(_T("%s %d%%\n"), strMessage.c_str(), nProgress); // Log the status message for debugging
 }
 
 /**
@@ -190,13 +195,6 @@ DWORD WINAPI UpdateThreadProc(LPVOID lpParam)
 	// Signal that thread is running
 	g_bThreadRunning = true;
 
-	// Start progress bar marquee animation (continuous scrolling)
-	if (g_dlgCheckForUpdates != nullptr)
-	{
-		// TRUE = enable marquee mode, 30 = animation speed in milliseconds
-		g_dlgCheckForUpdates->m_ctrlProgress.SetMarquee(TRUE, 30);
-	}
-
 	// Get the full path to the current executable
 	const DWORD nLength = 0x1000; // 4096 bytes (sufficient for MAX_PATH)
 	TCHAR lpszFilePath[nLength] = { 0, };
@@ -208,13 +206,6 @@ DWORD WINAPI UpdateThreadProc(LPVOID lpParam)
 	// - UI_Callback: Function to call with status updates
 	// Returns true if a new update was found and installer was launched
 	g_bNewUpdateFound = CheckForUpdates(lpszFilePath, APPLICATION_URL, UI_Callback);
-
-	// Stop progress bar animation
-	if (g_dlgCheckForUpdates != nullptr)
-	{
-		// FALSE = disable marquee mode
-		g_dlgCheckForUpdates->m_ctrlProgress.SetMarquee(FALSE, 30);
-	}
 
 	// Signal that thread has completed
 	g_bThreadRunning = false;
@@ -244,6 +235,8 @@ BOOL CCheckForUpdatesDlg::OnInitDialog()
 {
 	// Call base class initialization
 	CDialogEx::OnInitDialog();
+	// Set progress bar range (0-100 for percentage)
+	m_ctrlProgress.SetRange32(0, 100);
 
 #ifdef _DEBUG
 	// Debug builds: Create configuration file for update testing

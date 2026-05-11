@@ -110,6 +110,7 @@ void CBase64Dlg::OnBnClickedEncode()
 		}
 		else
 		{
+			bool bResizeFailed = false;
 			std::vector<char> memblock;
 			try
 			{
@@ -117,46 +118,51 @@ void CBase64Dlg::OnBnClickedEncode()
 			}
 			catch (...)
 			{
-				pInputFile.close();
+				bResizeFailed = true;
 				AfxMessageBox(IDS_MEMALLOC_FAILED, MB_ICONERROR);
-				return;
 			}
 
-			pInputFile.seekg(0, std::ios::beg);
-			pInputFile.read(memblock.data(), size);
-			if (!pInputFile)
+			if (!bResizeFailed)
 			{
-				AfxMessageBox(IDS_READ_INPUT_FAILED, MB_ICONERROR);
-			}
-			else
-			{
-				memblock[size] = 0;
-				std::string encoded;
-				try
+				pInputFile.seekg(0, std::ios::beg);
+				pInputFile.read(memblock.data(), size);
+				if (!pInputFile)
 				{
-					encoded = base64_encode(reinterpret_cast<const unsigned char*>(memblock.data()), size);
-				}
-				catch (...)
-				{
-					pInputFile.close();
-					AfxMessageBox(IDS_ENCODE_FAILED, MB_ICONERROR);
-					return;
-				}
-
-				std::ofstream pOutputFile(m_strOutputFile.GetBuffer(), std::ofstream::out | std::ofstream::binary);
-				m_strOutputFile.ReleaseBuffer();
-				if (!pOutputFile.is_open())
-				{
-					AfxMessageBox(IDS_WRITE_OPEN_FAILED, MB_ICONERROR);
+					AfxMessageBox(IDS_READ_INPUT_FAILED, MB_ICONERROR);
 				}
 				else
 				{
-					pOutputFile.write(encoded.c_str(), encoded.length());
-					if (!pOutputFile)
+					bool bEncodeFailed = false;
+					memblock[size] = 0;
+					std::string encoded;
+					try
 					{
-						AfxMessageBox(IDS_WRITE_OUTPUT_FAILED, MB_ICONERROR);
+						encoded = base64_encode(reinterpret_cast<const unsigned char*>(memblock.data()), size);
 					}
-					pOutputFile.close();
+					catch (...)
+					{
+						bEncodeFailed = true;
+						AfxMessageBox(IDS_ENCODE_FAILED, MB_ICONERROR);
+					}
+
+					if (!bEncodeFailed)
+					{
+						std::ofstream pOutputFile(m_strOutputFile.GetBuffer(), std::ofstream::out | std::ofstream::binary);
+						m_strOutputFile.ReleaseBuffer();
+						if (!pOutputFile.is_open())
+						{
+							AfxMessageBox(IDS_WRITE_OPEN_FAILED, MB_ICONERROR);
+						}
+						else
+						{
+							pOutputFile.write(encoded.c_str(), encoded.length());
+							if (!pOutputFile)
+							{
+								AfxMessageBox(IDS_WRITE_OUTPUT_FAILED, MB_ICONERROR);
+							}
+							pOutputFile.close();
+						}
+					}
 				}
 			}
 		}
@@ -183,6 +189,7 @@ void CBase64Dlg::OnBnClickedDecode()
 		}
 		else
 		{
+			bool bResizeFailed = false;
 			std::vector<char> memblock;
 			try
 			{
@@ -190,46 +197,51 @@ void CBase64Dlg::OnBnClickedDecode()
 			}
 			catch (...)
 			{
-				pInputFile.close();
+				bResizeFailed = true;
 				AfxMessageBox(IDS_MEMALLOC_FAILED, MB_ICONERROR);
-				return;
 			}
 
-			pInputFile.seekg(0, std::ios::beg);
-			pInputFile.read(memblock.data(), size);
-			if (!pInputFile)
+			if (!bResizeFailed)
 			{
-				AfxMessageBox(IDS_READ_INPUT_FAILED, MB_ICONERROR);
-			}
-			else
-			{
-				memblock[size] = 0;
-				std::string decoded;
-				try
+				pInputFile.seekg(0, std::ios::beg);
+				pInputFile.read(memblock.data(), size);
+				if (!pInputFile)
 				{
-					decoded = base64_decode(memblock.data());
-				}
-				catch (...)
-				{
-					pInputFile.close();
-					AfxMessageBox(IDS_DECODE_FAILED, MB_ICONERROR);
-					return;
-				}
-
-				std::ofstream pOutputFile(m_strOutputFile.GetBuffer(), std::ofstream::out | std::ofstream::binary);
-				m_strOutputFile.ReleaseBuffer();
-				if (!pOutputFile.is_open())
-				{
-					AfxMessageBox(IDS_WRITE_OPEN_FAILED, MB_ICONERROR);
+					AfxMessageBox(IDS_READ_INPUT_FAILED, MB_ICONERROR);
 				}
 				else
 				{
-					pOutputFile.write(decoded.c_str(), decoded.length());
-					if (!pOutputFile)
+					bool bDecodeFailed = false;
+					memblock[size] = 0;
+					std::string decoded;
+					try
 					{
-						AfxMessageBox(IDS_WRITE_OUTPUT_FAILED, MB_ICONERROR);
+						decoded = base64_decode(memblock.data());
 					}
-					pOutputFile.close();
+					catch (...)
+					{
+						bDecodeFailed = true;
+						AfxMessageBox(IDS_DECODE_FAILED, MB_ICONERROR);
+					}
+
+					if (!bDecodeFailed)
+					{
+						std::ofstream pOutputFile(m_strOutputFile.GetBuffer(), std::ofstream::out | std::ofstream::binary);
+						m_strOutputFile.ReleaseBuffer();
+						if (!pOutputFile.is_open())
+						{
+							AfxMessageBox(IDS_WRITE_OPEN_FAILED, MB_ICONERROR);
+						}
+						else
+						{
+							pOutputFile.write(decoded.c_str(), decoded.length());
+							if (!pOutputFile)
+							{
+								AfxMessageBox(IDS_WRITE_OUTPUT_FAILED, MB_ICONERROR);
+							}
+							pOutputFile.close();
+						}
+					}
 				}
 			}
 		}

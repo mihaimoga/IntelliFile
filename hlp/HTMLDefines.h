@@ -107,7 +107,7 @@
 // OLE menu and aliases
 #define HID_OLE_VERB_1                          0x1E21F
 
-// Commands (HID_*) 
+// Commands (HID_*)
 #define HID_FILE_NEW                            0x1E100
 #define HID_FILE_OPEN                           0x1E101
 #define HID_FILE_CLOSE                          0x1E102

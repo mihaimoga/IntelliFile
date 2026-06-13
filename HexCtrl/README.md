@@ -72,6 +72,7 @@
   * [SetFont](#setfont)
   * [SetGroupSize](#setgroupsize)
   * [SetHexCharsCase](#sethexcharscase)
+  * [SetMenuItem](#setmenuitem)
   * [SetMutable](#setmutable)
   * [SetOffsetMode](#setoffsetmode)
   * [SetPageSize](#setpagesize)
@@ -79,7 +80,6 @@
   * [SetScrollRatio](#setscrollratio)
   * [SetSelection](#setselection)
   * [SetUnprintableChar](#setunprintablechar)
-  * [SetVirtualBkm](#setvirtualbkm)
   * [SetWindowPos](#setwindowpos)
   * [ShowInfoBar](#showinfobar)
    </details>
@@ -107,6 +107,8 @@
 * [Enums](#enums) <details><summary>_Expand_</summary>
   * [EHexCmd](#ehexcmd)
   * [EHexDataType](#ehexdatatype)
+  * [EHexDlgItem](#ehexdlgitem)
+  * [EHexMenuItem](#ehexmenuitem)
   * [EHexModifyMode](#ehexmodifymode)
   * [EHexOperMode](#ehexopermode)
   * [EHexWnd](#ehexwnd)
@@ -153,12 +155,10 @@
 * Powerful system of [Templates](#templates)
 * [Assignable keyboard shortcuts](#setconfig) via external config file
 * Customizable look and appearance, font, colors
-* **High-DPI** compliant
+* **Per-Monitor V2 High-DPI Awareness** compliant
 * Utilizes **AVX/AVX2** instruction set for best performance
 * Supports compiling for the **ARM64** architecture
 * Written with the **/std:c++20** standard conformance
-
-![](docs/img/HexCtrl_Operations.jpg)
 
 ## [](#)How To Build
 `git clone https://github.com/jovibor/HexCtrl.git`  
@@ -178,13 +178,30 @@ To build **HexCtrl** from the sources:
 To build and use **HexCtrl** as a DLL:
 1. Build **HexCtrl{x86/x64/ARM64}.dll** and **HexCtrl{x86/x64/ARM64}.lib** with the **HexCtrl DLL.vcxproj**  project
 1. Add `HexCtrl.h` header into your project
-1. Add `/DHEXCTRL_DYNAMIC_LIB` compiler option, or alternatively `#define` it before including `HexCtrl.h`:
+1. Tell to the linker a name of the **HexCtrl**'s `.lib` file.  
+You can do it manually in your project settings, or with the help of this macro, which will expand and link to the appropriate `.lib` name based on current arch (`x86/x64/ARM64`) and build type (`Debug/Release`):
     ```cpp
-    #define HEXCTRL_DYNAMIC_LIB
-    #include "HexCtrl.h"
+    #ifdef _M_IX86
+    #ifdef _DEBUG
+    define HEXCTRL_LIBNAME "HexCtrlx86D"
+    #else //^^^ _DEBUG / vvv !_DEBUG
+    #define HEXCTRL_LIBNAME "HexCtrlx86"
+    #endif //^^^ !_DEBUG
+    #elif defined(_M_X64) //^^^ _M_IX86 / vvv _M_X64
+    #ifdef _DEBUG
+    #define HEXCTRL_LIBNAME "HexCtrlx64D"
+    #else //^^^ _DEBUG / vvv !_DEBUG
+    #define HEXCTRL_LIBNAME "HexCtrlx64"
+    #endif //^^^ !_DEBUG
+    #elif defined(_M_ARM64) //^^^ _M_X64 / vvv _M_ARM64
+    #ifdef _DEBUG
+    #define HEXCTRL_LIBNAME "HexCtrlARM64D"
+    #else //^^^ _DEBUG / vvv !_DEBUG
+    #define HEXCTRL_LIBNAME "HexCtrlARM64"
+    #endif //^^^ _DEBUG
+    #endif //^^^ _M_ARM64
+    #pragma comment(lib, HEXCTRL_LIBNAME)
     ```
-1. Declare `IHexCtrlPtr` object: `auto myHex { HEXCTRL::CreateHexCtrl() };`
-1. [Create](#creating) control instance
 
 ## [](#)Creating
 
@@ -251,7 +268,8 @@ Then provide a pointer to the created object of this derived class through the `
 ## [](#)Virtual Bookmarks
 **HexCtrl** has innate functional to work with any amount of bookmarked regions. These regions can be assigned with individual background and text colors and description.
 
-But if you have big and complicated data logic and want to handle all these bookmarks yourself, you can do it with the help of the **Virtual Bookmarks** mode. In this mode all bookmark's burden is handled by yourself, by implementing the [`IHexBookmarks`](#ihexbookmarks) interface and providing pointer to this implementation to the **HexCtrl** by calling the [`SetVirtualBkm`](#setvirtualbkm) method.
+But if you have big and complicated data logic and want to handle all these bookmarks yourself, you can do it using the **Virtual Bookmarks** mode.  
+In this mode all bookmark's burden is handled by yourself, by implementing the [`IHexBookmarks`](#ihexbookmarks) interface, and providing pointer to this implementation to the **HexCtrl** by calling the [`IHexBookmarks::SetVirtualBkm`](#ihexbookmarks) method.
 
 ## [](#)Custom Colors
 If you'd like to colorize data regions with your own custom colors, use the [`IHexVirtColors`](#ihexvirtcolors) interface.
@@ -354,19 +372,19 @@ The **HexCtrl** has plenty of methods that you can use to manage its behavior.
 ```cpp
 void ClearData();
 ```
-Clears data from the **HexCtrl** view, not touching data itself.
+Clears data from the **HexCtrl** view, not touching the data itself.
 
 ### [](#)Create
 ```cpp
-bool Create(const HEXCREATE& hcs);
+bool Create(const HEXCREATE& hc);
 ```
-Main initialization method. Takes the [`HEXCREATE`](#hexcreate) struct as argument. Returns `true` if created successfully, `false` otherwise.
+This is the main initialization method. It takes a [`HEXCREATE`](#hexcreate) struct as an argument and returns `true` on success.
 
 ### [](#)CreateDialogCtrl
 ```cpp
 bool CreateDialogCtrl(UINT uCtrlID, HWND hwndDlg);
 ```
-Creates **HexCtrl** from a **Custom Control** dialog's template. Takes control **id**, and dialog's window **handle** as arguments. See **[Creating](#in-dialog)** section for more info.
+Creates **HexCtrl** from a **Custom Control** dialog's template. It takes the control ID and dialog's window handle as arguments. See **[Creating](#in-dialog)** section for more info.
 
 ### [](#)Delete
 ```cpp
@@ -399,7 +417,7 @@ Returns the width of the **HexCtrl** bounding rectangle, i.e. the width of the d
 ```cpp
 [[nodiscard]] auto GetBookmarks()->IHexBookmarks*;
 ```
-Returns pointer to the [`IHexBookmarks`](#ihexbookmarks) interface, which responds for the bookmarks machinery.
+Returns a pointer to the [`IHexBookmarks`](#ihexbookmarks) interface, which responds for the bookmarks machinery.
 
 ### [](#)GetCacheSize
 ```cpp
@@ -417,13 +435,13 @@ Returns current capacity.
 ```cpp
 [[nodiscard]] auto GetCaretPos()const->ULONGLNG;
 ```
-Retrieves current caret position offset.
+Returns the caret's position.
 
 ### [](#)GetCharsExtraSpace
 ```cpp
 [[nodiscard]] auto GetCharsExtraSpace()const->DWORD;
 ```
-Get extra space between chars, in pixels. This extra space can be set with the [`SetCharsExtraSpace`](#setcharsextraspace) method.
+Returns extra space between chars, in pixels. This extra space can be set with the [`SetCharsExtraSpace`](#setcharsextraspace) method.
 
 ### [](#)GetColors
 ```cpp
@@ -480,9 +498,9 @@ Returns current data grouping size.
 ```cpp
 [[nodiscard]] auto GetMenuHandle()const->HMENU;
 ```
-Returns the `HMENU` handle of the **HexCtrl** context menu. You can use this handle to customize menu for your needs.  
+Returns a `HMENU` handle of the **HexCtrl** context menu. You can use this handle to customize menu for your needs.  
 **HexCtrl**'s internal menu uses `ID`s starting from `0x8001`. So if you wish to add your own new menu, assign menu `ID` starting from `0x9000` to not interfere.  
-When a user clicks custom menu, control sends `WM_NOTIFY` message to its parent window with `LPARAM` pointing to [`HEXMENUINFO`](#hexmenuinfo) with its `hdr.code` member set to `HEXCTRL_MSG_MENUCLICK`, and `wMenuID` field containing `ID` of the menu clicked.
+When the user clicks custom menu, control sends `WM_NOTIFY` message to its parent window with `LPARAM` pointing to [`HEXMENUINFO`](#hexmenuinfo) with its `hdr.code` member set to `HEXCTRL_MSG_MENUCLICK` and `wMenuID` field containing `ID` of the menu clicked.
 
 ### [](#)GetOffset
 ```cpp
@@ -730,17 +748,23 @@ void SetHexCharsCase(bool fUpper);
 ```
 Sets printed hex chars to an UPPER or lower case.
 
+### [](#)SetMenuItem
+```cpp
+void SetMenuItem(EHexMenuItem eItem, const MENUITEMINFOW& mii);
+```
+Sets a standard Windows [`MENUITEMINFOW`](https://learn.microsoft.com/windows/win32/api/winuser/ns-winuser-menuiteminfow) struct data to one of the **HexCtrl** menu items.
+
 ### [](#)SetMutable
 ```cpp
 void SetMutable(bool fMutable);
 ```
-Enables or disables mutable mode. In the mutable mode all the data can be modified.
+Enables or disables mutable mode, in which all data can be modified.
 
 ### [](#)SetOffsetMode
 ```cpp
 void SetOffsetMode(bool fHex);
 ```
-Sets offset area being shown as Hex (`fHex=true`) or as Decimal (`fHex=false`).
+Sets the hex or decimal data format for the offset area.
 
 ### [](#)SetPageSize
 ```cpp
@@ -772,12 +796,6 @@ Sets current selection or highlight in the selection, if `fHighlight` is `true`.
 void SetUnprintableChar(wchar_t wch);
 ```
 Sets replacement char for unprintable characters.
-
-### [](#)SetVirtualBkm
-```cpp
-void SetVirtualBkm(IHexBookmarks* pVirtBkm);
-```
-Sets a pointer for the [Virtual Bookmarks](#virtual-bookmarks) mode, or disables this mode if `nullptr` is set.
 
 ### [](#)SetWindowPos
 ```cpp
@@ -1009,19 +1027,7 @@ struct HEXVISION {
 ## [](#)Interfaces
 
 ### [](#)IHexBookmarks
-The `IHexBookmarks` interface responds for the **HexCtrl**'s bookmarks machinery. To obtain pointer to this interface use the [`GetBookmarks`](#getbookmarks) method.
-```cpp
-class IHexBookmarks {
-public:
-    virtual auto AddBkm(const HEXBKM& hbs, bool fRedraw = true) -> ULONGLONG = 0; //Add new bookmark, returns the new bookmark's ID.
-    [[nodiscard]] virtual auto GetByID(ULONGLONG ullID) -> PHEXBKM = 0;           //Get bookmark by ID.
-    [[nodiscard]] virtual auto GetByIndex(ULONGLONG ullIndex) -> PHEXBKM = 0;     //Get bookmark by index.
-    [[nodiscard]] virtual auto GetCount() -> ULONGLONG = 0;                       //Get bookmarks count.
-    [[nodiscard]] virtual auto HitTest(ULONGLONG ullOffset) -> PHEXBKM = 0;       //HitTest for given offset.
-    virtual void RemoveAll() = 0;                                                 //Remove all bookmarks.
-    virtual void RemoveByID(ULONGLONG ullID) = 0;                                 //Remove by a given ID.
-};
-```
+This interface is responsible for the **HexCtrl**'s bookmarks machinery. To obtain a pointer to this interface use the [`GetBookmarks`](#getbookmarks) method.
 
 #### [](#)IHexBookmarks::AddBkm
 ```cpp
@@ -1075,22 +1081,15 @@ void RemoveByID(ULONGLONG ullID);
 ```
 Removes bookmark with the given ID.
 
-### [](#)IHexTemplates
+#### [](#)IHexBookmarks::SetVirtualBkm
 ```cpp
-class IHexTemplates {
-public:
-    virtual auto AddTemplate(const HEXTEMPLATE& hts) -> int = 0; //Adds existing template.
-    virtual auto ApplyTemplate(ULONGLONG ullOffset, int iTemplateID) -> int = 0; //Applies template to offset, returns AppliedID.
-    virtual void DisapplyAll() = 0;
-    virtual void DisapplyByID(int iAppliedID) = 0;
-    virtual void DisapplyByOffset(ULONGLONG ullOffset) = 0;
-    virtual auto LoadTemplate(const wchar_t* pFilePath) -> int = 0; //Returns TemplateID on success, null otherwise.
-    virtual void ShowTooltips(bool fShow) = 0;
-    virtual void UnloadAll() = 0;                     //Unload all templates.
-    virtual void UnloadTemplate(int iTemplateID) = 0; //Unload/remove loaded template from memory.
-    [[nodiscard]] static HEXCTRLAPI auto __cdecl LoadFromFile(const wchar_t* pFilePath)->std::unique_ptr<HEXTEMPLATE>;
-};
+void SetVirtualBkm(IHexBookmarks* pVirtBkm);
 ```
+Sets a pointer for the [Virtual Bookmarks](#virtual-bookmarks) mode, or disables this mode if `nullptr` is set.
+
+
+### [](#)IHexTemplates
+This interface is responsible for templates machinery in the **HexCtrl**. It can be obtained using the [`GetTemplates`](#gettemplates) method.
 
 #### [](#)LoadFromFile
 ```cpp
@@ -1123,61 +1122,24 @@ Internally **HexCtrl** operates with flat data offsets. If you set data of 1MB s
 
 ### [](#)EHexCmd
 Enum of commands that can be executed within **HexCtrl**.
-```cpp
-enum class EHexCmd : std::uint8_t {
-    CMD_SEARCH_DLG = 0x01, CMD_SEARCH_NEXT, CMD_SEARCH_PREV,
-    CMD_NAV_GOTO_DLG, CMD_NAV_REPFWD, CMD_NAV_REPBKW, CMD_NAV_DATABEG, CMD_NAV_DATAEND,
-    CMD_NAV_PAGEBEG, CMD_NAV_PAGEEND, CMD_NAV_LINEBEG, CMD_NAV_LINEEND, CMD_GROUPDATA_BYTE,
-    CMD_GROUPDATA_WORD, CMD_GROUPDATA_DWORD, CMD_GROUPDATA_QWORD, CMD_GROUPDATA_INC, CMD_GROUPDATA_DEC,
-    CMD_BKM_ADD, CMD_BKM_REMOVE, CMD_BKM_NEXT, CMD_BKM_PREV, CMD_BKM_REMOVEALL, CMD_BKM_DLG_MGR,
-    CMD_CLPBRD_COPY_HEX, CMD_CLPBRD_COPY_HEXLE, CMD_CLPBRD_COPY_HEXFMT, CMD_CLPBRD_COPY_TEXTCP,
-    CMD_CLPBRD_COPY_BASE64, CMD_CLPBRD_COPY_CARR, CMD_CLPBRD_COPY_GREPHEX, CMD_CLPBRD_COPY_PRNTSCRN,
-    CMD_CLPBRD_COPY_OFFSET, CMD_CLPBRD_PASTE_HEX, CMD_CLPBRD_PASTE_TEXTUTF16, CMD_CLPBRD_PASTE_TEXTCP,
-    CMD_MODIFY_OPERS_DLG, CMD_MODIFY_FILLZEROS, CMD_MODIFY_FILLDATA_DLG, CMD_MODIFY_UNDO, CMD_MODIFY_REDO,
-    CMD_SEL_MARKSTARTEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
-    CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG, CMD_APPEAR_FONTINC,
-    CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC, CMD_PRINT_DLG, CMD_ABOUT_DLG,
-    CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,
-    CMD_SCROLL_CURSOR, CMD_SCROLL_PAGEUP, CMD_SCROLL_PAGEDOWN,
-    CMD_TEMPL_APPLYCURR, CMD_TEMPL_DISAPPLY, CMD_TEMPL_DISAPPALL, CMD_TEMPL_DLG_MGR
-};
-```
 
 ### [](#)EHexDataType
 Enum of the data type used in the [`HEXMODIFY`](#hexmodify) struct with the `EHexModifyMode::MODIFY_OPERATION` mode.
-```cpp
-enum class EHexDataType : std::uint8_t {
-    DATA_INT8, DATA_UINT8, DATA_INT16, DATA_UINT16, DATA_INT32,
-    DATA_UINT32, DATA_INT64, DATA_UINT64, DATA_FLOAT, DATA_DOUBLE
-};
-```
+
+### [](#)EHexDlgItem
+Enum of all **HexCtrl**'s internal dialogs' items. Used in the [`GetDlgItemHandle`](#getdlgitemhandle).
+
+### [](#)EHexMenuItem
+Enum of all **HexCtrl**'s menu items.
 
 ### [](#)EHexModifyMode
 Enum of the data modification modes, used in [`HEXMODIFY`](#hexmodify).
-```cpp
-enum class EHexModifyMode : std::uint8_t {
-    MODIFY_ONCE, MODIFY_REPEAT, MODIFY_OPERATION, MODIFY_RAND_MT19937, MODIFY_RAND_FAST
-};
-```
 
 ### [](#)EHexOperMode
-Enum of the data operation modes, used in [`HEXMODIFY`](#hexmodify) when `HEXMODIFY::enModifyMode` is set to `MODIFY_OPERATION`.
-```cpp
-enum class EHexOperMode : std::uint8_t {
-    OPER_ASSIGN, OPER_ADD, OPER_SUB, OPER_MUL, OPER_DIV, OPER_CEIL, OPER_FLOOR, OPER_OR,
-    OPER_XOR, OPER_AND, OPER_NOT, OPER_SHL, OPER_SHR, OPER_ROTL, OPER_ROTR, OPER_SWAP,
-    OPER_BITREV
-};
-```
+Enum of the data operation modes, used in [`HEXMODIFY`](#hexmodify) when the `HEXMODIFY::enModifyMode` is set to `MODIFY_OPERATION`.
 
 ### [](#)EHexWnd
 Enum of all **HexCtrl**'s internal windows, used in the [`GetWndHandle`](#getwndhandle) method. 
-```cpp
-enum class EHexWnd : std::uint8_t {
-    WND_MAIN, DLG_BKMMGR, DLG_DATAINTERP, DLG_MODIFY,
-    DLG_SEARCH, DLG_ENCODING, DLG_GOTO, DLG_TEMPLMGR
-};
-```
 
 ## [](#)Notification Messages
 During its work the **HexCtrl** sends notification messages to its parent window through **[WM_NOTIFY](https://docs.microsoft.com/en-us/windows/win32/controls/wm-notify)** mechanism.  

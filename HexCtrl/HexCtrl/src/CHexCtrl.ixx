@@ -22,6 +22,7 @@ module;
 #include <numeric>
 #include <optional>
 #include <random>
+#include <ranges>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -266,7 +267,7 @@ namespace HEXCTRL::INTERNAL {
 		[[nodiscard]] auto GetPagePos()const -> ULONGLONG override;
 		[[nodiscard]] auto GetPageSize()const -> DWORD override;
 		[[nodiscard]] auto GetScrollRatio()const -> std::tuple<float, bool> override;
-		[[nodiscard]] auto GetSelection()const -> VecSpan override;
+		[[nodiscard]] auto GetSelection()const -> VecHexSpan override;
 		[[nodiscard]] auto GetTemplates() -> IHexTemplates* override;
 		[[nodiscard]] auto GetUnprintableChar()const -> wchar_t override;
 		[[nodiscard]] auto GetWndHandle(EHexWnd eWnd, bool fCreate)const -> HWND override;
@@ -292,24 +293,24 @@ namespace HEXCTRL::INTERNAL {
 		void SetCodepage(int iCodepage)override;
 		void SetColors(const HEXCOLORS& hcs)override;
 		bool SetConfig(std::wstring_view wsvPath)override;
-		void SetData(const HEXDATA& hds, bool fAdjust)override;
+		void SetData(const HEXDATA& hd, bool fAdjust)override;
 		void SetDateInfo(DWORD dwFormat, wchar_t wchSepar)override;
 		void SetDlgProperties(EHexWnd eWnd, std::uint64_t u64Flags)override;
 		void SetFont(const LOGFONTW& lf, bool fMain = true)override;
 		void SetGroupSize(DWORD dwSize)override;
 		void SetHexCharsCase(bool fUpper)override;
+		void SetMenuItem(EHexMenuItem eItem, const MENUITEMINFOW& mii)override;
 		void SetMutable(bool fMutable)override;
 		void SetOffsetMode(bool fHex)override;
 		void SetPageSize(DWORD dwSize, std::wstring_view wsvName)override;
 		void SetRedraw(bool fRedraw)override;
 		void SetScrollRatio(float flRatio, bool fLines)override;
-		void SetSelection(const VecSpan& vecSel, bool fRedraw = true, bool fHighlight = false)override;
+		void SetSelection(SpanHexSpan spnSel, bool fRedraw = true, bool fHighlight = false)override;
 		void SetUnprintableChar(wchar_t wch)override;
-		void SetVirtualBkm(IHexBookmarks* pVirtBkm)override;
 		void SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags)override;
 		void ShowInfoBar(bool fShow)override;
 	private:
-		struct KEYBIND; struct UNDO; enum class EClipboard : std::uint8_t;
+		struct KEYBIND; struct UNDO; struct MENUITEM; enum class EClipboard : std::uint8_t;
 		[[nodiscard]] auto BuildDataToDraw(ULONGLONG ullStartLine, int iLines)const -> std::tuple<std::wstring, std::wstring>;
 		void CaretMoveDown();  //Set caret one line down.
 		void CaretMoveLeft();  //Set caret one chunk left.
@@ -333,8 +334,10 @@ namespace HEXCTRL::INTERNAL {
 		[[nodiscard]] auto CopyOffset()const -> std::wstring;
 		[[nodiscard]] auto CopyPrintScreen()const -> std::wstring;
 		[[nodiscard]] auto CopyTextCP()const -> std::wstring;
+		[[nodiscard]] auto CreateCapacityString()const -> std::wstring;
 		void CreateMenu();
 		void CreatePens();
+		[[nodiscard]] auto CreateTextAreaString()const -> std::wstring;
 		void DrawWindow(HDC hDC)const;
 		void DrawInfoBar(HDC hDC)const;
 		void DrawOffsets(HDC hDC, ULONGLONG ullStartLine, int iLines)const;
@@ -346,12 +349,12 @@ namespace HEXCTRL::INTERNAL {
 		void DrawCaret(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wstring_view wsvHex, std::wstring_view wsvText)const;
 		void DrawDataInterp(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wstring_view wsvHex, std::wstring_view wsvText)const;
 		void DrawPageLines(HDC hDC, ULONGLONG ullStartLine, int iLines)const;
-		void FillCapacityString(); //Fill m_wstrCapacity according to current m_dwCapacity.
-		void FillWithZeros();      //Fill selection with zeros.
+		void FillWithZeros(); //Fill selection with zeros.
 		[[nodiscard]] auto FontPointsFromScaledPixels(long iSizePixels)const -> float;  //Get font size in points from size in scaled pixels.
 		[[nodiscard]] auto FontScaledPixelsFromPoints(float flSizePoints)const -> long; //Get font size in scaled pixels from size in points.
 		void FontSizeIncDec(bool fInc = true); //Increase os decrease font size by minimum amount.
 		[[nodiscard]] auto GetBottomLine()const -> ULONGLONG; //Returns current bottom line number in view.
+		[[nodiscard]] auto GetCapacityImpl()const -> DWORD;
 		[[nodiscard]] auto GetCaretPosImpl()const -> std::uint64_t;
 		[[nodiscard]] auto GetCharsWidthArray()const -> int*;
 		[[nodiscard]] auto GetCharWidthExtras()const -> int;  //Width of the one char with extra space, in px.
@@ -379,9 +382,10 @@ namespace HEXCTRL::INTERNAL {
 		[[nodiscard]] bool IsDrawable()const;                  //Should WM_PAINT be handled atm or not.
 		[[nodiscard]] bool IsMutableImpl()const;
 		[[nodiscard]] bool IsOffsetAsHexImpl()const;
-		[[nodiscard]] bool IsPageVisible()const;               //Returns m_fSectorVisible.
+		[[nodiscard]] bool IsPageVisible()const;
+		[[nodiscard]] bool IsScrollCursor()const;
 		[[nodiscard]] bool IsVirtualImpl()const;
-		void ModifyWorker(const HEXCTRL::HEXMODIFY& hms, const auto& FuncWorker, HEXCTRL::SpanCByte spnOper); //Main "Modify" method with different workers.
+		void ModifyWorker(const HEXCTRL::HEXMODIFY& hms, const auto& FuncWorker, HEXCTRL::SpanCByte spnOper)const; //Main "Modify" method with different workers.
 		[[nodiscard]] auto OffsetToWstr(ULONGLONG ullOffset)const -> std::wstring; //Format offset as std::wstring.
 		void OnCaretPosChange(ULONGLONG ullOffset);            //On changing caret position.
 		auto OnChar(const MSG& msg) -> LRESULT;
@@ -436,22 +440,19 @@ namespace HEXCTRL::INTERNAL {
 		void SetFontImpl(const LOGFONTW& lf, bool fMain, bool fRedraw = true, bool fNotify = true);
 		void SetFontSizeInPoints(float flSizePoints, bool fMain); //Set font size in points.
 		void SetGroupSizeImpl(DWORD dwSize, bool fRedraw = true, bool fNotify = true);
-		void SetScrollCursor();
+		void SetScrollCursor(bool fSet);
 		void SetUnprintableCharImpl(wchar_t wch, bool fRedraw = true);
-		void SnapshotUndo(const VecSpan& vecSpan); //Takes currently modifiable data snapshot.
+		void SnapshotUndo(SpanHexSpan spnHexSpan); //Takes currently modifiable data snapshot.
 		void TextChunkPoint(ULONGLONG ullOffset, int& iCx, int& iCy)const; //Point of the text chunk.
-		void TTMainShow(bool fShow, bool fTimer = false); //Main tooltip show/hide.
-		void TTOffsetShow(bool fShow); //Tooltip Offset show/hide.
+		void TTTrackShow(bool fShow, bool fTimer, const wchar_t* pwszText = nullptr);
 		void Undo();
 		void UpdateDPIScale(); //Set new DPI scale factor according to current DPI.
-		static void ModifyOper(std::byte* pData, const HEXMODIFY& hms, SpanCByte); //Modify operation classical.
-		static void ModifyOperVec128(std::byte* pData, const HEXMODIFY& hms, SpanCByte); //Modify operation x86/x64 vector 128.
-		static void ModifyOperVec256(std::byte* pData, const HEXMODIFY& hms, SpanCByte); //Modify operation x86/x64 vector 256.
+		static void ModifyOperScalar(std::byte* pData, const HEXMODIFY& hms, SpanCByte); //Modify operation scalar.
 		static auto CALLBACK SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 			UINT_PTR uIDSubclass, DWORD_PTR dwRefData)->LRESULT;
 	private:
 		static constexpr auto m_pwszClassName { L"HexCtrl_MainWnd" }; //HexCtrl unique Window Class name.
-		static constexpr auto m_uIDTTTMain { 0x01UL };                //Timer ID for default tooltip.
+		static constexpr auto m_uIDTTooltip { 0x01UL };               //Timer ID for the tooltip.
 		static constexpr auto m_uIDTScrolCursor { 0x02UL };           //Timer ID for the scroll cursor.
 		static constexpr auto m_iFirstHorzLinePx { 0 };               //First horizontal line indent.
 		static constexpr auto m_iFirstVertLinePx { 0 };               //First vertical line indent.
@@ -468,35 +469,25 @@ namespace HEXCTRL::INTERNAL {
 		CHexSelection m_Selection;            //Selection class.
 		CHexScroll m_ScrollV;                 //Vertical scroll bar.
 		CHexScroll m_ScrollH;                 //Horizontal scroll bar.
+		HEXCOLORS m_stColors;                 //All HexCtrl colors.
+		HEXDATA m_stData;                     //Main data struct.
 		HINSTANCE m_hInstRes { };             //Hinstance of the HexCtrl resources.
 		GDIUT::CWnd m_Wnd;                    //Main window.
-		GDIUT::CWnd m_wndTTMain;              //Main tooltip window.
-		GDIUT::CWnd m_wndTTOffset;            //Tooltip window for Offset in m_fHighLatency mode.
+		GDIUT::CWnd m_WndTT;                  //Tooltip window.
 		GDIUT::CMenu m_MenuMain;              //Main popup menu.
 		GDIUT::CPoint m_ptScrollCursorClick;  //Scroll cursor click coordinates.
-		std::wstring m_wstrCapacity;          //Top Capacity string.
-		std::wstring m_wstrInfoBar;           //Info bar text.
 		std::wstring m_wstrPageName;          //Name of the sector/page.
-		std::wstring m_wstrTextTitle;         //Text area title.
-		std::vector<std::unique_ptr<std::vector<UNDO>>> m_vecUndo; //Undo data.
-		std::vector<std::unique_ptr<std::vector<UNDO>>> m_vecRedo; //Redo data.
-		std::vector < std::unique_ptr < std::remove_pointer_t<HBITMAP>,
-			decltype([](HBITMAP hBmp) { ::DeleteObject(hBmp); }) >> m_vecIconsMenu; //Icons for the Menu.
+		std::vector<std::vector<UNDO>> m_vecUndo; //Undo data.
+		std::vector<std::vector<UNDO>> m_vecRedo; //Redo data.
 		std::vector<KEYBIND> m_vecKeyBind;    //Vector of key bindings.
 		std::vector<int> m_vecCharsWidth;     //Vector of chars widths.
+		std::unordered_map<EHexMenuItem, MENUITEM> m_umapMenuItems; //m_MenuMain items.
 		HFONT m_hFntMain { };                 //Main Hex chunks font.
 		HFONT m_hFntInfoBar { };              //Font for bottom Info bar.
 		HPEN m_hPenLinesMain { };             //Pen for main lines.
 		HPEN m_hPenLinesTempl { };            //Pen for templates' fields (vertical lines).
-		HEXCOLORS m_stColors;                 //All HexCtrl colors.
-		IHexVirtData* m_pHexVirtData { };     //Data handler pointer for Virtual mode.
-		IHexVirtColors* m_pHexVirtColors { }; //Pointer for custom colors class.
-		SpanByte m_spnData;                   //Main data span.
-		TTTOOLINFOW m_ttiMain { };            //Main tooltip info.
-		TTTOOLINFOW m_ttiOffset { };          //Tooltip info for Offset.
+		const wchar_t* m_pwszTTText { };      //Current tooltip text.
 		std::chrono::steady_clock::time_point m_tmTT; //Start time of the tooltip.
-		PHEXBKM m_pBkmTTCurr { };             //Currently shown bookmark's tooltip;
-		PCHEXTEMPLFIELD m_pTFieldTTCurr { };  //Currently shown Template field's tooltip;
 		ULONGLONG m_ullCaretPos { };          //Current caret position.
 		ULONGLONG m_ullCursorNow { };         //The cursor's current clicked pos.
 		ULONGLONG m_ullCursorPrev { };        //The cursor's previously clicked pos, used in selection resolutions.
@@ -509,10 +500,8 @@ namespace HEXCTRL::INTERNAL {
 		DWORD m_dwDigitsOffsetDec { 10UL };   //Amount of digits for "Offset" in Decimal mode, 10 is max for 32bit number.
 		DWORD m_dwDigitsOffsetHex { 8UL };    //Amount of digits for "Offset" in Hex mode, 8 is max for 32bit number.
 		DWORD m_dwPageSize { };               //Size of a page to print additional lines between.
-		DWORD m_dwCacheSize { };              //Data cache size for VirtualData mode.
 		DWORD m_dwDateFormat { };             //Current date format. See https://docs.microsoft.com/en-gb/windows/win32/intl/locale-idate
 		DWORD m_dwCharsExtraSpace { };        //Extra space between chars.
-		int m_iSizeFirstHalfPx { };           //Size in px of the first half of the capacity.
 		int m_iSizeHexBytePx { };             //Size in px of two hex letters representing one byte.
 		int m_iIndentTextXPx { };             //Indent in px of the text beginning.
 		int m_iIndentFirstHexChunkXPx { };    //First hex chunk indent in px.
@@ -541,14 +530,12 @@ namespace HEXCTRL::INTERNAL {
 		wchar_t m_wchDateSepar { };           //Date separator.
 		bool m_fCreated { false };            //Is control created or not.
 		bool m_fDataSet { false };            //Is data set or not.
-		bool m_fMutable { false };            //Does control work in Edit or ReadOnly mode.
 		bool m_fInfoBar { true };             //Show bottom Info window or not.
 		bool m_fCaretHigh { true };           //Caret's High or Low bits position (first or last digit in hex chunk).
 		bool m_fCursorTextArea { false };     //Whether last focus was set at ASCII or Hex chunks area.
 		bool m_fLMousePressed { false };      //Is left mouse button pressed.
 		bool m_fClickWithAlt { false };       //Mouse click was with Alt pressed.
 		bool m_fOffsetHex { false };          //Print offset numbers as Hex or as Decimals.
-		bool m_fHighLatency { false };        //Reflects HEXDATA::fHighLatency.
 		bool m_fRedraw { true };              //Should WM_PAINT be handled or not.
 		bool m_fScrollLines { false };        //Page scroll in "Screen * m_flScrollRatio" or in lines.
 		bool m_fHexCharsUpper { true };       //Hex chars printed in UPPER or lower case.
@@ -572,6 +559,11 @@ struct CHexCtrl::KEYBIND { //Key bindings.
 struct CHexCtrl::UNDO {
 	ULONGLONG              ullOffset { }; //Start byte to apply Undo to.
 	std::vector<std::byte> vecData;       //Data for Undo.
+};
+
+struct CHexCtrl::MENUITEM {
+	HMENU hMenuSub { }; //If it's not null, then it's popup menu (submenu) of the m_MenuMain.
+	UINT  uMenuID { };  //If hMenuSub is null, then it's menu ID within the m_MenuMain.
 };
 
 enum class CHexCtrl::EClipboard : std::uint8_t {
@@ -610,12 +602,8 @@ void CHexCtrl::ClearData()
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
 
-	m_spnData = { };
+	m_stData = { };
 	m_fDataSet = false;
-	m_fMutable = false;
-	m_pHexVirtData = nullptr;
-	m_pHexVirtColors = nullptr;
-	m_fHighLatency = false;
 	m_ullCursorPrev = 0;
 	m_ullCaretPos = 0;
 	m_ullCursorNow = 0;
@@ -662,20 +650,11 @@ bool CHexCtrl::Create(const HEXCREATE& hcs)
 	m_ScrollV.AddSibling(&m_ScrollH);
 	m_ScrollH.AddSibling(&m_ScrollV);
 
-	m_wndTTMain.Attach(::CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, TTS_NOPREFIX | TTS_ALWAYSTIP,
+	m_WndTT.Attach(::CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, TTS_ALWAYSTIP | TTS_NOPREFIX,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, m_Wnd, nullptr, nullptr, nullptr));
-	m_ttiMain.cbSize = sizeof(TTTOOLINFOW);
-	m_ttiMain.uFlags = TTF_TRACK;
-	m_wndTTMain.SendMsg(TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&m_ttiMain));
-	m_wndTTMain.SendMsg(TTM_SETMAXTIPWIDTH, 0, static_cast<LPARAM>(400)); //To allow the use of a newline \n.
-
-	m_wndTTOffset.Attach(::CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr,
-		TTS_NOANIMATE | TTS_NOFADE | TTS_NOPREFIX | TTS_ALWAYSTIP,
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, m_Wnd, nullptr, nullptr, nullptr));
-	m_ttiOffset.cbSize = sizeof(TTTOOLINFOW);
-	m_ttiOffset.uFlags = TTF_TRACK;
-	m_wndTTOffset.SendMsg(TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&m_ttiOffset));
-	m_wndTTOffset.SendMsg(TTM_SETMAXTIPWIDTH, 0, static_cast<LPARAM>(400)); //To allow the use of a newline \n.
+	m_WndTT.SendMsg(TTM_SETMAXTIPWIDTH, 0, 400); //To allow the use of a newline \n.
+	const TTTOOLINFOW ti { .cbSize { sizeof(TTTOOLINFOW) }, .uFlags { TTF_TRACK } };
+	m_WndTT.SendMsg(TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&ti));
 
 	if (hcs.pColors != nullptr) {
 		m_stColors = *hcs.pColors;
@@ -709,13 +688,13 @@ bool CHexCtrl::Create(const HEXCREATE& hcs)
 	SetUnprintableCharImpl(L'.', false);
 
 	//All dialogs are initialized after the main window, to set the parent handle correctly.
-	m_DlgBkmMgr.Initialize(this, m_hInstRes);
-	m_DlgDataInterp.Initialize(this, m_hInstRes);
-	m_DlgCodepage.Initialize(this, m_hInstRes);
-	m_DlgGoTo.Initialize(this, m_hInstRes);
-	m_DlgSearch.Initialize(this, m_hInstRes);
-	m_DlgTemplMgr.Initialize(this, m_hInstRes);
-	m_DlgModify.Initialize(this, m_hInstRes);
+	m_DlgBkmMgr.Initialize(*this, m_hInstRes);
+	m_DlgDataInterp.Initialize(*this, m_hInstRes);
+	m_DlgCodepage.Initialize(*this, m_hInstRes);
+	m_DlgGoTo.Initialize(*this, m_hInstRes);
+	m_DlgSearch.Initialize(*this, m_hInstRes);
+	m_DlgTemplMgr.Initialize(*this, m_hInstRes);
+	m_DlgModify.Initialize(*this, m_hInstRes);
 
 	RedrawImpl();
 
@@ -812,11 +791,13 @@ void CHexCtrl::ExecuteCmd(EHexCmd eCmd)
 		break;
 	case CMD_BKM_ADD:
 		m_DlgBkmMgr.AddBkm(HEXBKM { .vecSpan { HasSelection() ? GetSelection()
-			: VecSpan { { GetCaretPosImpl(), 1 } } },
-			.stClr { .clrBk { GetColors().clrBkBkm }, .clrText { GetColors().clrFontBkm } } }, true);
+			: VecHexSpan { { GetCaretPosImpl(), 1 } } },
+			.stClr { .clrBk { GetColors().clrBkBkm }, .clrText { GetColors().clrFontBkm } } });
+		RedrawImpl();
 		break;
 	case CMD_BKM_REMOVE:
 		m_DlgBkmMgr.RemoveByOffset(GetCaretPosImpl());
+		RedrawImpl();
 		break;
 	case CMD_BKM_NEXT:
 		m_DlgBkmMgr.GoNext();
@@ -826,6 +807,7 @@ void CHexCtrl::ExecuteCmd(EHexCmd eCmd)
 		break;
 	case CMD_BKM_REMOVEALL:
 		m_DlgBkmMgr.RemoveAll();
+		RedrawImpl();
 		break;
 	case CMD_BKM_DLG_MGR:
 		ParentNotify(HEXCTRL_MSG_DLGBKMMGR);
@@ -948,7 +930,7 @@ void CHexCtrl::ExecuteCmd(EHexCmd eCmd)
 		CaretMoveDown();
 		break;
 	case CMD_SCROLL_CURSOR:
-		SetScrollCursor();
+		SetScrollCursor(!IsScrollCursor());
 		break;
 	case CMD_SCROLL_PAGEUP:
 		m_ScrollV.ScrollPageUp();
@@ -958,12 +940,15 @@ void CHexCtrl::ExecuteCmd(EHexCmd eCmd)
 		break;
 	case CMD_TEMPL_APPLYCURR:
 		m_DlgTemplMgr.ApplyCurr(GetCaretPosImpl());
+		RedrawImpl();
 		break;
 	case CMD_TEMPL_DISAPPLY:
 		m_DlgTemplMgr.DisapplyByOffset(GetCaretPosImpl());
+		RedrawImpl();
 		break;
 	case CMD_TEMPL_DISAPPALL:
 		m_DlgTemplMgr.DisapplyAll();
+		RedrawImpl();
 		break;
 	case CMD_TEMPL_DLG_MGR:
 		ParentNotify(HEXCTRL_MSG_DLGTEMPLMGR);
@@ -991,14 +976,14 @@ auto CHexCtrl::GetCacheSize()const->DWORD
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return { }; }
 	if (!IsDataSetImpl()) { ut::DBG_REPORT_NO_DATA_SET(); return { }; }
 
-	return m_dwCacheSize;
+	return m_stData.dwCacheSize;
 }
 
 auto CHexCtrl::GetCapacity()const->DWORD
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return { }; }
 
-	return m_dwCapacity;
+	return GetCapacityImpl();
 }
 
 auto CHexCtrl::GetCaretPos()const->ULONGLONG
@@ -1039,13 +1024,13 @@ auto CHexCtrl::GetData(HEXSPAN hss)const->SpanByte
 	SpanByte spnData;
 	if (!IsVirtualImpl()) {
 		if (hss.ullOffset + hss.ullSize <= GetDataSizeImpl()) {
-			spnData = { m_spnData.data() + hss.ullOffset, static_cast<std::size_t>(hss.ullSize) };
+			spnData = { m_stData.spnData.data() + hss.ullOffset, static_cast<std::size_t>(hss.ullSize) };
 		}
 	}
 	else {
 		assert(hss.ullSize <= GetCacheSize());
 		HEXDATAINFO hdi { .hdr { m_Wnd, static_cast<UINT>(m_Wnd.GetDlgCtrlID()) }, .stHexSpan { hss } };
-		m_pHexVirtData->OnHexGetData(hdi);
+		m_stData.pHexVirtData->OnHexGetData(hdi);
 		spnData = hdi.spnData;
 	}
 
@@ -1073,6 +1058,7 @@ auto CHexCtrl::GetDlgItemHandle(EHexDlgItem eItem)const->HWND
 	using enum EHexDlgItem;
 	switch (eItem) {
 	case BKMMGR_CHK_HEX:
+	case BKMMGR_CHK_TT:
 		return m_DlgBkmMgr.GetDlgItemHandle(eItem);
 	case DATAINTERP_CHK_HEX: case DATAINTERP_CHK_BE:
 		return m_DlgDataInterp.GetDlgItemHandle(eItem);
@@ -1086,6 +1072,7 @@ auto CHexCtrl::GetDlgItemHandle(EHexDlgItem eItem)const->HWND
 	case TEMPLMGR_CHK_HEX: case TEMPLMGR_CHK_SWAP:
 		return m_DlgTemplMgr.GetDlgItemHandle(eItem);
 	default:
+		ut::DBG_REPORT(L"Unsupported EHexDlgItem.");
 		return { };
 	};
 }
@@ -1152,7 +1139,7 @@ auto CHexCtrl::GetScrollRatio()const->std::tuple<float, bool>
 	return { m_flScrollRatio, m_fScrollLines };
 }
 
-auto CHexCtrl::GetSelection()const->VecSpan
+auto CHexCtrl::GetSelection()const->VecHexSpan
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return { }; }
 	if (!IsDataSetImpl()) { ut::DBG_REPORT_NO_DATA_SET(); return { }; }
@@ -1294,7 +1281,7 @@ bool CHexCtrl::IsCmdAvail(EHexCmd eCmd)const
 	using enum EHexCmd;
 	switch (eCmd) {
 	case CMD_BKM_REMOVE:
-		fAvail = fDataSet && m_DlgBkmMgr.HasBookmark(GetCaretPosImpl());
+		fAvail = fDataSet && m_DlgBkmMgr.HasBkmAtOffset(GetCaretPosImpl());
 		break;
 	case CMD_BKM_NEXT:
 	case CMD_BKM_PREV:
@@ -1502,12 +1489,12 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 			std::copy_n(spnDataFrom.data(), spnDataFrom.size(), pData);
 			};
 
-		const auto& refHexSpan = hms.vecSpan.back();
-		if (hms.eModifyMode == MODIFY_RAND_MT19937 && hms.vecSpan.size() == 1 && refHexSpan.ullSize >= sizeof(std::uint64_t)) {
+		const auto& hs = hms.vecSpan.back();
+		if (hms.eModifyMode == MODIFY_RAND_MT19937 && hms.vecSpan.size() == 1 && hs.ullSize >= sizeof(std::uint64_t)) {
 			ModifyWorker(hms, lmbRandUInt64, { static_cast<std::byte*>(nullptr), sizeof(std::uint64_t) });
 
-			if (const auto dwRem = refHexSpan.ullSize % sizeof(std::uint64_t); dwRem > 0) { //Remainder.
-				const auto ullOffset = refHexSpan.ullOffset + refHexSpan.ullSize - dwRem;
+			if (const auto dwRem = hs.ullSize % sizeof(std::uint64_t); dwRem > 0) { //Remainder.
+				const auto ullOffset = hs.ullOffset + hs.ullSize - dwRem;
 				const auto spnData = GetData({ .ullOffset { ullOffset }, .ullSize { dwRem } });
 				for (std::size_t itRem = 0; itRem < dwRem; ++itRem) {
 					spnData.data()[itRem] = static_cast<std::byte>(distUInt64(gen));
@@ -1515,7 +1502,7 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 				SetDataVirtual(spnData, { .ullOffset { ullOffset }, .ullSize { dwRem } });
 			}
 		}
-		else if (hms.eModifyMode == MODIFY_RAND_FAST && hms.vecSpan.size() == 1 && refHexSpan.ullSize >= GetCacheSize()) {
+		else if (hms.eModifyMode == MODIFY_RAND_FAST && hms.vecSpan.size() == 1 && hs.ullSize >= GetCacheSize()) {
 			//Fill the uptrRandData buffer with true random data of ulSizeRandBuff size.
 			//Then clone this buffer to the destination data.
 			//Buffer is allocated with alignment for maximum performance.
@@ -1529,9 +1516,9 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 			ModifyWorker(hms, lmbRandFast, { uptrRandData.get(), ulSizeRandBuff });
 
 			//Filling the remainder data.
-			if (const auto ullRem = refHexSpan.ullSize % ulSizeRandBuff; ullRem > 0) { //Remainder.
+			if (const auto ullRem = hs.ullSize % ulSizeRandBuff; ullRem > 0) { //Remainder.
 				if (ullRem <= GetCacheSize()) {
-					const auto ullOffsetCurr = refHexSpan.ullOffset + refHexSpan.ullSize - ullRem;
+					const auto ullOffsetCurr = hs.ullOffset + hs.ullSize - ullRem;
 					const auto spnData = GetData({ .ullOffset { ullOffsetCurr }, .ullSize { ullRem } });
 					assert(!spnData.empty());
 					std::copy_n(uptrRandData.get(), ullRem, spnData.data());
@@ -1541,7 +1528,7 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 					const auto ullSizeCache = GetCacheSize();
 					const auto dwModCache = ullRem % ullSizeCache;
 					auto ullChunks = (ullRem / ullSizeCache) + (dwModCache > 0 ? 1 : 0);
-					auto ullOffsetCurr = refHexSpan.ullOffset + refHexSpan.ullSize - ullRem;
+					auto ullOffsetCurr = hs.ullOffset + hs.ullSize - ullRem;
 					auto ullOffsetRandCurr = 0ULL;
 					while (ullChunks-- > 0) {
 						const auto ullSizeToModify = (ullChunks == 1 && dwModCache > 0) ? dwModCache : ullSizeCache;
@@ -1602,31 +1589,44 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 	{
 		using enum EHexDataType;
 		using enum EHexOperMode;
-		//Special case for the OPER_ASSIGN operation.
-		//It can easily be replaced with the MODIFY_REPEAT mode, which is significantly faster.
-		//Additionally, ensuring that the spnData.size() (operand size) is equal eDataType size.
+		//Special case for the OPER_ASSIGN operation. This operation can easily be replaced 
+		//with the MODIFY_REPEAT mode, which is significantly faster.
+
 		if (hms.eOperMode == OPER_ASSIGN) {
 			HEXMODIFY hmsRepeat = hms;
 			hmsRepeat.eModifyMode = MODIFY_REPEAT;
+			std::uint64_t u64Data { };
+
 			switch (hms.eDataType) {
-			case DATA_INT8:
-			case DATA_UINT8:
-				hmsRepeat.spnData = { hms.spnData.data(), sizeof(std::int8_t) };
-				break;
 			case DATA_INT16:
 			case DATA_UINT16:
-				hmsRepeat.spnData = { hms.spnData.data(), sizeof(std::int16_t) };
-				break;
+			{
+				auto u16 = *reinterpret_cast<const std::uint16_t*>(hms.spnData.data());
+				if (hms.fBigEndian) { u16 = ut::ByteSwap(u16); }
+				u64Data = u16;
+				hmsRepeat.spnData = { reinterpret_cast<const std::byte*>(&u64Data), sizeof(std::uint16_t) };
+			}
+			break;
 			case DATA_INT32:
 			case DATA_UINT32:
 			case DATA_FLOAT:
-				hmsRepeat.spnData = { hms.spnData.data(), sizeof(std::int32_t) };
-				break;
+			{
+				auto u32 = *reinterpret_cast<const std::uint32_t*>(hms.spnData.data());
+				if (hms.fBigEndian) { u32 = ut::ByteSwap(u32); }
+				u64Data = u32;
+				hmsRepeat.spnData = { reinterpret_cast<const std::byte*>(&u64Data), sizeof(std::uint32_t) };
+			}
+			break;
 			case DATA_INT64:
 			case DATA_UINT64:
 			case DATA_DOUBLE:
-				hmsRepeat.spnData = { hms.spnData.data(), sizeof(std::int64_t) };
-				break;
+			{
+				auto u64 = *reinterpret_cast<const std::uint64_t*>(hms.spnData.data());
+				if (hms.fBigEndian) { u64 = ut::ByteSwap(u64); }
+				u64Data = u64;
+				hmsRepeat.spnData = { reinterpret_cast<const std::byte*>(&u64Data), sizeof(std::uint64_t) };
+			}
+			break;
 			default:
 				break;
 			};
@@ -1635,34 +1635,41 @@ void CHexCtrl::ModifyData(const HEXMODIFY& hms)
 			return;
 		}
 
-	#if defined(_M_IX86) || defined(_M_X64)
 		//In cases where the only one affected data region (hms.vecSpan.size()==1) is used,
 		//and ullSizeToModify > ulSizeOfVec, we use SIMD.
 		//At the end we simply fill up the remainder (ullSizeToModify % ulSizeOfVec).
-		const auto ulSizeOfVec { ut::HasAVX2() ? 32UL : 16UL };
+		const auto ulSizeOfVec { simd::VecTypeToSize(simd::GetVectorType()) };
 		const auto ullOffsetToModify = hms.vecSpan.back().ullOffset;
 		const auto ullSizeToModify = hms.vecSpan.back().ullSize;
 		const auto ullSizeToFillWith = hms.spnData.size();
 
 		if (hms.vecSpan.size() == 1 && ((ullSizeToModify / ulSizeOfVec) > 0)) {
-			ModifyWorker(hms, ut::HasAVX2() ? ModifyOperVec256 : ModifyOperVec128,
-				{ static_cast<std::byte*>(nullptr), ulSizeOfVec }); //Worker with vector.
+			using PFuncWorker = void(*)(std::byte* pData, const HEXCTRL::HEXMODIFY& hms, HEXCTRL::SpanCByte);
+			PFuncWorker pFuncWorker;
+			switch (simd::GetVectorType()) {
+			case simd::EVecType::VECTOR_128:
+				pFuncWorker = simd::ModifyOperVec<simd::EVecType::VECTOR_128>;
+				break;
+			case simd::EVecType::VECTOR_256:
+				pFuncWorker = simd::ModifyOperVec<simd::EVecType::VECTOR_256>;
+				break;
+			default: return;
+			}
+
+			ModifyWorker(hms, pFuncWorker, { static_cast<std::byte*>(nullptr), ulSizeOfVec }); //Vector worker.
 
 			if (const auto ullRem = ullSizeToModify % ulSizeOfVec; ullRem >= ullSizeToFillWith) { //Remainder of the vector data.
 				const auto ullOffset = ullOffsetToModify + ullSizeToModify - ullRem;
 				const auto spnData = GetData({ .ullOffset { ullOffset }, .ullSize { ullRem } });
 				for (std::size_t itRem = 0; itRem < (ullRem / ullSizeToFillWith); ++itRem) { //Works only if ullRem >= ullSizeToFillWith.
-					ModifyOper(spnData.data() + (itRem * ullSizeToFillWith), hms, { });
+					ModifyOperScalar(spnData.data() + (itRem * ullSizeToFillWith), hms, { });
 				}
 				SetDataVirtual(spnData, { .ullOffset { ullOffset }, .ullSize { ullRem - (ullRem % ullSizeToFillWith) } });
 			}
 		}
 		else {
-			ModifyWorker(hms, ModifyOper, hms.spnData);
+			ModifyWorker(hms, ModifyOperScalar, hms.spnData);
 		}
-	#elif defined(_M_ARM64) //^^^ _M_IX86 || _M_X64 / vvv _M_ARM64
-		ModifyWorker(hms, ModifyOper, hms.spnData);
-	#endif // ^^^ _M_ARM64
 	}
 	break;
 	default:
@@ -1776,7 +1783,7 @@ void CHexCtrl::SetColors(const HEXCOLORS& hcs)
 	CreatePens();
 	m_ScrollV.SetColors(hcs.clrScrollBar, hcs.clrScrollThumb, hcs.clrScrollArrow);
 	m_ScrollH.SetColors(hcs.clrScrollBar, hcs.clrScrollThumb, hcs.clrScrollArrow);
-	m_Wnd.RedrawWindow();
+	RedrawImpl();
 }
 
 bool CHexCtrl::SetConfig(std::wstring_view wsvPath)
@@ -1786,10 +1793,10 @@ bool CHexCtrl::SetConfig(std::wstring_view wsvPath)
 	return SetConfigImpl(wsvPath);
 }
 
-void CHexCtrl::SetData(const HEXDATA& hds, bool fAdjust)
+void CHexCtrl::SetData(const HEXDATA& hd, bool fAdjust)
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
-	if (hds.spnData.empty()) { ut::DBG_REPORT(L"Data size can't be zero."); return; }
+	if (hd.spnData.empty()) { ut::DBG_REPORT(L"Data size can't be zero."); return; }
 
 	if (fAdjust) {
 		if (!IsDataSetImpl()) {
@@ -1797,7 +1804,7 @@ void CHexCtrl::SetData(const HEXDATA& hds, bool fAdjust)
 			return;
 		}
 
-		if (hds.spnData.size() != GetDataSizeImpl()) {
+		if (hd.spnData.size() != GetDataSizeImpl()) {
 			ut::DBG_REPORT(L"Data size must be equal to the prior data size.");
 			return;
 		}
@@ -1806,15 +1813,11 @@ void CHexCtrl::SetData(const HEXDATA& hds, bool fAdjust)
 		ClearData();
 	}
 
-	m_spnData = hds.spnData;
-	m_pHexVirtData = hds.pHexVirtData;
-	m_pHexVirtColors = hds.pHexVirtColors;
-	m_dwCacheSize = (std::max)(hds.dwCacheSize, 1024UL * 64UL); //Minimum cache size for VirtualData mode.
-	m_fMutable = hds.fMutable;
-	m_fHighLatency = hds.fHighLatency;
+	m_stData = hd;
+	m_stData.dwCacheSize = (std::max)(hd.dwCacheSize, 1024UL * 64UL); //Minimum cache size for VirtualData mode.
 
-	const auto ullDataSize = hds.pHexVirtData ? (std::max)(hds.ullMaxVirtOffset,
-		static_cast<ULONGLONG>(hds.spnData.size())) : hds.spnData.size();
+	const auto ullDataSize = hd.pHexVirtData ?
+		(std::max)(hd.ullMaxVirtOffset, static_cast<ULONGLONG>(hd.spnData.size())) : hd.spnData.size();
 	if (ullDataSize <= 0xFFFFFFFFUL) {
 		m_dwDigitsOffsetDec = 10UL;
 		m_dwDigitsOffsetHex = 8UL;
@@ -1903,12 +1906,56 @@ void CHexCtrl::SetHexCharsCase(bool fUpper)
 	RedrawImpl();
 }
 
+void CHexCtrl::SetMenuItem(EHexMenuItem eItem, const MENUITEMINFOW& mii)
+{
+	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
+
+	const auto it = m_umapMenuItems.find(eItem);
+	if (it == m_umapMenuItems.end()) {
+		return;
+	}
+
+	const auto& item = it->second;
+	if (item.hMenuSub == nullptr) {
+		m_MenuMain.SetItemInfo(item.uMenuID, mii, true);
+	}
+	else {
+		//Returns parent HMENU and position within it, of the hMenuSubFind popup menu (submenu).
+		const auto lmbSubMenuPos = [](HMENU hMenu, HMENU hMenuSubFind) {
+			struct FINDITEM {
+				HMENU hMenuSub { };
+				int iPos { -1 };
+			};
+			const auto _lmbSubMenuPos = [](const auto& lmbSelf, HMENU hMenu, HMENU hMenuSubFind)->std::optional<FINDITEM> {
+				const auto menu = GDIUT::CMenu(hMenu);
+				for (auto i = 0; i < menu.GetItemsCount(); ++i) {
+					if (const auto menuSub = menu.GetSubMenu(i); menuSub.IsMenu()) {
+						if (menuSub == hMenuSubFind) {
+							return FINDITEM { menu, i };
+						}
+
+						if (const auto opt = lmbSelf(lmbSelf, menuSub, hMenuSubFind); opt) {
+							return opt;
+						}
+					}
+				}
+				return std::nullopt;
+				};
+			return _lmbSubMenuPos(_lmbSubMenuPos, hMenu, hMenuSubFind);
+			};
+
+		if (const auto opt = lmbSubMenuPos(m_MenuMain, item.hMenuSub); opt) {
+			GDIUT::CMenu(opt->hMenuSub).SetItemInfo(opt->iPos, mii, false);
+		}
+	}
+}
+
 void CHexCtrl::SetMutable(bool fMutable)
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
 	if (!IsDataSetImpl()) { ut::DBG_REPORT_NO_DATA_SET(); return; }
 
-	m_fMutable = fMutable;
+	m_stData.fMutable = fMutable;
 	RedrawImpl();
 }
 
@@ -1917,7 +1964,6 @@ void CHexCtrl::SetOffsetMode(bool fHex)
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
 
 	m_fOffsetHex = fHex;
-	FillCapacityString();
 	RecalcAll();
 	RedrawImpl();
 }
@@ -1949,12 +1995,12 @@ void CHexCtrl::SetScrollRatio(float flRatio, bool fLines)
 	m_ScrollV.SetScrollPageSize(GetScrollPageSize());
 }
 
-void CHexCtrl::SetSelection(const VecSpan& vecSel, bool fRedraw, bool fHighlight)
+void CHexCtrl::SetSelection(SpanHexSpan spnSel, bool fRedraw, bool fHighlight)
 {
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
 	if (!IsDataSetImpl()) { ut::DBG_REPORT_NO_DATA_SET(); return; }
 
-	m_Selection.SetSelection(vecSel, fHighlight);
+	m_Selection.SetSelection(spnSel, fHighlight);
 
 	if (fRedraw) {
 		RedrawImpl();
@@ -1968,13 +2014,6 @@ void CHexCtrl::SetUnprintableChar(wchar_t wch)
 	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
 
 	SetUnprintableCharImpl(wch);
-}
-
-void CHexCtrl::SetVirtualBkm(IHexBookmarks* pVirtBkm)
-{
-	if (!IsCreated()) { ut::DBG_REPORT_NOT_CREATED(); return; }
-
-	m_DlgBkmMgr.SetVirtual(pVirtBkm);
 }
 
 void CHexCtrl::SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags)
@@ -2003,20 +2042,20 @@ auto CHexCtrl::BuildDataToDraw(ULONGLONG ullStartLine, int iLines)const->std::tu
 
 	const auto ullOffsetStart = ullStartLine * GetCapacity(); //Offset of the visible data to print.
 	const auto ullDataSize = GetDataSizeImpl();
-	auto sSizeDataToPrint = static_cast<std::size_t>(iLines) * GetCapacity(); //Size of the visible data to print.
-	if (ullOffsetStart + sSizeDataToPrint > ullDataSize) {
-		sSizeDataToPrint = static_cast<std::size_t>(ullDataSize - ullOffsetStart);
+	auto uzSizeDataToPrint = static_cast<std::size_t>(iLines) * GetCapacity(); //Size of the visible data to print.
+	if (ullOffsetStart + uzSizeDataToPrint > ullDataSize) {
+		uzSizeDataToPrint = static_cast<std::size_t>(ullDataSize - ullOffsetStart);
 	}
 
-	const auto spnData = GetData({ .ullOffset { ullOffsetStart }, .ullSize { sSizeDataToPrint } });
+	const auto spnData = GetData({ .ullOffset { ullOffsetStart }, .ullSize { uzSizeDataToPrint } });
 	assert(!spnData.empty());
-	assert(spnData.size() >= sSizeDataToPrint);
+	assert(spnData.size() >= uzSizeDataToPrint);
 	const auto pDataBegin = reinterpret_cast<unsigned char*>(spnData.data()); //Pointer to data to print.
-	const auto pDataEnd = pDataBegin + sSizeDataToPrint;
+	const auto pDataEnd = pDataBegin + uzSizeDataToPrint;
 
 	//Hex Bytes to print.
 	std::wstring wstrHex;
-	wstrHex.reserve(sSizeDataToPrint * 2);
+	wstrHex.reserve(uzSizeDataToPrint * 2);
 	const auto pwszHexChars = GetHexChars();
 	for (auto itData = pDataBegin; itData < pDataEnd; ++itData) { //Converting bytes to Hexes.
 		wstrHex.push_back(pwszHexChars[(*itData >> 4) & 0x0F]);
@@ -2031,14 +2070,14 @@ auto CHexCtrl::BuildDataToDraw(ULONGLONG ullStartLine, int iLines)const->std::tu
 	}
 	else if (iCodepage == 0) { //UTF-16.
 		const auto pDataUTF16Beg = reinterpret_cast<wchar_t*>(pDataBegin);
-		const auto pDataUTF16End = reinterpret_cast<wchar_t*>((sSizeDataToPrint % 2) == 0 ? pDataEnd : pDataEnd - 1);
+		const auto pDataUTF16End = reinterpret_cast<wchar_t*>((uzSizeDataToPrint % 2) == 0 ? pDataEnd : pDataEnd - 1);
 		wstrText.assign(pDataUTF16Beg, pDataUTF16End);
-		wstrText.resize(sSizeDataToPrint);
+		wstrText.resize(uzSizeDataToPrint);
 	}
 	else {
-		wstrText.resize(sSizeDataToPrint);
+		wstrText.resize(uzSizeDataToPrint);
 		::MultiByteToWideChar(iCodepage, 0, reinterpret_cast<LPCCH>(pDataBegin),
-			static_cast<int>(sSizeDataToPrint), wstrText.data(), static_cast<int>(sSizeDataToPrint));
+			static_cast<int>(uzSizeDataToPrint), wstrText.data(), static_cast<int>(uzSizeDataToPrint));
 	}
 
 	ReplaceUnprintable(wstrText, iCodepage == -1, true);
@@ -2270,9 +2309,9 @@ void CHexCtrl::ClipboardCopy(EClipboard eType)const
 		break;
 	}
 
-	constexpr auto sCharSize { sizeof(wchar_t) };
-	const std::size_t sMemSize = (wstrData.size() * sCharSize) + sCharSize;
-	const auto hMem = ::GlobalAlloc(GMEM_MOVEABLE, sMemSize);
+	constexpr auto uzCharSize { sizeof(wchar_t) };
+	const std::size_t uzMemSize = (wstrData.size() * uzCharSize) + uzCharSize;
+	const auto hMem = ::GlobalAlloc(GMEM_MOVEABLE, uzMemSize);
 	if (!hMem) {
 		ut::DBG_REPORT(L"GlobalAlloc error.");
 		return;
@@ -2284,7 +2323,7 @@ void CHexCtrl::ClipboardCopy(EClipboard eType)const
 		return;
 	}
 
-	std::memcpy(lpMemLock, wstrData.data(), sMemSize);
+	std::memcpy(lpMemLock, wstrData.data(), uzMemSize);
 	::GlobalUnlock(hMem);
 	::OpenClipboard(m_Wnd);
 	::EmptyClipboard();
@@ -2301,21 +2340,26 @@ void CHexCtrl::ClipboardPaste(EClipboard eType)
 	if (!hClpbrd)
 		return;
 
+	const auto uzSizeClpbrd = ::GlobalSize(hClpbrd);
+	if (uzSizeClpbrd == 0) {
+		::CloseClipboard();
+		return;
+	}
+
 	const auto pDataClpbrd = static_cast<wchar_t*>(::GlobalLock(hClpbrd));
 	if (pDataClpbrd == nullptr) {
 		::CloseClipboard();
 		return;
 	}
 
-	const auto sSizeClpbrd = wcslen(pDataClpbrd) * sizeof(wchar_t);
 	const auto ullDataSize = GetDataSizeImpl();
 	const auto ullCaretPos = GetCaretPosImpl();
 	HEXMODIFY hmd;
 	ULONGLONG ullSizeModify;
 	std::string strDataModify; //Actual data to paste, must outlive hmd.
 	const auto lmbPasteUTF16 = [&]() {
-		ullSizeModify = sSizeClpbrd;
-		if (ullCaretPos + sSizeClpbrd > ullDataSize) {
+		ullSizeModify = uzSizeClpbrd;
+		if (ullCaretPos + uzSizeClpbrd > ullDataSize) {
 			ullSizeModify = ullDataSize - ullCaretPos;
 		}
 		hmd.spnData = { reinterpret_cast<std::byte*>(pDataClpbrd), static_cast<std::size_t>(ullSizeModify) };
@@ -2369,7 +2413,7 @@ void CHexCtrl::ClipboardPaste(EClipboard eType)
 
 	::GlobalUnlock(hClpbrd);
 	::CloseClipboard();
-	m_Wnd.RedrawWindow();
+	RedrawImpl();
 }
 
 auto CHexCtrl::CopyBase64()const->std::wstring
@@ -2567,12 +2611,13 @@ auto CHexCtrl::CopyPrintScreen()const->std::wstring
 	wstrRet.insert(0, (static_cast<std::size_t>(GetDigitsOffset()) - wstrRet.size()) / 2, ' ');
 	wstrRet.insert(wstrRet.size(), static_cast<std::size_t>(GetDigitsOffset()) - wstrRet.size(), ' ');
 	wstrRet += L"   "; //Spaces to Capacity.
-	wstrRet += m_wstrCapacity;
+	wstrRet += CreateCapacityString();
 	wstrRet += L"   "; //Spaces to Text.
-	if (const auto iSize = static_cast<int>(dwCapacity) - static_cast<int>(m_wstrTextTitle.size()); iSize > 0) {
+	const auto wstrTextTitle = CreateTextAreaString();
+	if (const auto iSize = static_cast<int>(dwCapacity) - static_cast<int>(wstrTextTitle.size()); iSize > 0) {
 		wstrRet.insert(wstrRet.size(), static_cast<std::size_t>(iSize / 2), ' ');
 	}
-	wstrRet += m_wstrTextTitle;
+	wstrRet += wstrTextTitle;
 	wstrRet += L"\r\n";
 
 	//How many spaces to insert at the beginning.
@@ -2582,18 +2627,18 @@ auto CHexCtrl::CopyPrintScreen()const->std::wstring
 	const auto dwStartOffset = dwModStart; //Offset from the line start in the wstrHex.
 	const auto& [wstrHex, wstrText] = BuildDataToDraw(ullStartLine, static_cast<int>(ullLines));
 	std::wstring wstrDataText;
-	std::size_t sIndexToPrint { 0 };
+	std::size_t uzIndexToPrint { 0 };
 
 	for (auto itLine { 0U }; itLine < ullLines; ++itLine) {
 		wstrRet += OffsetToWstr(ullStartLine * dwCapacity + dwCapacity * itLine);
 		wstrRet.insert(wstrRet.size(), 3, ' ');
 
 		for (auto itChunk { 0U }; itChunk < dwCapacity; ++itChunk) {
-			if (dwModStart == 0 && sIndexToPrint < ullSelSize) {
-				wstrRet += wstrHex[(sIndexToPrint + dwStartOffset) * 2];
-				wstrRet += wstrHex[(sIndexToPrint + dwStartOffset) * 2 + 1];
-				wstrDataText += wstrText[sIndexToPrint + dwStartOffset];
-				++sIndexToPrint;
+			if (dwModStart == 0 && uzIndexToPrint < ullSelSize) {
+				wstrRet += wstrHex[(uzIndexToPrint + dwStartOffset) * 2];
+				wstrRet += wstrHex[(uzIndexToPrint + dwStartOffset) * 2 + 1];
+				wstrDataText += wstrText[uzIndexToPrint + dwStartOffset];
+				++uzIndexToPrint;
 			}
 			else {
 				wstrRet += L"  ";
@@ -2638,9 +2683,9 @@ auto CHexCtrl::CopyTextCP()const->std::wstring
 		wstrText.assign(strData.begin(), strData.end());
 	}
 	else if (iCodepage == 0) { //UTF-16.
-		const auto sSizeWstr = (strData.size() - (strData.size() % 2)) / sizeof(wchar_t);
+		const auto uzSizeWstr = (strData.size() - (strData.size() % 2)) / sizeof(wchar_t);
 		const auto pDataUTF16Beg = reinterpret_cast<const wchar_t*>(strData.data());
-		const auto pDataUTF16End = pDataUTF16Beg + sSizeWstr;
+		const auto pDataUTF16End = pDataUTF16Beg + uzSizeWstr;
 		wstrText.assign(pDataUTF16Beg, pDataUTF16End);
 	}
 	else {
@@ -2649,6 +2694,28 @@ auto CHexCtrl::CopyTextCP()const->std::wstring
 	ReplaceUnprintable(wstrText, iCodepage == -1, false);
 
 	return wstrText;
+}
+
+auto CHexCtrl::CreateCapacityString()const->std::wstring
+{
+	const auto dwCapacity = GetCapacityImpl();
+	std::wstring wstrCapacity;
+	wstrCapacity.reserve(static_cast<std::size_t>(dwCapacity) * 3);
+	for (auto i { 0U }; i < dwCapacity; ++i) {
+		wstrCapacity += std::vformat(m_fOffsetHex ? L"{: >2X}" : L"{: >2d}", std::make_wformat_args(i));
+
+		//Additional space between hex chunk's blocks.
+		if ((((i + 1) % m_dwGroupSize) == 0) && (i < (dwCapacity - 1))) {
+			wstrCapacity += L" ";
+		}
+
+		//Additional space between hex halves.
+		if (m_dwGroupSize == 1 && i == (m_dwCapacityBlockSize - 1)) {
+			wstrCapacity += L"  ";
+		}
+	}
+
+	return wstrCapacity;
 }
 
 void CHexCtrl::CreateMenu()
@@ -2660,61 +2727,98 @@ void CHexCtrl::CreateMenu()
 		}
 	}
 
-	m_vecIconsMenu.clear();
-	const auto iSizeIcon = static_cast<int>(16 * GetDPIScale());
-	const auto menuTop = m_MenuMain.GetSubMenu(0); //Context sub-menu handle.
+	//Returns parent HMENU for the given menu item ID.
+	const auto lmbHMENUFromID = [](HMENU hMenu, UINT uMenuID)->HMENU {
+		const auto _lmbHMENUFromID = [](const auto& lmbSelf, HMENU hMenu, UINT uMenuID)->HMENU {
+			const auto menu = GDIUT::CMenu(hMenu);
+			for (auto i = 0; i < menu.GetItemsCount(); ++i) {
+				if (menu.GetItemID(i) == uMenuID) {
+					return hMenu;
+				}
 
-	//"Search" menu icon.
-	auto hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_SEARCH), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
+				if (const auto menuSub = menu.GetSubMenu(i); menuSub.IsMenu()) {
+					if (const auto hMenuParent = lmbSelf(lmbSelf, menuSub, uMenuID); hMenuParent != nullptr) {
+						return hMenuParent;
+					}
+				}
+			}
+			return nullptr;
+			};
 
-	menuTop.SetItemBitmap(0, hBmp, false); //"Search" parent menu icon.
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_SEARCH_DLGSEARCH, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
+		return _lmbHMENUFromID(_lmbHMENUFromID, hMenu, uMenuID);
+		};
 
-	//"Group Data" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_GROUP), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	menuTop.SetItemBitmap(2, hBmp, false); //"Group Data" parent menu icon.
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Bookmarks->Add" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_BKMS), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	menuTop.SetItemBitmap(4, hBmp, false); //"Bookmarks" parent menu icon.
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_BKM_ADD, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Clipboard->Copy as Hex" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_CLPBRD_COPYHEX), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	menuTop.SetItemBitmap(5, hBmp, false); //"Clipboard" parent menu icon.
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_CLPBRD_COPYHEX, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Clipboard->Paste as Hex" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_CLPBRD_PASTEHEX), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_CLPBRD_PASTEHEX, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Modify" parent menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_MODIFY), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	menuTop.SetItemBitmap(6, hBmp, false);
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Modify->Fill with Zeros" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_MODIFY_FILLZEROS), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_MODIFY_FILLZEROS, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
-
-	//"Appearance->Choose Font" menu icon.
-	hBmp = static_cast<HBITMAP>(::LoadImageW(m_hInstRes, MAKEINTRESOURCEW(IDB_HEXCTRL_FONTCHOOSE), IMAGE_BITMAP,
-		iSizeIcon, iSizeIcon, LR_CREATEDIBSECTION));
-	m_MenuMain.SetItemBitmap(IDM_HEXCTRL_APPEAR_DLGFONT, hBmp);
-	m_vecIconsMenu.emplace_back(hBmp);
+	using enum EHexMenuItem;
+	std::unordered_map<EHexMenuItem, MENUITEM> umapMenuItems {
+		{ IDM_SEARCH_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_SEARCH_SEARCH) } } },
+		{ IDM_SEARCH_SEARCH, { .uMenuID { IDM_HEXCTRL_SEARCH_SEARCH } } },
+		{ IDM_SEARCH_NEXT, { .uMenuID { IDM_HEXCTRL_SEARCH_NEXT } } },
+		{ IDM_SEARCH_PREV, { .uMenuID { IDM_HEXCTRL_SEARCH_PREV } } },
+		{ IDM_GROUPDATA_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_GROUPDATA_1BYTE) } } },
+		{ IDM_GROUPDATA_1BYTE, { .uMenuID { IDM_HEXCTRL_GROUPDATA_1BYTE } } },
+		{ IDM_GROUPDATA_2BYTE, { .uMenuID { IDM_HEXCTRL_GROUPDATA_2BYTE } } },
+		{ IDM_GROUPDATA_4BYTE, { .uMenuID { IDM_HEXCTRL_GROUPDATA_4BYTE } } },
+		{ IDM_GROUPDATA_8BYTE, { .uMenuID { IDM_HEXCTRL_GROUPDATA_8BYTE } } },
+		{ IDM_GROUPDATA_INC, { .uMenuID { IDM_HEXCTRL_GROUPDATA_INC } } },
+		{ IDM_GROUPDATA_DEC, { .uMenuID { IDM_HEXCTRL_GROUPDATA_DEC } } },
+		{ IDM_NAV_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_NAV_GOTO) } } },
+		{ IDM_NAV_GOTO, { .uMenuID { IDM_HEXCTRL_NAV_GOTO } } },
+		{ IDM_NAV_REPFWD, { .uMenuID { IDM_HEXCTRL_NAV_REPFWD } } },
+		{ IDM_NAV_REPBKW, { .uMenuID { IDM_HEXCTRL_NAV_REPBKW } } },
+		{ IDM_NAV_DATABEG, { .uMenuID { IDM_HEXCTRL_NAV_DATABEG } } },
+		{ IDM_NAV_DATAEND, { .uMenuID { IDM_HEXCTRL_NAV_DATAEND } } },
+		{ IDM_NAV_PAGEBEG, { .uMenuID { IDM_HEXCTRL_NAV_PAGEBEG } } },
+		{ IDM_NAV_PAGEEND, { .uMenuID { IDM_HEXCTRL_NAV_PAGEEND } } },
+		{ IDM_NAV_LINEBEG, { .uMenuID { IDM_HEXCTRL_NAV_LINEBEG } } },
+		{ IDM_NAV_LINEEND, { .uMenuID { IDM_HEXCTRL_NAV_LINEEND } } },
+		{ IDM_BKM_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_BKM_ADD) } } },
+		{ IDM_BKM_ADD, { .uMenuID { IDM_HEXCTRL_BKM_ADD } } },
+		{ IDM_BKM_REMOVE, { .uMenuID { IDM_HEXCTRL_BKM_REMOVE } } },
+		{ IDM_BKM_GONEXT, { .uMenuID { IDM_HEXCTRL_BKM_GONEXT } } },
+		{ IDM_BKM_GOPREV, { .uMenuID { IDM_HEXCTRL_BKM_GOPREV } } },
+		{ IDM_BKM_REMOVEALL, { .uMenuID { IDM_HEXCTRL_BKM_REMOVEALL } } },
+		{ IDM_BKM_BKMMGR, { .uMenuID { IDM_HEXCTRL_BKM_BKMMGR } } },
+		{ IDM_CLPBRD_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_CLPBRD_COPYHEX) } } },
+		{ IDM_CLPBRD_COPYHEX, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYHEX } } },
+		{ IDM_CLPBRD_COPYHEXLE, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYHEXLE } } },
+		{ IDM_CLPBRD_COPYHEXFMT, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYHEXFMT } } },
+		{ IDM_CLPBRD_COPYTEXTCP, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYTEXTCP } } },
+		{ IDM_CLPBRD_COPYBASE64, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYBASE64 } } },
+		{ IDM_CLPBRD_COPYCARR, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYCARR } } },
+		{ IDM_CLPBRD_COPYGREPHEX, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYGREPHEX } } },
+		{ IDM_CLPBRD_COPYPRNTSCRN, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYPRNTSCRN } } },
+		{ IDM_CLPBRD_COPYCAROFF, { .uMenuID { IDM_HEXCTRL_CLPBRD_COPYCAROFF } } },
+		{ IDM_CLPBRD_PASTEHEX, { .uMenuID { IDM_HEXCTRL_CLPBRD_PASTEHEX } } },
+		{ IDM_CLPBRD_PASTEUTF16, { .uMenuID { IDM_HEXCTRL_CLPBRD_PASTEUTF16 } } },
+		{ IDM_CLPBRD_PASTETEXTCP, { .uMenuID { IDM_HEXCTRL_CLPBRD_PASTETEXTCP } } },
+		{ IDM_MODIFY_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_MODIFY_OPERS) } } },
+		{ IDM_MODIFY_OPERS, { .uMenuID { IDM_HEXCTRL_MODIFY_OPERS } } },
+		{ IDM_MODIFY_FILLZEROS, { .uMenuID { IDM_HEXCTRL_MODIFY_FILLZEROS } } },
+		{ IDM_MODIFY_FILLDATA, { .uMenuID { IDM_HEXCTRL_MODIFY_FILLDATA } } },
+		{ IDM_MODIFY_UNDO, { .uMenuID { IDM_HEXCTRL_MODIFY_UNDO } } },
+		{ IDM_MODIFY_REDO, { .uMenuID { IDM_HEXCTRL_MODIFY_REDO } } },
+		{ IDM_SEL_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_SEL_MARKSTARTEND) } } },
+		{ IDM_SEL_MARKSTARTEND, { .uMenuID { IDM_HEXCTRL_SEL_MARKSTARTEND } } },
+		{ IDM_SEL_SELALL, { .uMenuID { IDM_HEXCTRL_SEL_ALL } } },
+		{ IDM_TEMPL_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_TEMPL_APPLYCURR) } } },
+		{ IDM_TEMPL_APPLYCURR, { .uMenuID { IDM_HEXCTRL_TEMPL_APPLYCURR } } },
+		{ IDM_TEMPL_DISAPPLY, { .uMenuID { IDM_HEXCTRL_TEMPL_DISAPPLY } } },
+		{ IDM_TEMPL_DISAPPLYALL, { .uMenuID { IDM_HEXCTRL_TEMPL_DISAPPLYALL } } },
+		{ IDM_TEMPL_TEMPLMGR, { .uMenuID { IDM_HEXCTRL_TEMPL_TEMPLMGR } } },
+		{ IDM_DATAVIEW_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_DATAINTERP) } } },
+		{ IDM_DATAVIEW_DATAINTERP, { .uMenuID { IDM_HEXCTRL_DATAINTERP } } },
+		{ IDM_DATAVIEW_TEXTCP, { .uMenuID { IDM_HEXCTRL_TEXTCODEPAGE } } },
+		{ IDM_APPEAR_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_APPEAR_CHOOSEFONT) } } },
+		{ IDM_APPEAR_CHOOSEFONT, { .uMenuID { IDM_HEXCTRL_APPEAR_CHOOSEFONT } } },
+		{ IDM_APPEAR_INCFONT, { .uMenuID { IDM_HEXCTRL_APPEAR_INCFONT } } },
+		{ IDM_APPEAR_DECFONT, { .uMenuID { IDM_HEXCTRL_APPEAR_DECFONT } } },
+		{ IDM_APPEAR_INCCAPAS, { .uMenuID { IDM_HEXCTRL_APPEAR_INCCAPAC } } },
+		{ IDM_APPEAR_DECCAPAS, { .uMenuID { IDM_HEXCTRL_APPEAR_DECCAPAC } } },
+		{ IDM_OTHER_POPUP, { .hMenuSub { lmbHMENUFromID(m_MenuMain, IDM_HEXCTRL_OTHER_PRINT) } } },
+		{ IDM_OTHER_PRINT, { .uMenuID { IDM_HEXCTRL_OTHER_PRINT } } },
+		{ IDM_OTHER_ABOUT, { .uMenuID { IDM_HEXCTRL_OTHER_ABOUT } } }
+	};
+	m_umapMenuItems = std::move(umapMenuItems);
 }
 
 void CHexCtrl::CreatePens()
@@ -2723,6 +2827,25 @@ void CHexCtrl::CreatePens()
 	::DeleteObject(m_hPenLinesTempl);
 	m_hPenLinesMain = ::CreatePen(PS_SOLID, 1, m_stColors.clrLinesMain);
 	m_hPenLinesTempl = ::CreatePen(PS_SOLID, 1, m_stColors.clrLinesTempl);
+}
+
+auto CHexCtrl::CreateTextAreaString()const->std::wstring
+{
+	const auto iCP = GetCodepage();
+	std::wstring_view wsvFmt;
+	switch (iCP) {
+	case -1:
+		wsvFmt = L"ASCII";
+		break;
+	case 0:
+		wsvFmt = L"UTF-16";
+		break;
+	default:
+		wsvFmt = L"Codepage {}";
+		break;
+	}
+
+	return std::vformat(wsvFmt, std::make_wformat_args(iCP));
 }
 
 void CHexCtrl::DrawWindow(HDC hDC)const
@@ -2786,20 +2909,67 @@ void CHexCtrl::DrawWindow(HDC hDC)const
 	dc.DrawTextW(L"Offset", rcCaptionOffset, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 	//Capacity numbers.
+	const auto wstrCapacity = CreateCapacityString();
 	dc.SetBkColor(m_stColors.clrBkHex);
 	::ExtTextOutW(dc, m_iIndentFirstHexChunkXPx - iScrollH, m_iFirstHorzLinePx + m_iIndentCapTextYPx, 0, nullptr,
-		m_wstrCapacity.data(), static_cast<UINT>(m_wstrCapacity.size()), GetCharsWidthArray());
+		wstrCapacity.data(), static_cast<UINT>(wstrCapacity.size()), GetCharsWidthArray());
 
 	//Text area caption.
 	dc.SetBkColor(m_stColors.clrBkText);
 	auto rcCaptionText = GetRectTextCaption();
-	dc.DrawTextW(m_wstrTextTitle, rcCaptionText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+	dc.DrawTextW(CreateTextAreaString(), rcCaptionText, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 }
 
 void CHexCtrl::DrawInfoBar(HDC hDC)const
 {
-	if (!HasInfoBar())
+	if (!IsDataSetImpl() || !HasInfoBar())
 		return;
+
+	const auto ullCaretPos = GetVirtualOffset(GetCaretPosImpl());
+
+	//^ (caret) - encloses a data name, ` (tilda) - encloses the data itself.
+	auto wstrInfoBar = std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Caret: ^`0x{:X}`|" : L"^Caret: ^`{:L}`|",
+		std::make_wformat_args(ullCaretPos));
+
+	if (IsPageVisible()) { //Page/Sector.
+		const auto ullPagePos = GetPagePosImpl();
+		const auto ullPagesCount = GetPagesCountImpl();
+		wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^{}: ^`0x{:X}/0x{:X}`|" : L"^{}: ^`{:L}/{:L}`|",
+			std::make_wformat_args(m_wstrPageName, ullPagePos, ullPagesCount));
+	}
+
+	if (HasSelection()) {
+		const auto ullSelStart = GetVirtualOffset(m_Selection.GetSelStart());
+		const auto ullSelSize = m_Selection.GetSelSize();
+		if (ullSelSize == 1) { //In case of just one byte selected.
+			wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Selected: ^`0x{:X} [0x{:X}]`|" :
+				L"^Selected: ^`{} [{:L}]`|", std::make_wformat_args(ullSelSize, ullSelStart));
+		}
+		else {
+			const auto ullSelEnd = m_Selection.GetSelEnd();
+			wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Selected: ^`0x{:X} [0x{:X}-0x{:X}]`|" :
+				L"^Selected: ^`{:L} [{:L}-{:L}]`|", std::make_wformat_args(ullSelSize, ullSelStart, ullSelEnd));
+		}
+	}
+
+	wstrInfoBar += IsMutableImpl() ? L"^RW^|" : L"^RO^|"; //RW/RO mode.
+
+	constexpr auto uBInKB { 1024U };          //Bytes in KB.
+	constexpr auto uBInMB { uBInKB * 1024U }; //Bytes in MB.
+	constexpr auto uBInGB { uBInMB * 1024U }; //Bytes in GB.
+	const auto ullDataSize = GetDataSizeImpl();
+	if (ullDataSize < uBInKB) {
+		wstrInfoBar += std::format(L"^{}B^|", ullDataSize);
+	}
+	else if (ullDataSize < uBInMB) {
+		wstrInfoBar += std::format(L"^{}KB^|", ullDataSize / uBInKB);
+	}
+	else if (ullDataSize < uBInGB) {
+		wstrInfoBar += std::format(L"^{:.1f}MB^|", ullDataSize / static_cast<float>(uBInMB));
+	}
+	else { //More than or equal to 1 GB/s.
+		wstrInfoBar += std::format(L"^{:.1f}GB^|", ullDataSize / static_cast<float>(uBInGB));
+	}
 
 	struct POLYINFODATA { //InfoBar text, colors, and vertical lines.
 		POLYTEXTW stPoly { };
@@ -2807,7 +2977,7 @@ void CHexCtrl::DrawInfoBar(HDC hDC)const
 		int       iVertLineX { };
 	};
 	std::vector<POLYINFODATA> vecInfoData;
-	vecInfoData.reserve(4);
+	vecInfoData.reserve(6);
 
 	const auto iScrollH = static_cast<int>(m_ScrollH.GetScrollPos());
 	GDIUT::CRect rcInfoBar(m_iFirstVertLinePx + 1 - iScrollH, m_iThirdHorzLinePx + 1,
@@ -2816,34 +2986,34 @@ void CHexCtrl::DrawInfoBar(HDC hDC)const
 	rcInfoBarText.left = m_iFirstVertLinePx + 5; //Draw the text beginning with little indent.
 	rcInfoBarText.right = m_iFirstVertLinePx + m_iWidthClientAreaPx; //Draw text to the end of the client area, even if it passes iFourthHorizLine.
 
-	std::size_t sCurrPosBegin { };
-	while (true) {
-		const auto sParamPosBegin = m_wstrInfoBar.find_first_of('^', sCurrPosBegin);
-		if (sParamPosBegin == std::wstring::npos)
-			break;
-
-		const auto sParamPosEnd = m_wstrInfoBar.find_first_of('^', sParamPosBegin + 1);
-		if (sParamPosEnd == std::wstring::npos)
-			break;
-
-		const auto iParamSize = static_cast<UINT>(sParamPosEnd - sParamPosBegin - 1);
-		vecInfoData.emplace_back(POLYTEXTW { .n { iParamSize }, .lpstr { m_wstrInfoBar.data() + sParamPosBegin + 1 },
-			.rcl { rcInfoBarText } }, m_stColors.clrFontInfoParam);
-		rcInfoBarText.left += iParamSize * m_sizeFontInfo.cx; //Increase rect left offset by string size.
-		sCurrPosBegin = sParamPosEnd + 1;
-
-		if (const auto sDataPosBegin = m_wstrInfoBar.find_first_of('`', sCurrPosBegin);
-			sDataPosBegin != std::wstring::npos) {
-			if (const auto sDataPosEnd = m_wstrInfoBar.find_first_of('`', sDataPosBegin + 1);
-				sDataPosEnd != std::wstring::npos) {
-				const auto iDataSize = static_cast<UINT>(sDataPosEnd - sDataPosBegin - 1);
-				vecInfoData.emplace_back(POLYTEXTW { .n { iDataSize }, .lpstr { m_wstrInfoBar.data() + sDataPosBegin + 1 },
-					.rcl { rcInfoBarText } }, m_stColors.clrFontInfoData);
-				rcInfoBarText.left += iDataSize * m_sizeFontInfo.cx;
-				sCurrPosBegin = sDataPosEnd + 1;
-			}
+	for (const auto subrWstr : std::views::split(wstrInfoBar, L'|')) {
+		if (subrWstr.empty()) {
+			continue;
 		}
 
+		auto wsvSub = std::wstring_view(subrWstr.data(), subrWstr.size());
+		std::size_t uzPosCurr { };
+		while (true) {
+			const auto uzParamPosBegin = wsvSub.find(L'^', uzPosCurr);
+			const auto uzDataPosBegin = wsvSub.find(L'`', uzPosCurr);
+			if (uzParamPosBegin == std::wstring_view::npos && uzDataPosBegin == std::wstring_view::npos) {
+				break; //Found nothing.
+			}
+
+			const bool fIsParam = uzParamPosBegin < uzDataPosBegin;
+			const auto uzPosBegin = fIsParam ? uzParamPosBegin : uzDataPosBegin;
+			const auto uzPosEnd = wsvSub.find(fIsParam ? L'^' : L'`', uzPosBegin + 1);
+			if (uzPosEnd == std::wstring_view::npos) {
+				ut::DBG_REPORT(L"Wrong formatting.");
+				break;
+			}
+
+			const auto uStringSize = static_cast<UINT>(uzPosEnd - uzPosBegin - 1);
+			vecInfoData.emplace_back(POLYTEXTW { .n { uStringSize }, .lpstr { wsvSub.data() + uzPosBegin + 1 },
+				.rcl { rcInfoBarText } }, fIsParam ? m_stColors.clrFontInfoParam : m_stColors.clrFontInfoData);
+			rcInfoBarText.left += uStringSize * m_sizeFontInfo.cx; //Increase rect left offset by string size.
+			uzPosCurr = uzPosEnd + 1;
+		}
 		rcInfoBarText.left += m_sizeFontInfo.cx; //Additional space to the next rect's left side.
 		vecInfoData.back().iVertLineX = rcInfoBarText.left - (m_sizeFontInfo.cx / 2); //Vertical line after current rect.
 	}
@@ -2856,13 +3026,13 @@ void CHexCtrl::DrawInfoBar(HDC hDC)const
 
 	for (const auto& pid : vecInfoData) {
 		dc.SetTextColor(pid.clrText);
-		const auto& refPoly = pid.stPoly;
-		auto rc = refPoly.rcl;
-		dc.DrawTextW(refPoly.lpstr, refPoly.n, &rc, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+		const auto& poly = pid.stPoly;
+		auto rc = poly.rcl;
+		dc.DrawTextW(poly.lpstr, poly.n, &rc, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 
 		if (pid.iVertLineX > 0) {
-			dc.MoveTo(pid.iVertLineX, refPoly.rcl.top);
-			dc.LineTo(pid.iVertLineX, refPoly.rcl.bottom);
+			dc.MoveTo(pid.iVertLineX, poly.rcl.top);
+			dc.LineTo(pid.iVertLineX, poly.rcl.bottom);
 		}
 	}
 }
@@ -2910,7 +3080,7 @@ void CHexCtrl::DrawHexText(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wst
 	vecWstrHex.reserve(static_cast<std::size_t>(iLines));
 	vecWstrText.reserve(static_cast<std::size_t>(iLines));
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { 0 };
+	std::size_t uzIndexToPrint { 0 };
 	HEXCOLORINFO hci { .hdr { m_Wnd, static_cast<UINT>(m_Wnd.GetDlgCtrlID()) },
 		.stClr { .clrBk { m_stColors.clrBkHex }, .clrText { m_stColors.clrFontHex } } };
 
@@ -2954,10 +3124,10 @@ void CHexCtrl::DrawHexText(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wst
 			};
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
-			if (m_pHexVirtColors != nullptr) {
-				hci.ullOffset = ullStartOffset + sIndexToPrint;
-				if (m_pHexVirtColors->OnHexGetColor(hci)) {
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
+			if (m_stData.pHexVirtColors != nullptr) {
+				hci.ullOffset = ullStartOffset + uzIndexToPrint;
+				if (m_stData.pHexVirtColors->OnHexGetColor(hci)) {
 					stClrTextArea = hci.stClr; //Text area color is now equal to the Hex area color.
 				}
 				else {
@@ -2977,15 +3147,15 @@ void CHexCtrl::DrawHexText(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wst
 
 			if (fNeedChunkPoint) {
 				int iCy;
-				HexChunkPoint(sIndexToPrint, iHexPosToPrintX, iCy);
-				TextChunkPoint(sIndexToPrint, iTextPosToPrintX, iCy);
+				HexChunkPoint(uzIndexToPrint, iHexPosToPrintX, iCy);
+				TextChunkPoint(uzIndexToPrint, iTextPosToPrintX, iCy);
 				fNeedChunkPoint = false;
 			}
 
 			lmbHexSpaces(itChunk);
-			wstrHexToPrint += wsvHex[sIndexToPrint * 2];
-			wstrHexToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-			wstrTextToPrint += wsvText[sIndexToPrint];
+			wstrHexToPrint += wsvHex[uzIndexToPrint * 2];
+			wstrHexToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+			wstrTextToPrint += wsvText[uzIndexToPrint];
 		}
 
 		lmbPoly();
@@ -3024,7 +3194,7 @@ void CHexCtrl::DrawTemplates(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 	std::vector<std::unique_ptr<std::wstring>> vecWstrFieldsHex; //unique_ptr to avoid wstring ptr invalidation.
 	std::vector<std::unique_ptr<std::wstring>> vecWstrFieldsText;
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { };
+	std::size_t uzIndexToPrint { };
 	PCHEXTEMPLFIELD pFieldCurr { };
 
 	for (auto itLine = 0; itLine < iLines; ++itLine) {
@@ -3069,9 +3239,9 @@ void CHexCtrl::DrawTemplates(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 			};
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
 			//Fields.
-			if (auto pField = m_DlgTemplMgr.HitTest(ullStartOffset + sIndexToPrint); pField != nullptr) {
+			if (auto pField = m_DlgTemplMgr.HitTest(ullStartOffset + uzIndexToPrint); pField != nullptr) {
 				if (itChunk == 0 && pField == pFieldCurr) {
 					fPrintVertLine = false;
 				}
@@ -3087,15 +3257,15 @@ void CHexCtrl::DrawTemplates(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 
 				if (fNeedChunkPoint) {
 					int iCy;
-					HexChunkPoint(sIndexToPrint, iFieldHexPosToPrintX, iCy);
-					TextChunkPoint(sIndexToPrint, iFieldTextPosToPrintX, iCy);
+					HexChunkPoint(uzIndexToPrint, iFieldHexPosToPrintX, iCy);
+					TextChunkPoint(uzIndexToPrint, iFieldTextPosToPrintX, iCy);
 					fNeedChunkPoint = false;
 				}
 
 				lmbHexSpaces(itChunk);
-				wstrHexFieldToPrint += wsvHex[sIndexToPrint * 2];
-				wstrHexFieldToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-				wstrTextFieldToPrint += wsvText[sIndexToPrint];
+				wstrHexFieldToPrint += wsvHex[uzIndexToPrint * 2];
+				wstrHexFieldToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+				wstrTextFieldToPrint += wsvText[uzIndexToPrint];
 				fField = true;
 			}
 			else if (fField) {
@@ -3169,7 +3339,7 @@ void CHexCtrl::DrawBookmarks(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 	std::vector<std::unique_ptr<std::wstring>> vecWstrBkmHex; //unique_ptr to avoid wstring ptr invalidation.
 	std::vector<std::unique_ptr<std::wstring>> vecWstrBkmText;
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { };
+	std::size_t uzIndexToPrint { };
 
 	for (auto itLine = 0; itLine < iLines; ++itLine) {
 		std::wstring wstrHexBkmToPrint;
@@ -3211,9 +3381,9 @@ void CHexCtrl::DrawBookmarks(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 			};
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
 			//Bookmarks.
-			if (const auto pBkm = m_DlgBkmMgr.HitTest(ullStartOffset + sIndexToPrint); pBkm != nullptr) {
+			if (const auto pBkm = m_DlgBkmMgr.HitTest(ullStartOffset + uzIndexToPrint); pBkm != nullptr) {
 				//If it's nested bookmark.
 				if (pBkmCurr != nullptr && pBkmCurr != pBkm) {
 					lmbHexSpaces(itChunk);
@@ -3225,15 +3395,15 @@ void CHexCtrl::DrawBookmarks(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 
 				if (fNeedChunkPoint) {
 					int iCy;
-					HexChunkPoint(sIndexToPrint, iBkmHexPosToPrintX, iCy);
-					TextChunkPoint(sIndexToPrint, iBkmTextPosToPrintX, iCy);
+					HexChunkPoint(uzIndexToPrint, iBkmHexPosToPrintX, iCy);
+					TextChunkPoint(uzIndexToPrint, iBkmTextPosToPrintX, iCy);
 					fNeedChunkPoint = false;
 				}
 
 				lmbHexSpaces(itChunk);
-				wstrHexBkmToPrint += wsvHex[sIndexToPrint * 2];
-				wstrHexBkmToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-				wstrTextBkmToPrint += wsvText[sIndexToPrint];
+				wstrHexBkmToPrint += wsvHex[uzIndexToPrint * 2];
+				wstrHexBkmToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+				wstrTextBkmToPrint += wsvText[uzIndexToPrint];
 				fBookmark = true;
 			}
 			else if (fBookmark) {
@@ -3278,7 +3448,7 @@ void CHexCtrl::DrawSelection(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 	std::vector<POLYTEXTW> vecPolySelText;
 	std::vector<std::unique_ptr<std::wstring>> vecWstrSel; //unique_ptr to avoid wstring ptr invalidation.
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { };
+	std::size_t uzIndexToPrint { };
 
 	for (auto itLine = 0; itLine < iLines; ++itLine) {
 		std::wstring wstrHexSelToPrint; //Selected Hex and Text strings to print.
@@ -3304,13 +3474,13 @@ void CHexCtrl::DrawSelection(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 			};
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
 			//Selection.
-			if (m_Selection.HitTest(ullStartOffset + sIndexToPrint)) {
+			if (m_Selection.HitTest(ullStartOffset + uzIndexToPrint)) {
 				if (fNeedChunkPoint) {
 					int iCy;
-					HexChunkPoint(sIndexToPrint, iSelHexPosToPrintX, iCy);
-					TextChunkPoint(sIndexToPrint, iSelTextPosToPrintX, iCy);
+					HexChunkPoint(uzIndexToPrint, iSelHexPosToPrintX, iCy);
+					TextChunkPoint(uzIndexToPrint, iSelTextPosToPrintX, iCy);
 					fNeedChunkPoint = false;
 				}
 
@@ -3324,9 +3494,9 @@ void CHexCtrl::DrawSelection(HDC hDC, ULONGLONG ullStartLine, int iLines, std::w
 						wstrHexSelToPrint += L"  ";
 					}
 				}
-				wstrHexSelToPrint += wsvHex[sIndexToPrint * 2];
-				wstrHexSelToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-				wstrTextSelToPrint += wsvText[sIndexToPrint];
+				wstrHexSelToPrint += wsvHex[uzIndexToPrint * 2];
+				wstrHexSelToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+				wstrTextSelToPrint += wsvText[uzIndexToPrint];
 				fSelection = true;
 			}
 			else if (fSelection) {
@@ -3364,7 +3534,7 @@ void CHexCtrl::DrawSelHighlight(HDC hDC, ULONGLONG ullStartLine, int iLines, std
 	std::vector<POLYTEXTW> vecPolySelTextHgl;
 	std::vector<std::unique_ptr<std::wstring>> vecWstrSelHgl; //unique_ptr to avoid wstring ptr invalidation.
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { };
+	std::size_t uzIndexToPrint { };
 
 	for (auto itLine = 0; itLine < iLines; ++itLine) {
 		std::wstring wstrHexSelToPrint; //Selected Hex and Text strings to print.
@@ -3390,13 +3560,13 @@ void CHexCtrl::DrawSelHighlight(HDC hDC, ULONGLONG ullStartLine, int iLines, std
 			};
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
 			//Selection highlights.
-			if (m_Selection.HitTestHighlight(ullStartOffset + sIndexToPrint)) {
+			if (m_Selection.HitTestHighlight(ullStartOffset + uzIndexToPrint)) {
 				if (fNeedChunkPoint) {
 					int iCy;
-					HexChunkPoint(sIndexToPrint, iSelHexPosToPrintX, iCy);
-					TextChunkPoint(sIndexToPrint, iSelTextPosToPrintX, iCy);
+					HexChunkPoint(uzIndexToPrint, iSelHexPosToPrintX, iCy);
+					TextChunkPoint(uzIndexToPrint, iSelTextPosToPrintX, iCy);
 					fNeedChunkPoint = false;
 				}
 
@@ -3410,9 +3580,9 @@ void CHexCtrl::DrawSelHighlight(HDC hDC, ULONGLONG ullStartLine, int iLines, std
 						wstrHexSelToPrint += L"  ";
 					}
 				}
-				wstrHexSelToPrint += wsvHex[sIndexToPrint * 2];
-				wstrHexSelToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-				wstrTextSelToPrint += wsvText[sIndexToPrint];
+				wstrHexSelToPrint += wsvHex[uzIndexToPrint * 2];
+				wstrHexSelToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+				wstrTextSelToPrint += wsvText[uzIndexToPrint];
 				fSelection = true;
 			}
 			else if (fSelection) {
@@ -3460,17 +3630,17 @@ void CHexCtrl::DrawCaret(HDC hDC, ULONGLONG ullStartLine, int iLines, std::wstri
 	HexChunkPoint(ullCaretPos, iCaretHexPosToPrintX, iCaretHexPosToPrintY);
 	TextChunkPoint(ullCaretPos, iCaretTextPosToPrintX, iCaretTextPosToPrintY);
 
-	const auto sIndexToPrint = static_cast<std::size_t>(ullCaretPos - ullFirstOffset);
+	const auto uzIndexToPrint = static_cast<std::size_t>(ullCaretPos - ullFirstOffset);
 	std::wstring wstrHexCaretToPrint;
 	std::wstring wstrTextCaretToPrint;
 	if (m_fCaretHigh) {
-		wstrHexCaretToPrint = wsvHex[sIndexToPrint * 2];
+		wstrHexCaretToPrint = wsvHex[uzIndexToPrint * 2];
 	}
 	else {
-		wstrHexCaretToPrint = wsvHex[(sIndexToPrint * 2) + 1];
+		wstrHexCaretToPrint = wsvHex[(uzIndexToPrint * 2) + 1];
 		iCaretHexPosToPrintX += GetCharWidthExtras();
 	}
-	wstrTextCaretToPrint = wsvText[sIndexToPrint];
+	wstrTextCaretToPrint = wsvText[uzIndexToPrint];
 
 	POLYTEXTW arrPolyCaret[2]; //Caret Poly array.
 
@@ -3510,7 +3680,7 @@ void CHexCtrl::DrawDataInterp(HDC hDC, ULONGLONG ullStartLine, int iLines, std::
 	std::vector<POLYTEXTW> vecPolyDataInterp;
 	std::vector<std::unique_ptr<std::wstring>> vecWstrDataInterp;
 	const auto ullStartOffset = ullStartLine * GetCapacity();
-	std::size_t sIndexToPrint { };
+	std::size_t uzIndexToPrint { };
 
 	for (auto itLine = 0; itLine < iLines; ++itLine) {
 		std::wstring wstrHexDataInterpToPrint; //Data Interpreter Hex and Text strings to print.
@@ -3521,13 +3691,13 @@ void CHexCtrl::DrawDataInterp(HDC hDC, ULONGLONG ullStartLine, int iLines, std::
 		const auto iPosToPrintY = m_iStartWorkAreaYPx + (m_sizeFontMain.cy * itLine); //Hex and Text are the same.
 
 		//Main loop for printing Hex chunks and Text chars.
-		for (auto itChunk { 0U }; itChunk < GetCapacity() && sIndexToPrint < wsvText.size(); ++itChunk, ++sIndexToPrint) {
-			const auto ullOffsetCurr = ullStartOffset + sIndexToPrint;
+		for (auto itChunk { 0U }; itChunk < GetCapacity() && uzIndexToPrint < wsvText.size(); ++itChunk, ++uzIndexToPrint) {
+			const auto ullOffsetCurr = ullStartOffset + uzIndexToPrint;
 			if (ullOffsetCurr >= ullCaretPos && ullOffsetCurr < (ullCaretPos + dwHglSize)) {
 				if (fNeedChunkPoint) {
 					int iCy;
-					HexChunkPoint(sIndexToPrint, iDataInterpHexPosToPrintX, iCy);
-					TextChunkPoint(sIndexToPrint, iDataInterpTextPosToPrintX, iCy);
+					HexChunkPoint(uzIndexToPrint, iDataInterpHexPosToPrintX, iCy);
+					TextChunkPoint(uzIndexToPrint, iDataInterpTextPosToPrintX, iCy);
 					fNeedChunkPoint = false;
 				}
 
@@ -3541,9 +3711,9 @@ void CHexCtrl::DrawDataInterp(HDC hDC, ULONGLONG ullStartLine, int iLines, std::
 						wstrHexDataInterpToPrint += L"  ";
 					}
 				}
-				wstrHexDataInterpToPrint += wsvHex[sIndexToPrint * 2];
-				wstrHexDataInterpToPrint += wsvHex[(sIndexToPrint * 2) + 1];
-				wstrTextDataInterpToPrint += wsvText[sIndexToPrint];
+				wstrHexDataInterpToPrint += wsvHex[uzIndexToPrint * 2];
+				wstrHexDataInterpToPrint += wsvHex[(uzIndexToPrint * 2) + 1];
+				wstrTextDataInterpToPrint += wsvText[uzIndexToPrint];
 			}
 		}
 
@@ -3606,25 +3776,6 @@ void CHexCtrl::DrawPageLines(HDC hDC, ULONGLONG ullStartLine, int iLines)const
 	}
 }
 
-void CHexCtrl::FillCapacityString()
-{
-	m_wstrCapacity.clear();
-	m_wstrCapacity.reserve(static_cast<std::size_t>(m_dwCapacity) * 3);
-	for (auto i { 0U }; i < m_dwCapacity; ++i) {
-		m_wstrCapacity += std::vformat(m_fOffsetHex ? L"{: >2X}" : L"{: >2d}", std::make_wformat_args(i));
-
-		//Additional space between hex chunk blocks.
-		if ((((i + 1) % m_dwGroupSize) == 0) && (i < (m_dwCapacity - 1))) {
-			m_wstrCapacity += L" ";
-		}
-
-		//Additional space between hex halves.
-		if (m_dwGroupSize == 1 && i == (m_dwCapacityBlockSize - 1)) {
-			m_wstrCapacity += L"  ";
-		}
-	}
-}
-
 void CHexCtrl::FillWithZeros()
 {
 	if (!IsDataSetImpl())
@@ -3671,6 +3822,10 @@ auto CHexCtrl::GetBottomLine()const->ULONGLONG
 	return ullEndLine;
 }
 
+auto CHexCtrl::GetCapacityImpl()const->DWORD {
+	return m_dwCapacity;
+}
+
 auto CHexCtrl::GetCaretPosImpl()const->std::uint64_t
 {
 	return m_ullCaretPos;
@@ -3693,8 +3848,8 @@ auto CHexCtrl::GetCharWidthNative()const->int
 
 auto CHexCtrl::GetCommandFromKey(UINT uKey, bool fCtrl, bool fShift, bool fAlt)const->std::optional<EHexCmd>
 {
-	if (const auto it = std::find_if(m_vecKeyBind.begin(), m_vecKeyBind.end(), [=](const KEYBIND& ref) {
-		return ref.fCtrl == fCtrl && ref.fShift == fShift && ref.fAlt == fAlt && ref.uKey == uKey; });
+	if (const auto it = std::find_if(m_vecKeyBind.begin(), m_vecKeyBind.end(), [=](const KEYBIND& kb) {
+		return kb.fCtrl == fCtrl && kb.fShift == fShift && kb.fAlt == fAlt && kb.uKey == uKey; });
 		it != m_vecKeyBind.end()) {
 		return it->eCmd;
 	}
@@ -3704,8 +3859,8 @@ auto CHexCtrl::GetCommandFromKey(UINT uKey, bool fCtrl, bool fShift, bool fAlt)c
 
 auto CHexCtrl::GetCommandFromMenu(WORD wMenuID)const->std::optional<EHexCmd>
 {
-	if (const auto it = std::find_if(m_vecKeyBind.begin(), m_vecKeyBind.end(), [=](const KEYBIND& ref) {
-		return ref.wMenuID == wMenuID; }); it != m_vecKeyBind.end()) {
+	if (const auto it = std::find_if(m_vecKeyBind.begin(), m_vecKeyBind.end(), [=](const KEYBIND& kb) {
+		return kb.wMenuID == wMenuID; }); it != m_vecKeyBind.end()) {
 		return it->eCmd;
 	}
 
@@ -3714,7 +3869,7 @@ auto CHexCtrl::GetCommandFromMenu(WORD wMenuID)const->std::optional<EHexCmd>
 
 auto CHexCtrl::GetDataSizeImpl()const->std::uint64_t
 {
-	return m_spnData.size();
+	return m_stData.spnData.size();
 }
 
 auto CHexCtrl::GetDigitsOffset()const->DWORD
@@ -3741,7 +3896,7 @@ auto CHexCtrl::GetOffsetImpl(std::uint64_t u64Offset, bool fGetVirt) const -> st
 {
 	if (IsVirtualImpl()) {
 		HEXDATAINFO hdi { .hdr { m_Wnd, static_cast<UINT>(m_Wnd.GetDlgCtrlID()) }, .stHexSpan { .ullOffset { u64Offset } } };
-		m_pHexVirtData->OnHexGetOffset(hdi, fGetVirt);
+		m_stData.pHexVirtData->OnHexGetOffset(hdi, fGetVirt);
 		return hdi.stHexSpan.ullOffset;
 	}
 
@@ -3896,7 +4051,7 @@ bool CHexCtrl::IsDrawable()const
 
 bool CHexCtrl::IsMutableImpl()const
 {
-	return m_fMutable;
+	return m_stData.fMutable;
 }
 
 bool CHexCtrl::IsOffsetAsHexImpl()const
@@ -3909,25 +4064,30 @@ bool CHexCtrl::IsPageVisible()const
 	return GetPageSizeImpl() > 0 && (GetPageSizeImpl() % GetCapacity() == 0) && GetPageSizeImpl() >= GetCapacity();
 }
 
-bool CHexCtrl::IsVirtualImpl()const
+bool CHexCtrl::IsScrollCursor()const
 {
-	return m_pHexVirtData != nullptr;
+	return m_fScrollCursor;
 }
 
-void CHexCtrl::ModifyWorker(const HEXCTRL::HEXMODIFY& hms, const auto& FuncWorker, const HEXCTRL::SpanCByte spnOper)
+bool CHexCtrl::IsVirtualImpl()const
+{
+	return m_stData.pHexVirtData != nullptr;
+}
+
+void CHexCtrl::ModifyWorker(const HEXCTRL::HEXMODIFY& hms, const auto& FuncWorker, const HEXCTRL::SpanCByte spnOper)const
 {
 	if (spnOper.empty()) { ut::DBG_REPORT(L"Operation span is empty."); return; }
 
 	const auto& vecSpan = hms.vecSpan;
 	const auto ullTotalSize = std::reduce(vecSpan.begin(), vecSpan.end(), 0ULL,
-		[](ULONGLONG ullSumm, const HEXSPAN& ref) { return ullSumm + ref.ullSize; });
+		[](ULONGLONG ullSumm, const HEXSPAN& hs) { return ullSumm + hs.ullSize; });
 	assert(ullTotalSize <= GetDataSizeImpl());
 
 	CHexDlgProgress dlgProg(L"Modifying...", L"", vecSpan.back().ullOffset, vecSpan.back().ullOffset + ullTotalSize);
 	const auto lmbModify = [&]() {
-		for (const auto& ref : vecSpan) { //Span-vector's size times.
-			const auto ullOffsetToModify { ref.ullOffset };
-			const auto ullSizeToModify { ref.ullSize };
+		for (const auto& hs : vecSpan) { //Span-vector's size times.
+			const auto ullOffsetToModify { hs.ullOffset };
+			const auto ullSizeToModify { hs.ullSize };
 			const auto ullSizeDataOper { spnOper.size() };
 
 			//If the size of the data to_modify_from is bigger than
@@ -4145,11 +4305,11 @@ auto CHexCtrl::OnDestroy()->LRESULT
 	m_DlgSearch.DestroyDlg();
 	m_DlgTemplMgr.DestroyDlg();
 	m_DlgTemplMgr.UnloadAll(); //Templates could be loaded without creating the dialog itself.
-	m_vecIconsMenu.clear();
 	m_vecKeyBind.clear();
 	m_vecUndo.clear();
 	m_vecRedo.clear();
 	m_vecCharsWidth.clear();
+	m_umapMenuItems.clear();
 	m_MenuMain.DestroyMenu();
 	::DeleteObject(m_hFntMain);
 	::DeleteObject(m_hFntInfoBar);
@@ -4198,8 +4358,7 @@ auto CHexCtrl::OnHelp([[maybe_unused]] const MSG& msg)->LRESULT
 
 auto CHexCtrl::OnHScroll([[maybe_unused]] const MSG& msg)->LRESULT
 {
-	m_Wnd.RedrawWindow();
-
+	RedrawImpl();
 	return 0;
 }
 
@@ -4209,12 +4368,12 @@ auto CHexCtrl::OnInitMenuPopup(const MSG& msg)->LRESULT
 	//The LOWORD(lParam) specifies zero-based relative position of the menu, that opens drop-down menu or submenu.
 	switch (LOWORD(msg.lParam)) {
 	case 0:	//Search.
-		m_MenuMain.EnableItem(IDM_HEXCTRL_SEARCH_DLGSEARCH, IsCmdAvail(CMD_SEARCH_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_SEARCH_SEARCH, IsCmdAvail(CMD_SEARCH_DLG));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_SEARCH_NEXT, IsCmdAvail(CMD_SEARCH_NEXT));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_SEARCH_PREV, IsCmdAvail(CMD_SEARCH_PREV));
 		break;
 	case 3:	//Navigation.
-		m_MenuMain.EnableItem(IDM_HEXCTRL_NAV_DLGGOTO, IsCmdAvail(CMD_NAV_GOTO_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_NAV_GOTO, IsCmdAvail(CMD_NAV_GOTO_DLG));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_NAV_REPFWD, IsCmdAvail(CMD_NAV_REPFWD));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_NAV_REPBKW, IsCmdAvail(CMD_NAV_REPBKW));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_NAV_DATABEG, IsCmdAvail(CMD_NAV_DATABEG));
@@ -4227,10 +4386,10 @@ auto CHexCtrl::OnInitMenuPopup(const MSG& msg)->LRESULT
 	case 4:	//Bookmarks.
 		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_ADD, IsCmdAvail(CMD_BKM_ADD));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_REMOVE, IsCmdAvail(CMD_BKM_REMOVE));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_NEXT, IsCmdAvail(CMD_BKM_NEXT));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_PREV, IsCmdAvail(CMD_BKM_PREV));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_GONEXT, IsCmdAvail(CMD_BKM_NEXT));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_GOPREV, IsCmdAvail(CMD_BKM_PREV));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_REMOVEALL, IsCmdAvail(CMD_BKM_REMOVEALL));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_DLGMGR, IsCmdAvail(CMD_BKM_DLG_MGR));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_BKM_BKMMGR, IsCmdAvail(CMD_BKM_DLG_MGR));
 		break;
 	case 5:	//Clipboard.
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYHEX, IsCmdAvail(CMD_CLPBRD_COPY_HEX));
@@ -4241,15 +4400,15 @@ auto CHexCtrl::OnInitMenuPopup(const MSG& msg)->LRESULT
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYCARR, IsCmdAvail(CMD_CLPBRD_COPY_CARR));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYGREPHEX, IsCmdAvail(CMD_CLPBRD_COPY_GREPHEX));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYPRNTSCRN, IsCmdAvail(CMD_CLPBRD_COPY_PRNTSCRN));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYOFFSET, IsCmdAvail(CMD_CLPBRD_COPY_OFFSET));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_COPYCAROFF, IsCmdAvail(CMD_CLPBRD_COPY_OFFSET));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_PASTEHEX, IsCmdAvail(CMD_CLPBRD_PASTE_HEX));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_PASTETEXTUTF16, IsCmdAvail(CMD_CLPBRD_PASTE_TEXTUTF16));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_PASTEUTF16, IsCmdAvail(CMD_CLPBRD_PASTE_TEXTUTF16));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_CLPBRD_PASTETEXTCP, IsCmdAvail(CMD_CLPBRD_PASTE_TEXTCP));
 		break;
 	case 6: //Modify.
 		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_FILLZEROS, IsCmdAvail(CMD_MODIFY_FILLZEROS));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_DLGFILLDATA, IsCmdAvail(CMD_MODIFY_FILLDATA_DLG));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_DLGOPERS, IsCmdAvail(CMD_MODIFY_OPERS_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_FILLDATA, IsCmdAvail(CMD_MODIFY_FILLDATA_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_OPERS, IsCmdAvail(CMD_MODIFY_OPERS_DLG));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_UNDO, IsCmdAvail(CMD_MODIFY_UNDO));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_MODIFY_REDO, IsCmdAvail(CMD_MODIFY_REDO));
 		break;
@@ -4260,12 +4419,12 @@ auto CHexCtrl::OnInitMenuPopup(const MSG& msg)->LRESULT
 	case 8: //Templates.
 		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_APPLYCURR, IsCmdAvail(CMD_TEMPL_APPLYCURR));
 		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_DISAPPLY, IsCmdAvail(CMD_TEMPL_DISAPPLY));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_DISAPPALL, IsCmdAvail(CMD_TEMPL_DISAPPALL));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_DLGMGR, IsCmdAvail(CMD_TEMPL_DLG_MGR));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_DISAPPLYALL, IsCmdAvail(CMD_TEMPL_DISAPPALL));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_TEMPL_TEMPLMGR, IsCmdAvail(CMD_TEMPL_DLG_MGR));
 		break;
 	case 9: //Data Presentation.
-		m_MenuMain.EnableItem(IDM_HEXCTRL_DLGDATAINTERP, IsCmdAvail(CMD_DATAINTERP_DLG));
-		m_MenuMain.EnableItem(IDM_HEXCTRL_DLGCODEPAGE, IsCmdAvail(CMD_CODEPAGE_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_DATAINTERP, IsCmdAvail(CMD_DATAINTERP_DLG));
+		m_MenuMain.EnableItem(IDM_HEXCTRL_TEXTCODEPAGE, IsCmdAvail(CMD_CODEPAGE_DLG));
 		break;
 	default:
 		break;
@@ -4354,7 +4513,7 @@ auto CHexCtrl::OnLButtonDblClk(const MSG& msg)->LRESULT
 			hs.ullOffset = m_ullCaretPos;
 			hs.ullSize = 1ULL;
 		}
-		SetSelection({ hs });
+		SetSelection({ &hs, 1 });
 		m_Wnd.SetCapture();
 	}
 
@@ -4367,8 +4526,8 @@ auto CHexCtrl::OnLButtonDown(const MSG& msg)->LRESULT
 
 	m_Wnd.SetFocus(); //SetFocus is vital to give proper keyboard input to the main HexCtrl window.
 
-	if (m_fScrollCursor) {
-		SetScrollCursor();
+	if (IsScrollCursor()) {
+		SetScrollCursor(false);
 		return 0;
 	}
 
@@ -4386,7 +4545,7 @@ auto CHexCtrl::OnLButtonDown(const MSG& msg)->LRESULT
 	m_fClickWithAlt = ::GetAsyncKeyState(VK_MENU) < 0;
 	m_Wnd.SetCapture();
 
-	VecSpan vecSel;
+	VecHexSpan vecSel;
 	if (msg.wParam & MK_SHIFT) {
 		ULONGLONG ullSelStart;
 		ULONGLONG ullSelEnd;
@@ -4531,7 +4690,7 @@ auto CHexCtrl::OnMouseMove(const MSG& msg)->LRESULT
 
 		m_ullCursorPrev = ullClick;
 		m_ullCaretPos = ullStart;
-		VecSpan vecSel;
+		VecHexSpan vecSel;
 		vecSel.reserve(static_cast<std::size_t>(ullLines));
 		for (auto itLine = 0ULL; itLine < ullLines; ++itLine) {
 			vecSel.emplace_back(ullStart + (dwCapacity * itLine), ullSize);
@@ -4540,32 +4699,30 @@ auto CHexCtrl::OnMouseMove(const MSG& msg)->LRESULT
 	}
 	else {
 		if (optHit) {
-			if (const auto pBkm = m_DlgBkmMgr.HitTest(optHit->ullOffset); pBkm != nullptr) {
-				if (m_pBkmTTCurr != pBkm) {
-					m_pBkmTTCurr = pBkm;
-					m_ttiMain.lpszText = pBkm->wstrDesc.data();
-					TTMainShow(true);
+			if (const auto pBkm = m_DlgBkmMgr.HitTest(optHit->ullOffset);
+				pBkm != nullptr && m_DlgBkmMgr.IsShowTooltips()) {
+				const auto pwszBkmDesc = pBkm->wstrDesc.data();
+				if (m_pwszTTText != pwszBkmDesc) {
+					m_pwszTTText = pwszBkmDesc;
+					TTTrackShow(true, true, m_pwszTTText);
 				}
-			}
-			else if (m_pBkmTTCurr != nullptr) {
-				TTMainShow(false);
 			}
 			else if (const auto pField = m_DlgTemplMgr.HitTest(optHit->ullOffset);
-				m_DlgTemplMgr.IsTooltips() && pField != nullptr) {
-				if (m_pTFieldTTCurr != pField) {
-					m_pTFieldTTCurr = pField;
-					m_ttiMain.lpszText = const_cast<LPWSTR>(pField->wstrName.data());
-					TTMainShow(true);
+				pField != nullptr && m_DlgTemplMgr.IsShowTooltips()) {
+				const auto pwszFieldName = pField->wstrName.data();
+				if (m_pwszTTText != pwszFieldName) {
+					m_pwszTTText = pwszFieldName;
+					TTTrackShow(true, true, m_pwszTTText);
 				}
 			}
-			else if (m_pTFieldTTCurr != nullptr) {
-				TTMainShow(false);
+			else if (m_pwszTTText != nullptr) {
+				TTTrackShow(false, false);
 			}
 		}
 		else {
 			//If there is tooltip already shown, but cursor is outside of data chunks.
-			if (m_pBkmTTCurr != nullptr || m_pTFieldTTCurr != nullptr) {
-				TTMainShow(false);
+			if (m_pwszTTText != nullptr) {
+				TTTrackShow(false, false);
 			}
 		}
 
@@ -4676,8 +4833,8 @@ auto CHexCtrl::OnPaint()->LRESULT
 
 auto CHexCtrl::OnRButtonDown([[maybe_unused]] const MSG& msg)->LRESULT
 {
-	if (m_fScrollCursor) {
-		SetScrollCursor();
+	if (IsScrollCursor()) {
+		SetScrollCursor(false);
 		return 0;
 	}
 
@@ -4686,7 +4843,7 @@ auto CHexCtrl::OnRButtonDown([[maybe_unused]] const MSG& msg)->LRESULT
 
 auto CHexCtrl::OnSetCursor(const MSG& msg)->LRESULT
 {
-	if (m_fScrollCursor) {
+	if (IsScrollCursor()) {
 		static const auto hCurScroll = static_cast<HCURSOR>(::LoadImageW(nullptr, MAKEINTRESOURCEW(32654),
 			IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED)); //Standard Windows scrolling cursor.
 		::SetCursor(hCurScroll);
@@ -4725,20 +4882,20 @@ auto CHexCtrl::OnTimer(const MSG& msg)->LRESULT
 {
 	const auto uIDTimer = msg.wParam;
 
-	if (uIDTimer == m_uIDTTTMain) {
-		constexpr auto dbSecToShow { 5000.0 }; //How many ms to show tooltips.
+	if (uIDTimer == m_uIDTTooltip) {
+		constexpr auto dSecToShow { 5000.0 }; //How many ms to show tooltips.
 		auto rcClient = m_Wnd.GetClientRect();
 		m_Wnd.ClientToScreen(rcClient);
 		GDIUT::CPoint ptCur;
 		::GetCursorPos(ptCur);
 
-		if (!rcClient.PtInRect(ptCur)) { //Check if cursor has left client rect,
-			TTMainShow(false);
+		if (!rcClient.PtInRect(ptCur)) { //Check if cursor has left the client rect.
+			TTTrackShow(false, false);
 		}
 		else if (const auto msElapsed = std::chrono::duration<double, std::milli>
 			(std::chrono::high_resolution_clock::now() - m_tmTT).count();
-			msElapsed >= dbSecToShow) { //or more than dbSecToShow ms have passed since toolip was shown.
-			TTMainShow(false, true);
+			msElapsed >= dSecToShow) { //Check if more than dSecToShow ms have passed since toolip is shown.
+			TTTrackShow(false, true);
 		}
 
 		return 0;
@@ -4747,14 +4904,17 @@ auto CHexCtrl::OnTimer(const MSG& msg)->LRESULT
 	if (uIDTimer == m_uIDTScrolCursor) {
 		GDIUT::CPoint ptCur;
 		::GetCursorPos(ptCur);
-		const auto iSegmentPx = static_cast<int>(40 * GetDPIScale()); //Segment size in pixels, to accelerate against.
+		constexpr auto flSlowFactor = 4.F; //For scrolling slowly, for every segment.
+
+		//Segment size in pixels for cursor to move, to accelerate against.
+		const auto iSegmentPx = static_cast<int>(20 * GetDPIScale());
 		const auto iSegmentsY = (ptCur.y - m_ptScrollCursorClick.y) / iSegmentPx; //How many vertical segments away from click.
 		const auto i64NewScrollY = static_cast<std::int64_t>(m_ScrollV.GetScrollPos()
-			+ m_ScrollV.GetScrollLineSize() / 4.F * iSegmentsY);
+			+ m_ScrollV.GetScrollLineSize() / flSlowFactor * iSegmentsY);
 		m_ScrollV.SetScrollPos(i64NewScrollY);
 		const auto iSegmentsX = (ptCur.x - m_ptScrollCursorClick.x) / iSegmentPx; //How many horizontal segments away from click.
 		const auto i64NewScrollX = static_cast<std::int64_t>(m_ScrollH.GetScrollPos()
-			+ m_ScrollH.GetScrollLineSize() / 4.F * iSegmentsX);
+			+ m_ScrollH.GetScrollLineSize() / flSlowFactor * iSegmentsX);
 		m_ScrollH.SetScrollPos(i64NewScrollX);
 
 		return 0;
@@ -4766,13 +4926,19 @@ auto CHexCtrl::OnTimer(const MSG& msg)->LRESULT
 auto CHexCtrl::OnVScroll([[maybe_unused]] const MSG& msg)->LRESULT
 {
 	bool fRedraw { true };
-	if (m_fHighLatency) {
+	if (m_stData.fHighLatency) {
 		fRedraw = m_ScrollV.IsThumbReleased();
-		TTOffsetShow(!fRedraw);
+		if (!fRedraw) {
+			const auto wstrOffset = (IsOffsetAsHexImpl() ? L"Offset: 0x" : L"Offset: ") + OffsetToWstr(GetTopLine() * GetCapacity());
+			TTTrackShow(true, false, wstrOffset.data());
+		}
+		else {
+			TTTrackShow(false, false);
+		}
 	}
 
 	if (fRedraw) {
-		m_Wnd.RedrawWindow();
+		RedrawImpl();
 	}
 
 	return 0;
@@ -4835,7 +5001,7 @@ void CHexCtrl::Print()
 	const GDIUT::CRect rcPrint(POINT(0, 0), SIZE(::GetDeviceCaps(dcPrint, HORZRES) - (iMarginX * 2),
 		::GetDeviceCaps(dcPrint, VERTRES) - (iMarginY * 2)));
 	const SIZE sizePrintDpi { ::GetDeviceCaps(dcPrint, LOGPIXELSX), ::GetDeviceCaps(dcPrint, LOGPIXELSY) };
-	const auto iFontSizeRatio { sizePrintDpi.cy / GDIUT::GetDPIForHWND(m_Wnd) };
+	const auto iFontSizeRatio { sizePrintDpi.cy / ::GetDpiForWindow(m_Wnd) };
 	const auto dwCapacity = GetCapacity();
 
 	//Setting scaled fonts for printing, and temporarily disabling redraw.
@@ -4971,21 +5137,20 @@ void CHexCtrl::RecalcAll(bool fPrinter, HDC hDCPrinter, LPCRECT pRCPrinter)
 
 	const auto iCharWidth = GetCharWidthNative();
 	const auto iCharWidthExt = GetCharWidthExtras();
+	const auto dwCapacity = GetCapacityImpl();
 
 	//Approximately "dwCapacity * 3 + 1" size array of char's width, to be enough for the Hex area chars.
-	m_vecCharsWidth.assign((m_dwCapacity * 3) + 1, iCharWidthExt);
+	m_vecCharsWidth.assign((dwCapacity * 3) + 1, iCharWidthExt);
 	m_iSecondVertLinePx = m_iFirstVertLinePx + GetDigitsOffset() * iCharWidth + iCharWidth * 2;
 	m_iSizeHexBytePx = iCharWidthExt * 2;
-	m_iSpaceBetweenBlocksPx = (m_dwGroupSize == 1 && m_dwCapacity > 1) ? iCharWidthExt * 2 : 0;
+	m_iSpaceBetweenBlocksPx = (m_dwGroupSize == 1 && dwCapacity > 1) ? iCharWidthExt * 2 : 0;
 	m_iDistanceGroupedHexChunkPx = m_iSizeHexBytePx * m_dwGroupSize + iCharWidthExt;
-	m_iThirdVertLinePx = m_iSecondVertLinePx + m_iDistanceGroupedHexChunkPx * (m_dwCapacity / m_dwGroupSize)
+	m_iThirdVertLinePx = m_iSecondVertLinePx + m_iDistanceGroupedHexChunkPx * (dwCapacity / m_dwGroupSize)
 		+ iCharWidth + m_iSpaceBetweenBlocksPx;
 	m_iIndentTextXPx = m_iThirdVertLinePx + iCharWidth;
 	m_iDistanceBetweenCharsPx = iCharWidthExt;
-	m_iFourthVertLinePx = m_iIndentTextXPx + (m_iDistanceBetweenCharsPx * m_dwCapacity) + iCharWidth;
+	m_iFourthVertLinePx = m_iIndentTextXPx + (m_iDistanceBetweenCharsPx * dwCapacity) + iCharWidth;
 	m_iIndentFirstHexChunkXPx = m_iSecondVertLinePx + iCharWidth;
-	m_iSizeFirstHalfPx = m_iIndentFirstHexChunkXPx + m_dwCapacityBlockSize * (iCharWidthExt * 2) +
-		(m_dwCapacityBlockSize / m_dwGroupSize - 1) * iCharWidthExt;
 	m_iHeightTopRectPx = std::lround(m_sizeFontMain.cy * 1.5);
 	m_iStartWorkAreaYPx = m_iFirstHorzLinePx + m_iHeightTopRectPx;
 	m_iSecondHorzLinePx = m_iStartWorkAreaYPx - 1;
@@ -4999,7 +5164,7 @@ void CHexCtrl::RecalcAll(bool fPrinter, HDC hDCPrinter, LPCRECT pRCPrinter)
 		const auto ullDataSize = GetDataSizeImpl();
 		m_ScrollV.SetScrollSizes(m_sizeFontMain.cy, GetScrollPageSize(),
 			static_cast<ULONGLONG>(m_iStartWorkAreaYPx) + m_iHeightBottomOffAreaPx
-			+ (m_sizeFontMain.cy * (ullDataSize / m_dwCapacity + (ullDataSize % m_dwCapacity == 0 ? 1 : 2))));
+			+ (m_sizeFontMain.cy * (ullDataSize / dwCapacity + (ullDataSize % dwCapacity == 0 ? 1 : 2))));
 		m_ScrollH.SetScrollSizes(iCharWidthExt, rc.Width(), static_cast<ULONGLONG>(m_iFourthVertLinePx) + 1);
 		m_ScrollV.SetScrollPos(ullCurLineV * m_sizeFontMain.cy);
 		m_Wnd.ReleaseDC(dcCurr);
@@ -5022,78 +5187,44 @@ void CHexCtrl::Redo()
 	if (m_vecRedo.empty())
 		return;
 
-	const auto& uptrRedo = m_vecRedo.back();
-	VecSpan vecSpan;
-	vecSpan.reserve(uptrRedo->size());
-	std::transform(uptrRedo->begin(), uptrRedo->end(), std::back_inserter(vecSpan),
-		[](UNDO& ref) { return HEXSPAN { ref.ullOffset, ref.vecData.size() }; });
+	const auto& vecRedo = m_vecRedo.back();
+	VecHexSpan vecSpan;
+	vecSpan.reserve(vecRedo.size());
+	std::transform(vecRedo.begin(), vecRedo.end(), std::back_inserter(vecSpan), [](const UNDO& undo) {
+		return HEXSPAN { undo.ullOffset, undo.vecData.size() }; });
 	SnapshotUndo(vecSpan); //Creating new Undo data snapshot.
 
-	for (const auto& ref : *uptrRedo) {
-		const auto& vecRedoData = ref.vecData;
+	for (const auto& redo : vecRedo) {
+		const auto& vecRedoData = redo.vecData;
 
 		if (IsVirtualImpl() && vecRedoData.size() > GetCacheSize()) { //In VirtualData mode processing data chunk by chunk.
 			const auto dwSizeChunk = GetCacheSize();
-			const auto sMod = vecRedoData.size() % dwSizeChunk;
-			auto ullChunks = vecRedoData.size() / dwSizeChunk + (sMod > 0 ? 1 : 0);
-			std::size_t ullOffset = 0;
+			const auto uzMod = vecRedoData.size() % dwSizeChunk;
+			auto ullChunks = vecRedoData.size() / dwSizeChunk + (uzMod > 0 ? 1 : 0);
+			std::size_t uzOffset = 0;
 			while (ullChunks-- > 0) {
-				const auto ullSize = (ullChunks == 1 && sMod > 0) ? sMod : dwSizeChunk;
-				if (const auto spnData = GetData({ ullOffset, ullSize }); !spnData.empty()) {
-					std::copy_n(vecRedoData.begin() + ullOffset, ullSize, spnData.data());
-					SetDataVirtual(spnData, { ullOffset, ullSize });
+				const auto ullSize = (ullChunks == 1 && uzMod > 0) ? uzMod : dwSizeChunk;
+				if (const auto spnData = GetData({ uzOffset, ullSize }); !spnData.empty()) {
+					std::copy_n(vecRedoData.begin() + uzOffset, ullSize, spnData.data());
+					SetDataVirtual(spnData, { uzOffset, ullSize });
 				}
-				ullOffset += ullSize;
+				uzOffset += ullSize;
 			}
 		}
 		else {
-			if (const auto spnData = GetData({ ref.ullOffset, vecRedoData.size() }); !spnData.empty()) {
+			if (const auto spnData = GetData({ redo.ullOffset, vecRedoData.size() }); !spnData.empty()) {
 				std::copy_n(vecRedoData.begin(), vecRedoData.size(), spnData.data());
-				SetDataVirtual(spnData, { ref.ullOffset, vecRedoData.size() });
+				SetDataVirtual(spnData, { redo.ullOffset, vecRedoData.size() });
 			}
 		}
 	}
 
 	m_vecRedo.pop_back();
 	OnModifyData();
-	m_Wnd.RedrawWindow();
+	RedrawImpl();
 }
 
-void CHexCtrl::RedrawImpl()
-{
-	if (IsDataSetImpl()) {
-		const auto ullCaretPos = GetVirtualOffset(GetCaretPosImpl());
-		//^ (caret) - encloses a data name, ` (tilda) - encloses the data itself.
-		m_wstrInfoBar = std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Caret: ^`0x{:X}`" : L"^Caret: ^`{:L}`",
-			std::make_wformat_args(ullCaretPos));
-
-		if (IsPageVisible()) { //Page/Sector.
-			const auto ullPagePos = GetPagePosImpl();
-			const auto ullPagesCount = GetPagesCountImpl();
-			m_wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^{}: ^`0x{:X}/0x{:X}`" : L"^{}: ^`{:L}/{:L}`",
-				std::make_wformat_args(m_wstrPageName, ullPagePos, ullPagesCount));
-		}
-
-		if (HasSelection()) {
-			const auto ullSelStart = GetVirtualOffset(m_Selection.GetSelStart());
-			const auto ullSelSize = m_Selection.GetSelSize();
-			if (ullSelSize == 1) { //In case of just one byte selected.
-				m_wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Selected: ^`0x{:X} [0x{:X}]`" :
-					L"^Selected: ^`{} [{:L}]`", std::make_wformat_args(ullSelSize, ullSelStart));
-			}
-			else {
-				const auto ullSelEnd = m_Selection.GetSelEnd();
-				m_wstrInfoBar += std::vformat(ut::GetLocale(), IsOffsetAsHexImpl() ? L"^Selected: ^`0x{:X} [0x{:X}-0x{:X}]`" :
-					L"^Selected: ^`{:L} [{:L}-{:L}]`", std::make_wformat_args(ullSelSize, ullSelStart, ullSelEnd));
-			}
-		}
-
-		m_wstrInfoBar += IsMutableImpl() ? L"^RW^" : L"^RO^"; //RW/RO mode.
-	}
-	else {
-		m_wstrInfoBar.clear();
-	}
-
+void CHexCtrl::RedrawImpl() {
 	m_Wnd.RedrawWindow();
 }
 
@@ -5140,7 +5271,8 @@ void CHexCtrl::SelAll()
 	if (!IsDataSetImpl())
 		return;
 
-	SetSelection({ { 0, GetDataSizeImpl() } }); //Select all.
+	const HEXSPAN hs { .ullOffset { 0 }, .ullSize { GetDataSizeImpl() } };
+	SetSelection({ &hs, 1 }); //Select all.
 }
 
 void CHexCtrl::SelAddDown()
@@ -5192,7 +5324,8 @@ void CHexCtrl::SelAddDown()
 	if (ullSize > 0) {
 		m_ullCaretPos = ullStart;
 		m_ullCursorPrev = ullClick;
-		SetSelection({ { ullStart, ullSize } }, false);
+		const HEXSPAN hs { .ullOffset { ullStart }, .ullSize { ullSize } };
+		SetSelection({ &hs, 1 }, false);
 
 		const auto stOld = IsOffsetVisible(ullOldPos);
 		const auto stNew = IsOffsetVisible(ullNewPos);
@@ -5243,7 +5376,8 @@ void CHexCtrl::SelAddLeft()
 	if (ullSize > 0) {
 		m_ullCaretPos = ullStart;
 		m_ullCursorPrev = ullClick;
-		SetSelection({ { ullStart, ullSize } }, false);
+		const HEXSPAN hs { .ullOffset { ullStart }, .ullSize { ullSize } };
+		SetSelection({ &hs, 1 }, false);
 
 		const auto stOld = IsOffsetVisible(ullOldPos);
 		const auto stNew = IsOffsetVisible(ullNewPos);
@@ -5304,7 +5438,8 @@ void CHexCtrl::SelAddRight()
 	if (ullSize > 0) {
 		m_ullCaretPos = ullStart;
 		m_ullCursorPrev = ullClick;
-		SetSelection({ { ullStart, ullSize } }, false);
+		const HEXSPAN hs { .ullOffset { ullStart }, .ullSize { ullSize } };
+		SetSelection({ &hs, 1 }, false);
 
 		const auto stOld = IsOffsetVisible(ullOldPos);
 		const auto stNew = IsOffsetVisible(ullNewPos);
@@ -5379,11 +5514,12 @@ void CHexCtrl::SelAddUp()
 	if (ullSize > 0) {
 		m_ullCaretPos = ullStart;
 		m_ullCursorPrev = ullClick;
-		SetSelection({ { ullStart, ullSize } }, false);
+		const HEXSPAN hs { .ullOffset { ullStart }, .ullSize { ullSize } };
+		SetSelection({ &hs, 1 }, false);
 
-		const auto stOld = IsOffsetVisible(ullOldPos);
-		const auto stNew = IsOffsetVisible(ullNewPos);
-		if (stNew.i8Vert != 0 && stOld.i8Vert == 0) {
+		const auto hvOld = IsOffsetVisible(ullOldPos);
+		const auto hvNew = IsOffsetVisible(ullNewPos);
+		if (hvNew.i8Vert != 0 && hvOld.i8Vert == 0) {
 			m_ScrollV.ScrollLineUp();
 		}
 
@@ -5399,7 +5535,7 @@ void CHexCtrl::SetCapacityImpl(std::uint32_t dwCapacity, bool fRedraw, bool fNot
 	if (dwCapacity < 1UL || dwCapacity > 100UL) //Restrict capacity size in the [1-100] range.
 		return;
 
-	const auto dwCurrCapacity = m_dwCapacity;
+	const auto dwCurrCapacity = GetCapacityImpl();
 	const auto dwMod = dwCapacity % m_dwGroupSize; //Setting the capacity according to the current data grouping size.
 
 	if (dwCapacity < dwCurrCapacity) {
@@ -5419,7 +5555,6 @@ void CHexCtrl::SetCapacityImpl(std::uint32_t dwCapacity, bool fRedraw, bool fNot
 	m_dwCapacity = dwCapacity;
 	m_dwCapacityBlockSize = dwCapacity / 2;
 
-	FillCapacityString();
 	RecalcAll();
 
 	if (fRedraw) {
@@ -5433,25 +5568,14 @@ void CHexCtrl::SetCapacityImpl(std::uint32_t dwCapacity, bool fRedraw, bool fNot
 
 void CHexCtrl::SetCodepageImpl(int iCodepage, bool fRedraw, bool fNotify)
 {
-	std::wstring_view wsvFmt;
-	switch (iCodepage) {
-	case -1:
-		wsvFmt = L"ASCII";
-		break;
-	case 0:
-		wsvFmt = L"UTF-16";
-		break;
-	default:
-		if (CPINFOEXW stCP; ::GetCPInfoExW(static_cast<UINT>(iCodepage), 0, &stCP) != FALSE) {
-			wsvFmt = L"Codepage {}";
+	if (iCodepage != -1 && iCodepage != 0) { //-1 - ASCII, 0 - UTF-16.
+		if (CPINFOEXW stCP; ::GetCPInfoExW(static_cast<UINT>(iCodepage), 0, &stCP) == FALSE) {
+			ut::DBG_REPORT(L"Unsupported codepage.");
+			iCodepage = -1;
 		}
-		break;
 	}
 
-	if (!wsvFmt.empty()) {
-		m_iCodePage = iCodepage;
-		m_wstrTextTitle = std::vformat(wsvFmt, std::make_wformat_args(m_iCodePage));
-	}
+	m_iCodePage = iCodepage;
 
 	if (fRedraw) { RedrawImpl(); }
 	if (fNotify) { ParentNotify(HEXCTRL_MSG_SETCODEPAGE); }
@@ -5462,10 +5586,10 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 	using enum EHexCmd;
 	//Mapping between stringified EHexCmd::* and its value-menuID pairs.
 	const std::unordered_map<std::string_view, std::pair<EHexCmd, DWORD>> umapCmdMenu {
-		{ "CMD_SEARCH_DLG", { CMD_SEARCH_DLG, IDM_HEXCTRL_SEARCH_DLGSEARCH } },
+		{ "CMD_SEARCH_DLG", { CMD_SEARCH_DLG, IDM_HEXCTRL_SEARCH_SEARCH } },
 		{ "CMD_SEARCH_NEXT", { CMD_SEARCH_NEXT, IDM_HEXCTRL_SEARCH_NEXT } },
 		{ "CMD_SEARCH_PREV", { CMD_SEARCH_PREV, IDM_HEXCTRL_SEARCH_PREV } },
-		{ "CMD_NAV_GOTO_DLG", { CMD_NAV_GOTO_DLG, IDM_HEXCTRL_NAV_DLGGOTO } },
+		{ "CMD_NAV_GOTO_DLG", { CMD_NAV_GOTO_DLG, IDM_HEXCTRL_NAV_GOTO } },
 		{ "CMD_NAV_REPFWD", { CMD_NAV_REPFWD, IDM_HEXCTRL_NAV_REPFWD } },
 		{ "CMD_NAV_REPBKW", { CMD_NAV_REPBKW, IDM_HEXCTRL_NAV_REPBKW } },
 		{ "CMD_NAV_DATABEG", { CMD_NAV_DATABEG, IDM_HEXCTRL_NAV_DATABEG } },
@@ -5474,18 +5598,18 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 		{ "CMD_NAV_PAGEEND", { CMD_NAV_PAGEEND, IDM_HEXCTRL_NAV_PAGEEND } },
 		{ "CMD_NAV_LINEBEG", { CMD_NAV_LINEBEG, IDM_HEXCTRL_NAV_LINEBEG } },
 		{ "CMD_NAV_LINEEND", { CMD_NAV_LINEEND, IDM_HEXCTRL_NAV_LINEEND } },
-		{ "CMD_GROUPDATA_BYTE", { CMD_GROUPDATA_BYTE, IDM_HEXCTRL_GROUPDATA_BYTE } },
-		{ "CMD_GROUPDATA_WORD", { CMD_GROUPDATA_WORD, IDM_HEXCTRL_GROUPDATA_WORD } },
-		{ "CMD_GROUPDATA_DWORD", { CMD_GROUPDATA_DWORD, IDM_HEXCTRL_GROUPDATA_DWORD } },
-		{ "CMD_GROUPDATA_QWORD", { CMD_GROUPDATA_QWORD, IDM_HEXCTRL_GROUPDATA_QWORD } },
+		{ "CMD_GROUPDATA_BYTE", { CMD_GROUPDATA_BYTE, IDM_HEXCTRL_GROUPDATA_1BYTE } },
+		{ "CMD_GROUPDATA_WORD", { CMD_GROUPDATA_WORD, IDM_HEXCTRL_GROUPDATA_2BYTE } },
+		{ "CMD_GROUPDATA_DWORD", { CMD_GROUPDATA_DWORD, IDM_HEXCTRL_GROUPDATA_4BYTE } },
+		{ "CMD_GROUPDATA_QWORD", { CMD_GROUPDATA_QWORD, IDM_HEXCTRL_GROUPDATA_8BYTE } },
 		{ "CMD_GROUPDATA_INC", { CMD_GROUPDATA_INC, IDM_HEXCTRL_GROUPDATA_INC } },
 		{ "CMD_GROUPDATA_DEC", { CMD_GROUPDATA_DEC, IDM_HEXCTRL_GROUPDATA_DEC } },
 		{ "CMD_BKM_ADD", { CMD_BKM_ADD, IDM_HEXCTRL_BKM_ADD } },
 		{ "CMD_BKM_REMOVE", { CMD_BKM_REMOVE, IDM_HEXCTRL_BKM_REMOVE } },
-		{ "CMD_BKM_NEXT", { CMD_BKM_NEXT, IDM_HEXCTRL_BKM_NEXT } },
-		{ "CMD_BKM_PREV", { CMD_BKM_PREV, IDM_HEXCTRL_BKM_PREV } },
+		{ "CMD_BKM_NEXT", { CMD_BKM_NEXT, IDM_HEXCTRL_BKM_GONEXT } },
+		{ "CMD_BKM_PREV", { CMD_BKM_PREV, IDM_HEXCTRL_BKM_GOPREV } },
 		{ "CMD_BKM_REMOVEALL", { CMD_BKM_REMOVEALL, IDM_HEXCTRL_BKM_REMOVEALL } },
-		{ "CMD_BKM_DLG_MGR", { CMD_BKM_DLG_MGR, IDM_HEXCTRL_BKM_DLGMGR } },
+		{ "CMD_BKM_DLG_MGR", { CMD_BKM_DLG_MGR, IDM_HEXCTRL_BKM_BKMMGR } },
 		{ "CMD_CLPBRD_COPY_HEX", { CMD_CLPBRD_COPY_HEX, IDM_HEXCTRL_CLPBRD_COPYHEX } },
 		{ "CMD_CLPBRD_COPY_HEXLE", { CMD_CLPBRD_COPY_HEXLE, IDM_HEXCTRL_CLPBRD_COPYHEXLE } },
 		{ "CMD_CLPBRD_COPY_HEXFMT", { CMD_CLPBRD_COPY_HEXFMT, IDM_HEXCTRL_CLPBRD_COPYHEXFMT } },
@@ -5494,13 +5618,13 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 		{ "CMD_CLPBRD_COPY_CARR", { CMD_CLPBRD_COPY_CARR, IDM_HEXCTRL_CLPBRD_COPYCARR } },
 		{ "CMD_CLPBRD_COPY_GREPHEX", { CMD_CLPBRD_COPY_GREPHEX, IDM_HEXCTRL_CLPBRD_COPYGREPHEX } },
 		{ "CMD_CLPBRD_COPY_PRNTSCRN", { CMD_CLPBRD_COPY_PRNTSCRN, IDM_HEXCTRL_CLPBRD_COPYPRNTSCRN } },
-		{ "CMD_CLPBRD_COPY_OFFSET", { CMD_CLPBRD_COPY_OFFSET, IDM_HEXCTRL_CLPBRD_COPYOFFSET } },
+		{ "CMD_CLPBRD_COPY_OFFSET", { CMD_CLPBRD_COPY_OFFSET, IDM_HEXCTRL_CLPBRD_COPYCAROFF } },
 		{ "CMD_CLPBRD_PASTE_HEX", { CMD_CLPBRD_PASTE_HEX, IDM_HEXCTRL_CLPBRD_PASTEHEX } },
-		{ "CMD_CLPBRD_PASTE_TEXTUTF16", { CMD_CLPBRD_PASTE_TEXTUTF16, IDM_HEXCTRL_CLPBRD_PASTETEXTUTF16 } },
+		{ "CMD_CLPBRD_PASTE_TEXTUTF16", { CMD_CLPBRD_PASTE_TEXTUTF16, IDM_HEXCTRL_CLPBRD_PASTEUTF16 } },
 		{ "CMD_CLPBRD_PASTE_TEXTCP", { CMD_CLPBRD_PASTE_TEXTCP, IDM_HEXCTRL_CLPBRD_PASTETEXTCP } },
-		{ "CMD_MODIFY_OPERS_DLG", { CMD_MODIFY_OPERS_DLG, IDM_HEXCTRL_MODIFY_DLGOPERS } },
+		{ "CMD_MODIFY_OPERS_DLG", { CMD_MODIFY_OPERS_DLG, IDM_HEXCTRL_MODIFY_OPERS } },
 		{ "CMD_MODIFY_FILLZEROS", { CMD_MODIFY_FILLZEROS, IDM_HEXCTRL_MODIFY_FILLZEROS } },
-		{ "CMD_MODIFY_FILLDATA_DLG", { CMD_MODIFY_FILLDATA_DLG, IDM_HEXCTRL_MODIFY_DLGFILLDATA } },
+		{ "CMD_MODIFY_FILLDATA_DLG", { CMD_MODIFY_FILLDATA_DLG, IDM_HEXCTRL_MODIFY_FILLDATA } },
 		{ "CMD_MODIFY_UNDO", { CMD_MODIFY_UNDO, IDM_HEXCTRL_MODIFY_UNDO } },
 		{ "CMD_MODIFY_REDO", { CMD_MODIFY_REDO, IDM_HEXCTRL_MODIFY_REDO } },
 		{ "CMD_SEL_MARKSTARTEND", { CMD_SEL_MARKSTARTEND, IDM_HEXCTRL_SEL_MARKSTARTEND } },
@@ -5509,15 +5633,15 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 		{ "CMD_SEL_ADDRIGHT", { CMD_SEL_ADDRIGHT, 0 } },
 		{ "CMD_SEL_ADDUP", { CMD_SEL_ADDUP, 0 } },
 		{ "CMD_SEL_ADDDOWN", { CMD_SEL_ADDDOWN, 0 } },
-		{ "CMD_DATAINTERP_DLG", { CMD_DATAINTERP_DLG, IDM_HEXCTRL_DLGDATAINTERP } },
-		{ "CMD_CODEPAGE_DLG", { CMD_CODEPAGE_DLG, IDM_HEXCTRL_DLGCODEPAGE } },
-		{ "CMD_APPEAR_FONT_DLG", { CMD_APPEAR_FONT_DLG, IDM_HEXCTRL_APPEAR_DLGFONT } },
-		{ "CMD_APPEAR_FONTINC", { CMD_APPEAR_FONTINC, IDM_HEXCTRL_APPEAR_FONTINC } },
-		{ "CMD_APPEAR_FONTDEC", { CMD_APPEAR_FONTDEC, IDM_HEXCTRL_APPEAR_FONTDEC } },
-		{ "CMD_APPEAR_CAPACINC", { CMD_APPEAR_CAPACINC, IDM_HEXCTRL_APPEAR_CAPACINC } },
-		{ "CMD_APPEAR_CAPACDEC", { CMD_APPEAR_CAPACDEC, IDM_HEXCTRL_APPEAR_CAPACDEC } },
-		{ "CMD_PRINT_DLG", { CMD_PRINT_DLG, IDM_HEXCTRL_OTHER_DLGPRINT } },
-		{ "CMD_ABOUT_DLG", { CMD_ABOUT_DLG, IDM_HEXCTRL_OTHER_DLGABOUT } },
+		{ "CMD_DATAINTERP_DLG", { CMD_DATAINTERP_DLG, IDM_HEXCTRL_DATAINTERP } },
+		{ "CMD_CODEPAGE_DLG", { CMD_CODEPAGE_DLG, IDM_HEXCTRL_TEXTCODEPAGE } },
+		{ "CMD_APPEAR_FONT_DLG", { CMD_APPEAR_FONT_DLG, IDM_HEXCTRL_APPEAR_CHOOSEFONT } },
+		{ "CMD_APPEAR_FONTINC", { CMD_APPEAR_FONTINC, IDM_HEXCTRL_APPEAR_INCFONT } },
+		{ "CMD_APPEAR_FONTDEC", { CMD_APPEAR_FONTDEC, IDM_HEXCTRL_APPEAR_DECFONT } },
+		{ "CMD_APPEAR_CAPACINC", { CMD_APPEAR_CAPACINC, IDM_HEXCTRL_APPEAR_INCCAPAC } },
+		{ "CMD_APPEAR_CAPACDEC", { CMD_APPEAR_CAPACDEC, IDM_HEXCTRL_APPEAR_DECCAPAC } },
+		{ "CMD_PRINT_DLG", { CMD_PRINT_DLG, IDM_HEXCTRL_OTHER_PRINT } },
+		{ "CMD_ABOUT_DLG", { CMD_ABOUT_DLG, IDM_HEXCTRL_OTHER_ABOUT } },
 		{ "CMD_CARET_LEFT", { CMD_CARET_LEFT, 0 } },
 		{ "CMD_CARET_RIGHT", { CMD_CARET_RIGHT, 0 } },
 		{ "CMD_CARET_UP", { CMD_CARET_UP, 0 } },
@@ -5527,8 +5651,8 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 		{ "CMD_SCROLL_PAGEDOWN", { CMD_SCROLL_PAGEDOWN, 0 } },
 		{ "CMD_TEMPL_APPLYCURR", { CMD_TEMPL_APPLYCURR, IDM_HEXCTRL_TEMPL_APPLYCURR } },
 		{ "CMD_TEMPL_DISAPPLY", { CMD_TEMPL_DISAPPLY, IDM_HEXCTRL_TEMPL_DISAPPLY } },
-		{ "CMD_TEMPL_DISAPPALL", { CMD_TEMPL_DISAPPALL, IDM_HEXCTRL_TEMPL_DISAPPALL } },
-		{ "CMD_TEMPL_DLG_MGR", { CMD_TEMPL_DLG_MGR, IDM_HEXCTRL_TEMPL_DLGMGR } }
+		{ "CMD_TEMPL_DISAPPALL", { CMD_TEMPL_DISAPPALL, IDM_HEXCTRL_TEMPL_DISAPPLYALL } },
+		{ "CMD_TEMPL_DLG_MGR", { CMD_TEMPL_DLG_MGR, IDM_HEXCTRL_TEMPL_TEMPLMGR } }
 	};
 
 	//Mapping between JSON-data commands and actual keyboard codes, with names that appear in the menu.
@@ -5574,8 +5698,8 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 	//This is vital for ExecuteCmd to work properly.
 	m_vecKeyBind.clear();
 	m_vecKeyBind.reserve(umapCmdMenu.size());
-	for (const auto& refMap : umapCmdMenu) {
-		m_vecKeyBind.emplace_back(KEYBIND { .eCmd { refMap.second.first }, .wMenuID { static_cast<WORD>(refMap.second.second) } });
+	for (const auto& map : umapCmdMenu) {
+		m_vecKeyBind.emplace_back(KEYBIND { .eCmd { map.second.first }, .wMenuID { static_cast<WORD>(map.second.second) } });
 	}
 
 	rapidjson::Document docJSON;
@@ -5592,10 +5716,10 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 			return false;
 		}
 
-		const auto nSize = static_cast<std::size_t>(::SizeofResource(m_hInstRes, hRes));
+		const auto uzSize = static_cast<std::size_t>(::SizeofResource(m_hInstRes, hRes));
 		const auto pData = static_cast<const char*>(::LockResource(hResData));
-		docJSON.Parse(pData, nSize);
-		if (docJSON.IsNull()) { //Parse all default keybindings.
+		docJSON.Parse(pData, uzSize); //Parse all default keybindings.
+		if (docJSON.IsNull()) {
 			ut::DBG_REPORT(L"docJSON.IsNull().");
 			return false;
 		}
@@ -5613,37 +5737,37 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 		if (sv.empty())
 			return { };
 
-		KEYBIND stKB;
-		const auto nSize = sv.size();
-		std::size_t nPosStart { 0 }; //Next position to start search for '+' sign.
-		const auto nSubWords = std::count(sv.begin(), sv.end(), '+') + 1; //How many sub-words (divided by '+')?
-		for (auto itSubWords = 0; itSubWords < nSubWords; ++itSubWords) {
-			const auto nPosNext = sv.find('+', nPosStart);
-			const auto nSizeSubWord = nPosNext == std::string_view::npos ? nSize - nPosStart : nPosNext - nPosStart;
-			const auto strSubWord = sv.substr(nPosStart, nSizeSubWord);
-			nPosStart = nPosNext + 1;
+		KEYBIND kb;
+		const auto uzSize = sv.size();
+		std::size_t uzPosStart { 0 }; //Next position to start search for '+' sign.
+		const auto zSubWords = std::count(sv.begin(), sv.end(), '+') + 1; //How many sub-words (divided by '+')?
+		for (auto itSubWords = 0; itSubWords < zSubWords; ++itSubWords) {
+			const auto uzPosNext = sv.find('+', uzPosStart);
+			const auto uzSizeSubWord = uzPosNext == std::string_view::npos ? uzSize - uzPosStart : uzPosNext - uzPosStart;
+			const auto svSubWord = sv.substr(uzPosStart, uzSizeSubWord);
+			uzPosStart = uzPosNext + 1;
 
-			if (strSubWord.size() == 1) {
-				stKB.uKey = static_cast<UCHAR>(std::toupper(strSubWord[0])); //Binding keys are in uppercase.
+			if (svSubWord.size() == 1) {
+				kb.uKey = static_cast<UCHAR>(std::toupper(svSubWord[0])); //Binding keys are in uppercase.
 			}
-			else if (const auto itKey = umapKeys.find(strSubWord); itKey != umapKeys.end()) {
+			else if (const auto itKey = umapKeys.find(svSubWord); itKey != umapKeys.end()) {
 				switch (const auto uChar = itKey->second.first; uChar) {
 				case VK_CONTROL:
-					stKB.fCtrl = true;
+					kb.fCtrl = true;
 					break;
 				case VK_SHIFT:
-					stKB.fShift = true;
+					kb.fShift = true;
 					break;
 				case VK_MENU:
-					stKB.fAlt = true;
+					kb.fAlt = true;
 					break;
 				default:
-					stKB.uKey = uChar;
+					kb.uKey = uChar;
 				}
 			}
 		}
 
-		return stKB;
+		return kb;
 		};
 
 	for (auto itMembers = docJSON.MemberBegin(); itMembers != docJSON.MemberEnd(); ++itMembers) { //JSON data iterating.
@@ -5653,7 +5777,7 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 					optKB->eCmd = itCmd->second.first;
 					optKB->wMenuID = static_cast<WORD>(itCmd->second.second);
 					if (const auto itKB = std::find_if(m_vecKeyBind.begin(), m_vecKeyBind.end(),
-						[&optKB](const KEYBIND& ref) { return ref.eCmd == optKB->eCmd; }); itKB != m_vecKeyBind.end()) {
+						[&optKB](const KEYBIND& kb) { return kb.eCmd == optKB->eCmd; }); itKB != m_vecKeyBind.end()) {
 						if (itKB->uKey == 0) {
 							*itKB = *optKB; //Adding keybindings from JSON to m_vecKeyBind.
 						}
@@ -5677,8 +5801,8 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 			return kb.wMenuID == vecKB.wMenuID; });
 			itTmp == itEnd && vecKB.wMenuID != 0 && vecKB.uKey != 0) {
 			auto wstr = m_MenuMain.GetItemWstr(vecKB.wMenuID);
-			if (const auto nPos = wstr.find('\t'); nPos != std::wstring::npos) {
-				wstr.erase(nPos);
+			if (const auto uzPos = wstr.find('\t'); uzPos != std::wstring::npos) {
+				wstr.erase(uzPos);
 			}
 
 			wstr += L'\t';
@@ -5693,8 +5817,8 @@ bool CHexCtrl::SetConfigImpl(std::wstring_view wsvPath)
 			}
 
 			//Search for any special key names: 'Tab', 'Enter', etc... If not found then it's just a char.
-			if (const auto itUmap = std::find_if(umapKeys.begin(), umapKeys.end(), [&](const auto& ref) {
-				return ref.second.first == vecKB.uKey; }); itUmap != umapKeys.end()) {
+			if (const auto itUmap = std::find_if(umapKeys.begin(), umapKeys.end(), [&](const auto& map) {
+				return map.second.first == vecKB.uKey; }); itUmap != umapKeys.end()) {
 				wstr += itUmap->second.second;
 			}
 			else {
@@ -5736,7 +5860,7 @@ void CHexCtrl::SetDataVirtual(SpanByte spnData, const HEXSPAN& hss)const
 	if (!IsVirtualImpl())
 		return;
 
-	m_pHexVirtData->OnHexSetData({ .hdr { m_Wnd, static_cast<UINT>(m_Wnd.GetDlgCtrlID()) },
+	m_stData.pHexVirtData->OnHexSetData({ .hdr { m_Wnd, static_cast<UINT>(m_Wnd.GetDlgCtrlID()) },
 		.stHexSpan { hss }, .spnData { spnData } });
 }
 
@@ -5780,9 +5904,9 @@ void CHexCtrl::SetGroupSizeImpl(DWORD dwSize, bool fRedraw, bool fNotify)
 	const auto menuMain = m_MenuMain.GetSubMenu(0);
 	HMENU hMenuGroupData { };
 	for (auto i = 0; i < menuMain.GetItemsCount(); ++i) {
-		//Searching through all submenus whose first menuID is IDM_HEXCTRL_GROUPDATA_BYTE.
+		//Searching through all submenus whose first menuID is IDM_HEXCTRL_GROUPDATA_1BYTE.
 		if (auto menuSub = menuMain.GetSubMenu(i); menuSub.IsMenu()) {
-			if (menuSub.GetItemID(0) == IDM_HEXCTRL_GROUPDATA_BYTE) {
+			if (menuSub.GetItemID(0) == IDM_HEXCTRL_GROUPDATA_1BYTE) {
 				hMenuGroupData = menuSub.GetHMENU();
 				break;
 			}
@@ -5799,16 +5923,16 @@ void CHexCtrl::SetGroupSizeImpl(DWORD dwSize, bool fRedraw, bool fNotify)
 		UINT uIDToCheck { 0 };
 		switch (dwSize) {
 		case 1:
-			uIDToCheck = IDM_HEXCTRL_GROUPDATA_BYTE;
+			uIDToCheck = IDM_HEXCTRL_GROUPDATA_1BYTE;
 			break;
 		case 2:
-			uIDToCheck = IDM_HEXCTRL_GROUPDATA_WORD;
+			uIDToCheck = IDM_HEXCTRL_GROUPDATA_2BYTE;
 			break;
 		case 4:
-			uIDToCheck = IDM_HEXCTRL_GROUPDATA_DWORD;
+			uIDToCheck = IDM_HEXCTRL_GROUPDATA_4BYTE;
 			break;
 		case 8:
-			uIDToCheck = IDM_HEXCTRL_GROUPDATA_QWORD;
+			uIDToCheck = IDM_HEXCTRL_GROUPDATA_8BYTE;
 			break;
 		default:
 			break;
@@ -5826,11 +5950,11 @@ void CHexCtrl::SetGroupSizeImpl(DWORD dwSize, bool fRedraw, bool fNotify)
 	SetCapacityImpl(m_dwCapacity, fRedraw, fNotify); //To recalc current representation.
 }
 
-void CHexCtrl::SetScrollCursor()
+void CHexCtrl::SetScrollCursor(bool fSet)
 {
-	m_fScrollCursor = !m_fScrollCursor;
+	m_fScrollCursor = fSet;
 
-	if (m_fScrollCursor) {
+	if (fSet) {
 		::GetCursorPos(m_ptScrollCursorClick);
 		m_Wnd.SetTimer(m_uIDTScrolCursor, 20, nullptr);
 	}
@@ -5845,11 +5969,11 @@ void CHexCtrl::SetUnprintableCharImpl(wchar_t wch, bool fRedraw)
 	if (fRedraw) { RedrawImpl(); }
 }
 
-void CHexCtrl::SnapshotUndo(const VecSpan& vecSpan)
+void CHexCtrl::SnapshotUndo(SpanHexSpan spnHexSpan)
 {
 	constexpr auto dwUndoMax { 512U }; //Undo's max limit.
-	const auto ullTotalSize = std::reduce(vecSpan.begin(), vecSpan.end(), 0ULL,
-		[](ULONGLONG ullSumm, const HEXSPAN& ref) { return ullSumm + ref.ullSize; });
+	const auto ullTotalSize = std::reduce(spnHexSpan.begin(), spnHexSpan.end(), 0ULL,
+		[](ULONGLONG ullSumm, const HEXSPAN& hs) { return ullSumm + hs.ullSize; });
 
 	//Check for very big undo size.
 	if (ullTotalSize > 1024 * 1024 * 10)
@@ -5863,31 +5987,31 @@ void CHexCtrl::SnapshotUndo(const VecSpan& vecSpan)
 	}
 
 	//Making new Undo data snapshot.
-	const auto& refUndo = m_vecUndo.emplace_back(std::make_unique<std::vector<UNDO>>());
+	auto& vecUndo = m_vecUndo.emplace_back();
 
 	//Bad alloc may happen here!!!
 	try {
-		for (const auto& ref : vecSpan) { //vecSpan.size() amount of continuous areas to preserve.
-			auto& refUNDO = refUndo->emplace_back(UNDO { ref.ullOffset, { } });
-			refUNDO.vecData.resize(static_cast<std::size_t>(ref.ullSize));
+		for (const auto& hs : spnHexSpan) { //spnHexSpan.size() is the amount of continuous areas to preserve.
+			auto& undo = vecUndo.emplace_back(UNDO { hs.ullOffset, { } });
+			undo.vecData.resize(static_cast<std::size_t>(hs.ullSize));
 
 			//In VirtualData mode processing data chunk by chunk.
-			if (IsVirtualImpl() && ref.ullSize > GetCacheSize()) {
+			if (IsVirtualImpl() && hs.ullSize > GetCacheSize()) {
 				const auto dwSizeChunk = GetCacheSize();
-				const auto ullMod = ref.ullSize % dwSizeChunk;
-				auto ullChunks = ref.ullSize / dwSizeChunk + (ullMod > 0 ? 1 : 0);
+				const auto ullMod = hs.ullSize % dwSizeChunk;
+				auto ullChunks = hs.ullSize / dwSizeChunk + (ullMod > 0 ? 1 : 0);
 				ULONGLONG ullOffset { 0 };
 				while (ullChunks-- > 0) {
 					const auto ullSize = (ullChunks == 1 && ullMod > 0) ? ullMod : dwSizeChunk;
 					if (const auto spnData = GetData({ ullOffset, ullSize }); !spnData.empty()) {
-						std::copy_n(spnData.data(), ullSize, refUNDO.vecData.data() + static_cast<std::size_t>(ullOffset));
+						std::copy_n(spnData.data(), ullSize, undo.vecData.data() + static_cast<std::size_t>(ullOffset));
 					}
 					ullOffset += ullSize;
 				}
 			}
 			else {
-				if (const auto spnData = GetData(ref); !spnData.empty()) {
-					std::copy_n(spnData.data(), ref.ullSize, refUNDO.vecData.data());
+				if (const auto spnData = GetData(hs); !spnData.empty()) {
+					std::copy_n(spnData.data(), hs.ullSize, undo.vecData.data());
 				}
 			}
 		}
@@ -5910,45 +6034,32 @@ void CHexCtrl::TextChunkPoint(ULONGLONG ullOffset, int& iCx, int& iCy)const
 		(ullScrollV - (ullScrollV % m_sizeFontMain.cy)));
 }
 
-void CHexCtrl::TTMainShow(bool fShow, bool fTimer)
+void CHexCtrl::TTTrackShow(bool fShow, bool fTimer, const wchar_t* pwszText)
 {
+	//When fShow==true, the fTimer==true means to set a new timer for tooltip.
+	//When fShow==false, the fTimer==true means that this call is from the OnTimer, and tooltip showing time has run out.
+
+	const TTTOOLINFOW ti { .cbSize { sizeof(TTTOOLINFOW) }, .uFlags { TTF_TRACK }, .lpszText { const_cast<LPWSTR>(pwszText) } };
 	if (fShow) {
-		m_tmTT = std::chrono::high_resolution_clock::now();
 		POINT ptCur;
 		::GetCursorPos(&ptCur);
-		m_wndTTMain.SendMsg(TTM_TRACKPOSITION, 0, static_cast<LPARAM>(MAKELONG(ptCur.x + 9, ptCur.y - 20)));
-		m_wndTTMain.SendMsg(TTM_UPDATETIPTEXTW, 0, reinterpret_cast<LPARAM>(&m_ttiMain));
-		m_wndTTMain.SendMsg(TTM_TRACKACTIVATE, static_cast<WPARAM>(TRUE), reinterpret_cast<LPARAM>(&m_ttiMain));
-		m_Wnd.SetTimer(m_uIDTTTMain, 300, nullptr);
+		m_WndTT.SendMsg(TTM_UPDATETIPTEXTW, 0, reinterpret_cast<LPARAM>(&ti));
+		m_WndTT.SendMsg(TTM_TRACKPOSITION, 0, MAKELPARAM(ptCur.x - 5, ptCur.y - 25));
+
+		if (fTimer) { //To track tooltip showing time.
+			m_tmTT = std::chrono::high_resolution_clock::now();
+			m_Wnd.SetTimer(m_uIDTTooltip, 300, nullptr);
+		}
 	}
 	else {
-		m_Wnd.KillTimer(m_uIDTTTMain);
-
-		//When hiding tooltip by timer we not nullify the pointer.
-		//Otherwise tooltip will be shown again after mouse movement,
-		//even if cursor didn't leave current bkm area.
+		//When hiding a tooltip by the timer event, we not nullify the pointer, because otherwise the tooltip
+		//will be shown again after mouse movement, even if the cursor doesn't leave current tooltip's area.
 		if (!fTimer) {
-			m_pBkmTTCurr = nullptr;
-			m_pTFieldTTCurr = nullptr;
+			m_pwszTTText = nullptr;
 		}
-
-		m_wndTTMain.SendMsg(TTM_TRACKACTIVATE, FALSE, reinterpret_cast<LPARAM>(&m_ttiMain));
+		m_Wnd.KillTimer(m_uIDTTooltip);
 	}
-}
-
-void CHexCtrl::TTOffsetShow(bool fShow)
-{
-	if (fShow) {
-		POINT ptCur;
-		::GetCursorPos(&ptCur);
-		auto wstrOffset = (IsOffsetAsHexImpl() ? L"Offset: 0x" : L"Offset: ") + OffsetToWstr(GetTopLine() * GetCapacity());
-		m_ttiOffset.lpszText = wstrOffset.data();
-		m_wndTTOffset.SendMsg(TTM_TRACKPOSITION, 0, static_cast<LPARAM>(MAKELONG(ptCur.x - 5, ptCur.y - 20)));
-		m_wndTTOffset.SendMsg(TTM_UPDATETIPTEXTW, 0, reinterpret_cast<LPARAM>(&m_ttiOffset));
-		m_ttiOffset.lpszText = nullptr;
-	}
-
-	m_wndTTOffset.SendMsg(TTM_TRACKACTIVATE, static_cast<WPARAM>(fShow), reinterpret_cast<LPARAM>(&m_ttiOffset));
+	m_WndTT.SendMsg(TTM_TRACKACTIVATE, fShow, reinterpret_cast<LPARAM>(&ti));
 }
 
 void CHexCtrl::Undo()
@@ -5959,21 +6070,21 @@ void CHexCtrl::Undo()
 	//Bad alloc may happen here! If there is no more free memory, just clear the vec and return.
 	try {
 		//Creating new Redo data snapshot.
-		const auto& refRedo = m_vecRedo.emplace_back(std::make_unique<std::vector<UNDO>>());
-		for (const auto& ref : *m_vecUndo.back()) {
-			auto& refRedoBack = refRedo->emplace_back(UNDO { ref.ullOffset, { } });
-			refRedoBack.vecData.resize(ref.vecData.size());
-			const auto& vecUndoData = ref.vecData;
+		auto& vecRedo = m_vecRedo.emplace_back();
+		for (const auto& undo : m_vecUndo.back()) {
+			auto& redo = vecRedo.emplace_back(UNDO { undo.ullOffset, { } });
+			redo.vecData.resize(undo.vecData.size());
+			const auto& vecUndoData = undo.vecData;
 
 			if (IsVirtualImpl() && vecUndoData.size() > GetCacheSize()) { //In VirtualData mode processing data chunk by chunk.
 				const auto dwSizeChunk = GetCacheSize();
-				const auto sMod = vecUndoData.size() % dwSizeChunk;
-				auto ullChunks = vecUndoData.size() / dwSizeChunk + (sMod > 0 ? 1 : 0);
+				const auto uzMod = vecUndoData.size() % dwSizeChunk;
+				auto ullChunks = vecUndoData.size() / dwSizeChunk + (uzMod > 0 ? 1 : 0);
 				std::size_t ullOffset = 0;
 				while (ullChunks-- > 0) {
-					const auto ullSize = (ullChunks == 1 && sMod > 0) ? sMod : dwSizeChunk;
+					const auto ullSize = (ullChunks == 1 && uzMod > 0) ? uzMod : dwSizeChunk;
 					if (const auto spnData = GetData({ ullOffset, ullSize }); !spnData.empty()) {
-						std::copy_n(spnData.data(), ullSize, refRedoBack.vecData.begin() + ullOffset); //Fill Redo with the data.
+						std::copy_n(spnData.data(), ullSize, redo.vecData.begin() + ullOffset); //Fill Redo with the data.
 						std::copy_n(vecUndoData.begin() + ullOffset, ullSize, spnData.data()); //Undo the data.
 						SetDataVirtual(spnData, { ullOffset, ullSize });
 					}
@@ -5981,10 +6092,10 @@ void CHexCtrl::Undo()
 				}
 			}
 			else {
-				if (const auto spnData = GetData({ ref.ullOffset, vecUndoData.size() }); !spnData.empty()) {
-					std::copy_n(spnData.data(), vecUndoData.size(), refRedoBack.vecData.begin()); //Fill Redo with the data.
+				if (const auto spnData = GetData({ undo.ullOffset, vecUndoData.size() }); !spnData.empty()) {
+					std::copy_n(spnData.data(), vecUndoData.size(), redo.vecData.begin()); //Fill Redo with the data.
 					std::copy_n(vecUndoData.begin(), vecUndoData.size(), spnData.data()); //Undo the data.
-					SetDataVirtual(spnData, { ref.ullOffset, vecUndoData.size() });
+					SetDataVirtual(spnData, { undo.ullOffset, vecUndoData.size() });
 				}
 			}
 		}
@@ -5996,7 +6107,7 @@ void CHexCtrl::Undo()
 
 	m_vecUndo.pop_back();
 	OnModifyData();
-	m_Wnd.RedrawWindow();
+	RedrawImpl();
 }
 
 void CHexCtrl::UpdateDPIScale()
@@ -6004,13 +6115,13 @@ void CHexCtrl::UpdateDPIScale()
 	m_flDPIScale = GDIUT::GetDPIScaleForHWND(m_Wnd);
 }
 
-void CHexCtrl::ModifyOper(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused]] SpanCByte)
+void CHexCtrl::ModifyOperScalar(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused]] SpanCByte)
 {
 	assert(pData != nullptr);
 	using enum EHexDataType;
 	using enum EHexOperMode;
 
-	constexpr auto lmbOperT = []<typename T>(T * pData, const HEXMODIFY & hms) {
+	constexpr auto lmbOperScalarT = []<typename T>(T * pData, const HEXMODIFY & hms) {
 		T tData = hms.fBigEndian ? ut::ByteSwap(*pData) : *pData;
 		assert(!hms.spnData.empty());
 		const T tOper = *reinterpret_cast<const T*>(hms.spnData.data());
@@ -6066,10 +6177,20 @@ void CHexCtrl::ModifyOper(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused
 			tData /= tOper;
 			break;
 		case OPER_MIN:
-			tData = (std::max)(tData, tOper);
+			if constexpr (std::is_floating_point_v<T>) {
+				tData = std::fmax(tData, tOper);
+			}
+			else {
+				tData = (std::max)(tData, tOper);
+			}
 			break;
 		case OPER_MAX:
-			tData = (std::min)(tData, tOper);
+			if constexpr (std::is_floating_point_v<T>) {
+				tData = std::fmin(tData, tOper);
+			}
+			else {
+				tData = (std::min)(tData, tOper);
+			}
 			break;
 		case OPER_SWAP:
 			tData = ut::ByteSwap(tData);
@@ -6087,1865 +6208,39 @@ void CHexCtrl::ModifyOper(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused
 
 	switch (hms.eDataType) {
 	case DATA_INT8:
-		lmbOperT(reinterpret_cast<std::int8_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::int8_t*>(pData), hms);
 		break;
 	case DATA_UINT8:
-		lmbOperT(reinterpret_cast<std::uint8_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::uint8_t*>(pData), hms);
 		break;
 	case DATA_INT16:
-		lmbOperT(reinterpret_cast<std::int16_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::int16_t*>(pData), hms);
 		break;
 	case DATA_UINT16:
-		lmbOperT(reinterpret_cast<std::uint16_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::uint16_t*>(pData), hms);
 		break;
 	case DATA_INT32:
-		lmbOperT(reinterpret_cast<std::int32_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::int32_t*>(pData), hms);
 		break;
 	case DATA_UINT32:
-		lmbOperT(reinterpret_cast<std::uint32_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::uint32_t*>(pData), hms);
 		break;
 	case DATA_INT64:
-		lmbOperT(reinterpret_cast<std::int64_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::int64_t*>(pData), hms);
 		break;
 	case DATA_UINT64:
-		lmbOperT(reinterpret_cast<std::uint64_t*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<std::uint64_t*>(pData), hms);
 		break;
 	case DATA_FLOAT:
-		lmbOperT(reinterpret_cast<float*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<float*>(pData), hms);
 		break;
 	case DATA_DOUBLE:
-		lmbOperT(reinterpret_cast<double*>(pData), hms);
+		lmbOperScalarT(reinterpret_cast<double*>(pData), hms);
 		break;
 	default:
 		break;
 	}
 }
-
-#if defined(_M_IX86) || defined(_M_X64)
-void CHexCtrl::ModifyOperVec128(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused]] SpanCByte)
-{
-	assert(pData != nullptr);
-	using enum EHexDataType; using enum EHexOperMode;
-
-	constexpr auto lmbOperVec128Int8 = [](std::int8_t* pi8Data, const HEXMODIFY& hms) {
-		const auto m128iData = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pi8Data));
-		alignas(16) std::int8_t i8Data[16];
-		_mm_store_si128(reinterpret_cast<__m128i*>(i8Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto i8Oper = *reinterpret_cast<const std::int8_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi8(i8Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi8(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi8(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-		{
-			const auto m128iEven = _mm_mullo_epi16(m128iData, m128iOper);
-			const auto m128iOdd = _mm_mullo_epi16(_mm_srli_epi16(m128iData, 8), _mm_srli_epi16(m128iOper, 8));
-			m128iResult = _mm_or_si128(_mm_slli_epi16(m128iOdd, 8), _mm_srli_epi16(_mm_slli_epi16(m128iEven, 8), 8));
-		}
-		break;
-		case OPER_DIV:
-			assert(i8Oper > 0);
-			m128iResult = _mm_setr_epi8(i8Data[0] / i8Oper, i8Data[1] / i8Oper, i8Data[2] / i8Oper, i8Data[3] / i8Oper,
-				i8Data[4] / i8Oper, i8Data[5] / i8Oper, i8Data[6] / i8Oper, i8Data[7] / i8Oper,
-				i8Data[8] / i8Oper, i8Data[9] / i8Oper, i8Data[10] / i8Oper, i8Data[11] / i8Oper,
-				i8Data[12] / i8Oper, i8Data[13] / i8Oper, i8Data[14] / i8Oper, i8Data[15] / i8Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epi8(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epi8(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_SWAP: //No need for the int8_t.
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_setr_epi8(i8Data[0] << i8Oper, i8Data[1] << i8Oper, i8Data[2] << i8Oper, i8Data[3] << i8Oper,
-				i8Data[4] << i8Oper, i8Data[5] << i8Oper, i8Data[6] << i8Oper, i8Data[7] << i8Oper,
-				i8Data[8] << i8Oper, i8Data[9] << i8Oper, i8Data[10] << i8Oper, i8Data[11] << i8Oper,
-				i8Data[12] << i8Oper, i8Data[13] << i8Oper, i8Data[14] << i8Oper, i8Data[15] << i8Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_setr_epi8(i8Data[0] >> i8Oper, i8Data[1] >> i8Oper, i8Data[2] >> i8Oper, i8Data[3] >> i8Oper,
-				i8Data[4] >> i8Oper, i8Data[5] >> i8Oper, i8Data[6] >> i8Oper, i8Data[7] >> i8Oper,
-				i8Data[8] >> i8Oper, i8Data[9] >> i8Oper, i8Data[10] >> i8Oper, i8Data[11] >> i8Oper,
-				i8Data[12] >> i8Oper, i8Data[13] >> i8Oper, i8Data[14] >> i8Oper, i8Data[15] >> i8Oper);
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi8(std::rotl(static_cast<std::uint8_t>(i8Data[0]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[1]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[2]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[3]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[4]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[5]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[6]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[7]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[8]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[9]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[10]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[11]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[12]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[13]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[14]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[15]), i8Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi8(std::rotr(static_cast<std::uint8_t>(i8Data[0]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[1]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[2]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[3]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[4]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[5]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[6]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[7]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[8]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[9]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[10]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[11]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[12]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[13]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[14]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[15]), i8Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi8(ut::BitReverse(i8Data[0]), ut::BitReverse(i8Data[1]), ut::BitReverse(i8Data[2]),
-				ut::BitReverse(i8Data[3]), ut::BitReverse(i8Data[4]), ut::BitReverse(i8Data[5]), ut::BitReverse(i8Data[6]),
-				ut::BitReverse(i8Data[7]), ut::BitReverse(i8Data[8]), ut::BitReverse(i8Data[9]), ut::BitReverse(i8Data[10]),
-				ut::BitReverse(i8Data[11]), ut::BitReverse(i8Data[12]), ut::BitReverse(i8Data[13]), ut::BitReverse(i8Data[14]),
-				ut::BitReverse(i8Data[15]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int8_t operation.");
-			break;
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pi8Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128UInt8 = [](std::uint8_t* pui8Data, const HEXMODIFY& hms) {
-		const auto m128iData = _mm_loadu_si128(reinterpret_cast<const __m128i*>(pui8Data));
-		alignas(16) std::uint8_t ui8Data[16];
-		_mm_store_si128(reinterpret_cast<__m128i*>(ui8Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto ui8Oper = *reinterpret_cast<const std::uint8_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi8(ui8Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi8(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi8(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_setr_epi8(ui8Data[0] * ui8Oper, ui8Data[1] * ui8Oper, ui8Data[2] * ui8Oper,
-				ui8Data[3] * ui8Oper, ui8Data[4] * ui8Oper, ui8Data[5] * ui8Oper, ui8Data[6] * ui8Oper,
-				ui8Data[7] * ui8Oper, ui8Data[8] * ui8Oper, ui8Data[9] * ui8Oper, ui8Data[10] * ui8Oper,
-				ui8Data[11] * ui8Oper, ui8Data[12] * ui8Oper, ui8Data[13] * ui8Oper, ui8Data[14] * ui8Oper,
-				ui8Data[15] * ui8Oper);
-			break;
-		case OPER_DIV:
-			assert(ui8Oper > 0);
-			m128iResult = _mm_setr_epi8(ui8Data[0] / ui8Oper, ui8Data[1] / ui8Oper, ui8Data[2] / ui8Oper,
-				ui8Data[3] / ui8Oper, ui8Data[4] / ui8Oper, ui8Data[5] / ui8Oper, ui8Data[6] / ui8Oper,
-				ui8Data[7] / ui8Oper, ui8Data[8] / ui8Oper, ui8Data[9] / ui8Oper, ui8Data[10] / ui8Oper,
-				ui8Data[11] / ui8Oper, ui8Data[12] / ui8Oper, ui8Data[13] / ui8Oper, ui8Data[14] / ui8Oper,
-				ui8Data[15] / ui8Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epu8(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epu8(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_SWAP:	//No need for the uint8_t.
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_setr_epi8(ui8Data[0] << ui8Oper, ui8Data[1] << ui8Oper, ui8Data[2] << ui8Oper, ui8Data[3] << ui8Oper,
-				ui8Data[4] << ui8Oper, ui8Data[5] << ui8Oper, ui8Data[6] << ui8Oper, ui8Data[7] << ui8Oper,
-				ui8Data[8] << ui8Oper, ui8Data[9] << ui8Oper, ui8Data[10] << ui8Oper, ui8Data[11] << ui8Oper,
-				ui8Data[12] << ui8Oper, ui8Data[13] << ui8Oper, ui8Data[14] << ui8Oper, ui8Data[15] << ui8Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_setr_epi8(ui8Data[0] >> ui8Oper, ui8Data[1] >> ui8Oper, ui8Data[2] >> ui8Oper, ui8Data[3] >> ui8Oper,
-				ui8Data[4] >> ui8Oper, ui8Data[5] >> ui8Oper, ui8Data[6] >> ui8Oper, ui8Data[7] >> ui8Oper,
-				ui8Data[8] >> ui8Oper, ui8Data[9] >> ui8Oper, ui8Data[10] >> ui8Oper, ui8Data[11] >> ui8Oper,
-				ui8Data[12] >> ui8Oper, ui8Data[13] >> ui8Oper, ui8Data[14] >> ui8Oper, ui8Data[15] >> ui8Oper);
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi8(std::rotl(ui8Data[0], ui8Oper), std::rotl(ui8Data[1], ui8Oper),
-				std::rotl(ui8Data[2], ui8Oper), std::rotl(ui8Data[3], ui8Oper), std::rotl(ui8Data[4], ui8Oper),
-				std::rotl(ui8Data[5], ui8Oper), std::rotl(ui8Data[6], ui8Oper), std::rotl(ui8Data[7], ui8Oper),
-				std::rotl(ui8Data[8], ui8Oper), std::rotl(ui8Data[9], ui8Oper), std::rotl(ui8Data[10], ui8Oper),
-				std::rotl(ui8Data[11], ui8Oper), std::rotl(ui8Data[12], ui8Oper), std::rotl(ui8Data[13], ui8Oper),
-				std::rotl(ui8Data[14], ui8Oper), std::rotl(ui8Data[15], ui8Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi8(std::rotr(ui8Data[0], ui8Oper), std::rotr(ui8Data[1], ui8Oper),
-				std::rotr(ui8Data[2], ui8Oper), std::rotr(ui8Data[3], ui8Oper), std::rotr(ui8Data[4], ui8Oper),
-				std::rotr(ui8Data[5], ui8Oper), std::rotr(ui8Data[6], ui8Oper), std::rotr(ui8Data[7], ui8Oper),
-				std::rotr(ui8Data[8], ui8Oper), std::rotr(ui8Data[9], ui8Oper), std::rotr(ui8Data[10], ui8Oper),
-				std::rotr(ui8Data[11], ui8Oper), std::rotr(ui8Data[12], ui8Oper), std::rotr(ui8Data[13], ui8Oper),
-				std::rotr(ui8Data[14], ui8Oper), std::rotr(ui8Data[15], ui8Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi8(ut::BitReverse(ui8Data[0]), ut::BitReverse(ui8Data[1]), ut::BitReverse(ui8Data[2]),
-				ut::BitReverse(ui8Data[3]), ut::BitReverse(ui8Data[4]), ut::BitReverse(ui8Data[5]), ut::BitReverse(ui8Data[6]),
-				ut::BitReverse(ui8Data[7]), ut::BitReverse(ui8Data[8]), ut::BitReverse(ui8Data[9]), ut::BitReverse(ui8Data[10]),
-				ut::BitReverse(ui8Data[11]), ut::BitReverse(ui8Data[12]), ut::BitReverse(ui8Data[13]), ut::BitReverse(ui8Data[14]),
-				ut::BitReverse(ui8Data[15]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint8_t operation.");
-			break;
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pui8Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128Int16 = [](std::int16_t* pi16Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int16_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pi16Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pi16Data));
-		alignas(16) std::int16_t i16Data[8];
-		_mm_store_si128(reinterpret_cast<__m128i*>(i16Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto i16Oper = *reinterpret_cast<const std::int16_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi16(i16Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi16(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi16(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_mullo_epi16(m128iData, m128iOper);
-			break;
-		case OPER_DIV:
-			assert(i16Oper > 0);
-			m128iResult = _mm_setr_epi16(i16Data[0] / i16Oper, i16Data[1] / i16Oper, i16Data[2] / i16Oper,
-				i16Data[3] / i16Oper, i16Data[4] / i16Oper, i16Data[5] / i16Oper, i16Data[6] / i16Oper, i16Data[7] / i16Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epi16(m128iData, m128iOper);
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epi16(m128iData, m128iOper);
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::int16_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi16(m128iData, i16Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_srai_epi16(m128iData, i16Oper); //Arithmetic shift.
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi16(std::rotl(static_cast<std::uint16_t>(i16Data[0]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[1]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[2]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[3]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[4]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[5]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[6]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[7]), i16Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi16(std::rotr(static_cast<std::uint16_t>(i16Data[0]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[1]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[2]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[3]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[4]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[5]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[6]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[7]), i16Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi16(ut::BitReverse(i16Data[0]), ut::BitReverse(i16Data[1]), ut::BitReverse(i16Data[2]),
-				ut::BitReverse(i16Data[3]), ut::BitReverse(i16Data[4]), ut::BitReverse(i16Data[5]), ut::BitReverse(i16Data[6]),
-				ut::BitReverse(i16Data[7]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int16_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::int16_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pi16Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128UInt16 = [](std::uint16_t* pui16Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint16_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pui16Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pui16Data));
-		alignas(16) std::uint16_t ui16Data[8];
-		_mm_store_si128(reinterpret_cast<__m128i*>(ui16Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto ui16Oper = *reinterpret_cast<const std::uint16_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi16(ui16Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi16(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi16(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_setr_epi16(ui16Data[0] * ui16Oper, ui16Data[1] * ui16Oper, ui16Data[2] * ui16Oper,
-				ui16Data[3] * ui16Oper, ui16Data[4] * ui16Oper, ui16Data[5] * ui16Oper, ui16Data[6] * ui16Oper,
-				ui16Data[7] * ui16Oper);
-			break;
-		case OPER_DIV:
-			assert(ui16Oper > 0);
-			m128iResult = _mm_setr_epi16(ui16Data[0] / ui16Oper, ui16Data[1] / ui16Oper, ui16Data[2] / ui16Oper,
-				ui16Data[3] / ui16Oper, ui16Data[4] / ui16Oper, ui16Data[5] / ui16Oper, ui16Data[6] / ui16Oper,
-				ui16Data[7] / ui16Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epu16(m128iData, m128iOper);
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epu16(m128iData, m128iOper);
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::uint16_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi16(m128iData, ui16Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_srli_epi16(m128iData, ui16Oper); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi16(std::rotl(ui16Data[0], ui16Oper), std::rotl(ui16Data[1], ui16Oper),
-				std::rotl(ui16Data[2], ui16Oper), std::rotl(ui16Data[3], ui16Oper), std::rotl(ui16Data[4], ui16Oper),
-				std::rotl(ui16Data[5], ui16Oper), std::rotl(ui16Data[6], ui16Oper), std::rotl(ui16Data[7], ui16Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi16(std::rotr(ui16Data[0], ui16Oper), std::rotr(ui16Data[1], ui16Oper),
-				std::rotr(ui16Data[2], ui16Oper), std::rotr(ui16Data[3], ui16Oper), std::rotr(ui16Data[4], ui16Oper),
-				std::rotr(ui16Data[5], ui16Oper), std::rotr(ui16Data[6], ui16Oper), std::rotr(ui16Data[7], ui16Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi16(ut::BitReverse(ui16Data[0]), ut::BitReverse(ui16Data[1]), ut::BitReverse(ui16Data[2]),
-				ut::BitReverse(ui16Data[3]), ut::BitReverse(ui16Data[4]), ut::BitReverse(ui16Data[5]), ut::BitReverse(ui16Data[6]),
-				ut::BitReverse(ui16Data[7]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint16_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::uint16_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pui16Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128Int32 = [](std::int32_t* pi32Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int32_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pi32Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pi32Data));
-		alignas(16) std::int32_t i32Data[4];
-		_mm_store_si128(reinterpret_cast<__m128i*>(i32Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto i32Oper = *reinterpret_cast<const std::int32_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi32(i32Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi32(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi32(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_mullo_epi32(m128iData, m128iOper);
-			break;
-		case OPER_DIV:
-			assert(i32Oper > 0);
-			m128iResult = _mm_setr_epi32(i32Data[0] / i32Oper, i32Data[1] / i32Oper, i32Data[2] / i32Oper,
-				i32Data[3] / i32Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epi32(m128iData, m128iOper);
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epi32(m128iData, m128iOper);
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::int32_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi32(m128iData, i32Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_srai_epi32(m128iData, i32Oper); //Arithmetic shift.
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi32(std::rotl(static_cast<std::uint32_t>(i32Data[0]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[1]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[2]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[3]), i32Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi32(std::rotr(static_cast<std::uint32_t>(i32Data[0]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[1]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[2]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[3]), i32Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi32(ut::BitReverse(i32Data[0]), ut::BitReverse(i32Data[1]), ut::BitReverse(i32Data[2]),
-				ut::BitReverse(i32Data[3]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int32_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::int32_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pi32Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128UInt32 = [](std::uint32_t* pui32Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint32_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pui32Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pui32Data));
-		alignas(16) std::uint32_t ui32Data[4];
-		_mm_store_si128(reinterpret_cast<__m128i*>(ui32Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto ui32Oper = *reinterpret_cast<const std::uint32_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi32(ui32Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi32(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi32(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_setr_epi32(ui32Data[0] * ui32Oper, ui32Data[1] * ui32Oper, ui32Data[2] * ui32Oper,
-				ui32Data[3] * ui32Oper);
-			break;
-		case OPER_DIV:
-			assert(ui32Oper > 0);
-			m128iResult = _mm_setr_epi32(ui32Data[0] / ui32Oper, ui32Data[1] / ui32Oper, ui32Data[2] / ui32Oper,
-				ui32Data[3] / ui32Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_max_epu32(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_min_epu32(m128iData, m128iOper); //SSE4.1
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::uint32_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi32(m128iData, ui32Oper);
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_srli_epi32(m128iData, ui32Oper); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi32(std::rotl(ui32Data[0], ui32Oper), std::rotl(ui32Data[1], ui32Oper),
-				std::rotl(ui32Data[2], ui32Oper), std::rotl(ui32Data[3], ui32Oper));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi32(std::rotr(ui32Data[0], ui32Oper), std::rotr(ui32Data[1], ui32Oper),
-				std::rotr(ui32Data[2], ui32Oper), std::rotr(ui32Data[3], ui32Oper));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi32(ut::BitReverse(ui32Data[0]), ut::BitReverse(ui32Data[1]), ut::BitReverse(ui32Data[2]),
-				ut::BitReverse(ui32Data[3]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint32_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::uint32_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pui32Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128Int64 = [](std::int64_t* pi64Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int64_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pi64Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pi64Data));
-		alignas(16) std::int64_t i64Data[2];
-		_mm_store_si128(reinterpret_cast<__m128i*>(i64Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto i64Oper = *reinterpret_cast<const std::int64_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi64x(i64Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi64(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi64(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_setr_epi64x(i64Data[0] * i64Oper, i64Data[1] * i64Oper);
-			break;
-		case OPER_DIV:
-			assert(i64Oper > 0);
-			m128iResult = _mm_setr_epi64x(i64Data[0] / i64Oper, i64Data[1] / i64Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_setr_epi64x((std::max)(i64Data[0], i64Oper), (std::max)(i64Data[1], i64Oper));
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_setr_epi64x((std::min)(i64Data[0], i64Oper), (std::min)(i64Data[1], i64Oper));
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::int64_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi64(m128iData, static_cast<int>(i64Oper));
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_setr_epi64x(i64Data[0] >> i64Oper, i64Data[1] >> i64Oper);
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi64x(std::rotl(static_cast<std::uint64_t>(i64Data[0]), static_cast<const int>(i64Oper)),
-				std::rotl(static_cast<std::uint64_t>(i64Data[1]), static_cast<const int>(i64Oper)));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi64x(std::rotr(static_cast<std::uint64_t>(i64Data[0]), static_cast<const int>(i64Oper)),
-				std::rotr(static_cast<std::uint64_t>(i64Data[1]), static_cast<const int>(i64Oper)));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi64x(ut::BitReverse(i64Data[0]), ut::BitReverse(i64Data[1]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int64_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::int64_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pi64Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128UInt64 = [](std::uint64_t* pui64Data, const HEXMODIFY& hms) {
-		const auto m128iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint64_t>(_mm_loadu_si128(reinterpret_cast<const __m128i*>(pui64Data)))
-			: _mm_loadu_si128(reinterpret_cast<const __m128i*>(pui64Data));
-		alignas(16) std::uint64_t ui64Data[2];
-		_mm_store_si128(reinterpret_cast<__m128i*>(ui64Data), m128iData);
-		assert(!hms.spnData.empty());
-		const auto ui64Oper = *reinterpret_cast<const std::uint64_t*>(hms.spnData.data());
-		const auto m128iOper = _mm_set1_epi64x(ui64Oper);
-		__m128i m128iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128iResult = _mm_add_epi64(m128iData, m128iOper);
-			break;
-		case OPER_SUB:
-			m128iResult = _mm_sub_epi64(m128iData, m128iOper);
-			break;
-		case OPER_MUL:
-			m128iResult = _mm_setr_epi64x(ui64Data[0] * ui64Oper, ui64Data[1] * ui64Oper);
-			break;
-		case OPER_DIV:
-			assert(ui64Oper > 0);
-			m128iResult = _mm_setr_epi64x(ui64Data[0] / ui64Oper, ui64Data[1] / ui64Oper);
-			break;
-		case OPER_MIN:
-			m128iResult = _mm_setr_epi64x((std::max)(ui64Data[0], ui64Oper), (std::max)(ui64Data[1], ui64Oper));
-			break;
-		case OPER_MAX:
-			m128iResult = _mm_setr_epi64x((std::min)(ui64Data[0], ui64Oper), (std::min)(ui64Data[1], ui64Oper));
-			break;
-		case OPER_SWAP:
-			m128iResult = ut::ByteSwapVec<std::uint64_t>(m128iData);
-			break;
-		case OPER_OR:
-			m128iResult = _mm_or_si128(m128iData, m128iOper);
-			break;
-		case OPER_XOR:
-			m128iResult = _mm_xor_si128(m128iData, m128iOper);
-			break;
-		case OPER_AND:
-			m128iResult = _mm_and_si128(m128iData, m128iOper);
-			break;
-		case OPER_NOT:
-			//_mm_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m128iResult = _mm_xor_si128(m128iData, _mm_cmpeq_epi64(m128iData, m128iData)); //SSE4.1
-			break;
-		case OPER_SHL:
-			m128iResult = _mm_slli_epi64(m128iData, static_cast<int>(ui64Oper));
-			break;
-		case OPER_SHR:
-			m128iResult = _mm_srli_epi64(m128iData, static_cast<int>(ui64Oper)); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m128iResult = _mm_setr_epi64x(std::rotl(ui64Data[0], static_cast<const int>(ui64Oper)),
-				std::rotl(ui64Data[1], static_cast<const int>(ui64Oper)));
-			break;
-		case OPER_ROTR:
-			m128iResult = _mm_setr_epi64x(std::rotr(ui64Data[0], static_cast<const int>(ui64Oper)),
-				std::rotr(ui64Data[1], static_cast<const int>(ui64Oper)));
-			break;
-		case OPER_BITREV:
-			m128iResult = _mm_setr_epi64x(ut::BitReverse(ui64Data[0]), ut::BitReverse(ui64Data[1]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint64_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128iResult = ut::ByteSwapVec<std::uint64_t>(m128iResult);
-		}
-
-		_mm_storeu_si128(reinterpret_cast<__m128i*>(pui64Data), m128iResult);
-		};
-
-	constexpr auto lmbOperVec128Float = [](float* pflData, const HEXMODIFY& hms) {
-		const auto m128Data = hms.fBigEndian ? ut::ByteSwapVec<float>(_mm_loadu_ps(pflData)) : _mm_loadu_ps(pflData);
-		const auto m128Oper = _mm_set1_ps(*reinterpret_cast<const float*>(hms.spnData.data()));
-		__m128 m128Result { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128Result = _mm_add_ps(m128Data, m128Oper);
-			break;
-		case OPER_SUB:
-			m128Result = _mm_sub_ps(m128Data, m128Oper);
-			break;
-		case OPER_MUL:
-			m128Result = _mm_mul_ps(m128Data, m128Oper);
-			break;
-		case OPER_DIV:
-			assert(*reinterpret_cast<const float*>(hms.spnData.data()) > 0.F);
-			m128Result = _mm_div_ps(m128Data, m128Oper);
-			break;
-		case OPER_MIN:
-			m128Result = _mm_max_ps(m128Data, m128Oper);
-			break;
-		case OPER_MAX:
-			m128Result = _mm_min_ps(m128Data, m128Oper);
-			break;
-		case OPER_SWAP:
-			m128Result = ut::ByteSwapVec<float>(m128Data);
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported float operation.");
-			return;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128Result = ut::ByteSwapVec<float>(m128Result);
-		}
-
-		_mm_storeu_ps(pflData, m128Result);
-		};
-
-	constexpr auto lmbOperVec128Double = [](double* pdblData, const HEXMODIFY& hms) {
-		const auto m128dData = hms.fBigEndian ? ut::ByteSwapVec<double>(_mm_loadu_pd(pdblData)) : _mm_loadu_pd(pdblData);
-		const auto m128dOper = _mm_set1_pd(*reinterpret_cast<const double*>(hms.spnData.data()));
-		__m128d m128dResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m128dResult = _mm_add_pd(m128dData, m128dOper);
-			break;
-		case OPER_SUB:
-			m128dResult = _mm_sub_pd(m128dData, m128dOper);
-			break;
-		case OPER_MUL:
-			m128dResult = _mm_mul_pd(m128dData, m128dOper);
-			break;
-		case OPER_DIV:
-			assert(*reinterpret_cast<const double*>(hms.spnData.data()) > 0.);
-			m128dResult = _mm_div_pd(m128dData, m128dOper);
-			break;
-		case OPER_MIN:
-			m128dResult = _mm_max_pd(m128dData, m128dOper);
-			break;
-		case OPER_MAX:
-			m128dResult = _mm_min_pd(m128dData, m128dOper);
-			break;
-		case OPER_SWAP:
-			m128dResult = ut::ByteSwapVec<double>(m128dData);
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported double operation.");
-			return;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m128dResult = ut::ByteSwapVec<double>(m128dResult);
-		}
-
-		_mm_storeu_pd(pdblData, m128dResult);
-		};
-
-	switch (hms.eDataType) {
-	case DATA_INT8:
-		lmbOperVec128Int8(reinterpret_cast<std::int8_t*>(pData), hms);
-		break;
-	case DATA_UINT8:
-		lmbOperVec128UInt8(reinterpret_cast<std::uint8_t*>(pData), hms);
-		break;
-	case DATA_INT16:
-		lmbOperVec128Int16(reinterpret_cast<std::int16_t*>(pData), hms);
-		break;
-	case DATA_UINT16:
-		lmbOperVec128UInt16(reinterpret_cast<std::uint16_t*>(pData), hms);
-		break;
-	case DATA_INT32:
-		lmbOperVec128Int32(reinterpret_cast<std::int32_t*>(pData), hms);
-		break;
-	case DATA_UINT32:
-		lmbOperVec128UInt32(reinterpret_cast<std::uint32_t*>(pData), hms);
-		break;
-	case DATA_INT64:
-		lmbOperVec128Int64(reinterpret_cast<std::int64_t*>(pData), hms);
-		break;
-	case DATA_UINT64:
-		lmbOperVec128UInt64(reinterpret_cast<std::uint64_t*>(pData), hms);
-		break;
-	case DATA_FLOAT:
-		lmbOperVec128Float(reinterpret_cast<float*>(pData), hms);
-		break;
-	case DATA_DOUBLE:
-		lmbOperVec128Double(reinterpret_cast<double*>(pData), hms);
-		break;
-	default:
-		break;
-	}
-}
-
-void CHexCtrl::ModifyOperVec256(std::byte* pData, const HEXMODIFY& hms, [[maybe_unused]] SpanCByte)
-{
-	assert(pData != nullptr);
-	using enum EHexDataType; using enum EHexOperMode;
-
-	constexpr auto lmbOperVec256Int8 = [](std::int8_t* pi8Data, const HEXMODIFY& hms) {
-		const auto m256iData = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi8Data));
-		alignas(32) std::int8_t i8Data[32];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(i8Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto i8Oper = *reinterpret_cast<const std::int8_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi8(i8Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi8(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi8(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-		{
-			const auto m256iEven = _mm256_mullo_epi16(m256iData, m256iOper);
-			const auto m256iOdd = _mm256_mullo_epi16(_mm256_srli_epi16(m256iData, 8), _mm256_srli_epi16(m256iOper, 8));
-			m256iResult = _mm256_or_si256(_mm256_slli_epi16(m256iOdd, 8), _mm256_srli_epi16(_mm256_slli_epi16(m256iEven, 8), 8));
-		}
-		break;
-		case OPER_DIV:
-			assert(i8Oper > 0);
-			m256iResult = _mm256_setr_epi8(i8Data[0] / i8Oper, i8Data[1] / i8Oper, i8Data[2] / i8Oper, i8Data[3] / i8Oper,
-				i8Data[4] / i8Oper, i8Data[5] / i8Oper, i8Data[6] / i8Oper, i8Data[7] / i8Oper, i8Data[8] / i8Oper,
-				i8Data[9] / i8Oper, i8Data[10] / i8Oper, i8Data[11] / i8Oper, i8Data[12] / i8Oper, i8Data[13] / i8Oper,
-				i8Data[14] / i8Oper, i8Data[15] / i8Oper, i8Data[16] / i8Oper, i8Data[17] / i8Oper, i8Data[18] / i8Oper,
-				i8Data[19] / i8Oper, i8Data[20] / i8Oper, i8Data[21] / i8Oper, i8Data[22] / i8Oper, i8Data[23] / i8Oper,
-				i8Data[24] / i8Oper, i8Data[25] / i8Oper, i8Data[26] / i8Oper, i8Data[27] / i8Oper, i8Data[28] / i8Oper,
-				i8Data[29] / i8Oper, i8Data[30] / i8Oper, i8Data[31] / i8Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epi8(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epi8(m256iData, m256iOper);
-			break;
-		case OPER_SWAP: //No need for the int8_t.
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_setr_epi8(i8Data[0] << i8Oper, i8Data[1] << i8Oper, i8Data[2] << i8Oper,
-				i8Data[3] << i8Oper, i8Data[4] << i8Oper, i8Data[5] << i8Oper, i8Data[6] << i8Oper,
-				i8Data[7] << i8Oper, i8Data[8] << i8Oper, i8Data[9] << i8Oper, i8Data[10] << i8Oper,
-				i8Data[11] << i8Oper, i8Data[12] << i8Oper, i8Data[13] << i8Oper, i8Data[14] << i8Oper,
-				i8Data[15] << i8Oper, i8Data[16] << i8Oper, i8Data[17] << i8Oper, i8Data[18] << i8Oper,
-				i8Data[19] << i8Oper, i8Data[20] << i8Oper, i8Data[21] << i8Oper, i8Data[22] << i8Oper,
-				i8Data[23] << i8Oper, i8Data[24] << i8Oper, i8Data[25] << i8Oper, i8Data[26] << i8Oper,
-				i8Data[27] << i8Oper, i8Data[28] << i8Oper, i8Data[29] << i8Oper, i8Data[30] << i8Oper,
-				i8Data[31] << i8Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_setr_epi8(i8Data[0] >> i8Oper, i8Data[1] >> i8Oper, i8Data[2] >> i8Oper,
-				i8Data[3] >> i8Oper, i8Data[4] >> i8Oper, i8Data[5] >> i8Oper, i8Data[6] >> i8Oper,
-				i8Data[7] >> i8Oper, i8Data[8] >> i8Oper, i8Data[9] >> i8Oper, i8Data[10] >> i8Oper,
-				i8Data[11] >> i8Oper, i8Data[12] >> i8Oper, i8Data[13] >> i8Oper, i8Data[14] >> i8Oper,
-				i8Data[15] >> i8Oper, i8Data[16] >> i8Oper, i8Data[17] >> i8Oper, i8Data[18] >> i8Oper,
-				i8Data[19] >> i8Oper, i8Data[20] >> i8Oper, i8Data[21] >> i8Oper, i8Data[22] >> i8Oper,
-				i8Data[23] >> i8Oper, i8Data[24] >> i8Oper, i8Data[25] >> i8Oper, i8Data[26] >> i8Oper,
-				i8Data[27] >> i8Oper, i8Data[28] >> i8Oper, i8Data[29] >> i8Oper, i8Data[30] >> i8Oper,
-				i8Data[31] >> i8Oper);
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi8(std::rotl(static_cast<std::uint8_t>(i8Data[0]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[1]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[2]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[3]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[4]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[5]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[6]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[7]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[8]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[9]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[10]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[11]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[12]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[13]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[14]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[15]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[16]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[17]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[18]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[19]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[20]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[21]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[22]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[23]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[24]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[25]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[26]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[27]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[28]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[29]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[30]), i8Oper),
-				std::rotl(static_cast<std::uint8_t>(i8Data[31]), i8Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi8(std::rotr(static_cast<std::uint8_t>(i8Data[0]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[1]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[2]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[3]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[4]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[5]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[6]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[7]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[8]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[9]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[10]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[11]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[12]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[13]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[14]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[15]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[16]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[17]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[18]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[19]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[20]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[21]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[22]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[23]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[24]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[25]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[26]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[27]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[28]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[29]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[30]), i8Oper),
-				std::rotr(static_cast<std::uint8_t>(i8Data[31]), i8Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi8(ut::BitReverse(i8Data[0]), ut::BitReverse(i8Data[1]), ut::BitReverse(i8Data[2]),
-				ut::BitReverse(i8Data[3]), ut::BitReverse(i8Data[4]), ut::BitReverse(i8Data[5]), ut::BitReverse(i8Data[6]),
-				ut::BitReverse(i8Data[7]), ut::BitReverse(i8Data[8]), ut::BitReverse(i8Data[9]), ut::BitReverse(i8Data[10]),
-				ut::BitReverse(i8Data[11]), ut::BitReverse(i8Data[12]), ut::BitReverse(i8Data[13]), ut::BitReverse(i8Data[14]),
-				ut::BitReverse(i8Data[15]), ut::BitReverse(i8Data[16]), ut::BitReverse(i8Data[17]), ut::BitReverse(i8Data[18]),
-				ut::BitReverse(i8Data[19]), ut::BitReverse(i8Data[20]), ut::BitReverse(i8Data[21]), ut::BitReverse(i8Data[22]),
-				ut::BitReverse(i8Data[23]), ut::BitReverse(i8Data[24]), ut::BitReverse(i8Data[25]), ut::BitReverse(i8Data[26]),
-				ut::BitReverse(i8Data[27]), ut::BitReverse(i8Data[28]), ut::BitReverse(i8Data[29]), ut::BitReverse(i8Data[30]),
-				ut::BitReverse(i8Data[31]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int8_t operation.");
-			break;
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pi8Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256UInt8 = [](std::uint8_t* pui8Data, const HEXMODIFY& hms) {
-		const auto m256iData = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui8Data));
-		alignas(32) std::uint8_t ui8Data[32];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(ui8Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto ui8Oper = *reinterpret_cast<const std::uint8_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi8(ui8Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi8(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi8(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_setr_epi8(ui8Data[0] * ui8Oper, ui8Data[1] * ui8Oper, ui8Data[2] * ui8Oper,
-				ui8Data[3] * ui8Oper, ui8Data[4] * ui8Oper, ui8Data[5] * ui8Oper, ui8Data[6] * ui8Oper,
-				ui8Data[7] * ui8Oper, ui8Data[8] * ui8Oper, ui8Data[9] * ui8Oper, ui8Data[10] * ui8Oper,
-				ui8Data[11] * ui8Oper, ui8Data[12] * ui8Oper, ui8Data[13] * ui8Oper, ui8Data[14] * ui8Oper,
-				ui8Data[15] * ui8Oper, ui8Data[16] * ui8Oper, ui8Data[17] * ui8Oper, ui8Data[18] * ui8Oper,
-				ui8Data[19] * ui8Oper, ui8Data[20] * ui8Oper, ui8Data[21] * ui8Oper, ui8Data[22] * ui8Oper,
-				ui8Data[23] * ui8Oper, ui8Data[24] * ui8Oper, ui8Data[25] * ui8Oper, ui8Data[26] * ui8Oper,
-				ui8Data[27] * ui8Oper, ui8Data[28] * ui8Oper, ui8Data[29] * ui8Oper, ui8Data[30] * ui8Oper,
-				ui8Data[31] * ui8Oper);
-			break;
-		case OPER_DIV:
-			assert(ui8Oper > 0);
-			m256iResult = _mm256_setr_epi8(ui8Data[0] / ui8Oper, ui8Data[1] / ui8Oper, ui8Data[2] / ui8Oper,
-				ui8Data[3] / ui8Oper, ui8Data[4] / ui8Oper, ui8Data[5] / ui8Oper, ui8Data[6] / ui8Oper,
-				ui8Data[7] / ui8Oper, ui8Data[8] / ui8Oper, ui8Data[9] / ui8Oper, ui8Data[10] / ui8Oper,
-				ui8Data[11] / ui8Oper, ui8Data[12] / ui8Oper, ui8Data[13] / ui8Oper, ui8Data[14] / ui8Oper,
-				ui8Data[15] / ui8Oper, ui8Data[16] / ui8Oper, ui8Data[17] / ui8Oper, ui8Data[18] / ui8Oper,
-				ui8Data[19] / ui8Oper, ui8Data[20] / ui8Oper, ui8Data[21] / ui8Oper, ui8Data[22] / ui8Oper,
-				ui8Data[23] / ui8Oper, ui8Data[24] / ui8Oper, ui8Data[25] / ui8Oper, ui8Data[26] / ui8Oper,
-				ui8Data[27] / ui8Oper, ui8Data[28] / ui8Oper, ui8Data[29] / ui8Oper, ui8Data[30] / ui8Oper,
-				ui8Data[31] / ui8Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epu8(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epu8(m256iData, m256iOper);
-			break;
-		case OPER_SWAP:	//No need for the uint8_t.
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_setr_epi8(ui8Data[0] << ui8Oper, ui8Data[1] << ui8Oper, ui8Data[2] << ui8Oper,
-				ui8Data[3] << ui8Oper, ui8Data[4] << ui8Oper, ui8Data[5] << ui8Oper, ui8Data[6] << ui8Oper,
-				ui8Data[7] << ui8Oper, ui8Data[8] << ui8Oper, ui8Data[9] << ui8Oper, ui8Data[10] << ui8Oper,
-				ui8Data[11] << ui8Oper, ui8Data[12] << ui8Oper, ui8Data[13] << ui8Oper, ui8Data[14] << ui8Oper,
-				ui8Data[15] << ui8Oper, ui8Data[16] << ui8Oper, ui8Data[17] << ui8Oper, ui8Data[18] << ui8Oper,
-				ui8Data[19] << ui8Oper, ui8Data[20] << ui8Oper, ui8Data[21] << ui8Oper, ui8Data[22] << ui8Oper,
-				ui8Data[23] << ui8Oper, ui8Data[24] << ui8Oper, ui8Data[25] << ui8Oper, ui8Data[26] << ui8Oper,
-				ui8Data[27] << ui8Oper, ui8Data[28] << ui8Oper, ui8Data[29] << ui8Oper, ui8Data[30] << ui8Oper,
-				ui8Data[31] << ui8Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_setr_epi8(ui8Data[0] >> ui8Oper, ui8Data[1] >> ui8Oper, ui8Data[2] >> ui8Oper,
-				ui8Data[3] >> ui8Oper, ui8Data[4] >> ui8Oper, ui8Data[5] >> ui8Oper, ui8Data[6] >> ui8Oper,
-				ui8Data[7] >> ui8Oper, ui8Data[8] >> ui8Oper, ui8Data[9] >> ui8Oper, ui8Data[10] >> ui8Oper,
-				ui8Data[11] >> ui8Oper, ui8Data[12] >> ui8Oper, ui8Data[13] >> ui8Oper, ui8Data[14] >> ui8Oper,
-				ui8Data[15] >> ui8Oper, ui8Data[16] >> ui8Oper, ui8Data[17] >> ui8Oper, ui8Data[18] >> ui8Oper,
-				ui8Data[19] >> ui8Oper, ui8Data[20] >> ui8Oper, ui8Data[21] >> ui8Oper, ui8Data[22] >> ui8Oper,
-				ui8Data[23] >> ui8Oper, ui8Data[24] >> ui8Oper, ui8Data[25] >> ui8Oper, ui8Data[26] >> ui8Oper,
-				ui8Data[27] >> ui8Oper, ui8Data[28] >> ui8Oper, ui8Data[29] >> ui8Oper, ui8Data[30] >> ui8Oper,
-				ui8Data[31] >> ui8Oper);
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi8(std::rotl(ui8Data[0], ui8Oper), std::rotl(ui8Data[1], ui8Oper),
-				std::rotl(ui8Data[2], ui8Oper), std::rotl(ui8Data[3], ui8Oper), std::rotl(ui8Data[4], ui8Oper),
-				std::rotl(ui8Data[5], ui8Oper), std::rotl(ui8Data[6], ui8Oper), std::rotl(ui8Data[7], ui8Oper),
-				std::rotl(ui8Data[8], ui8Oper), std::rotl(ui8Data[9], ui8Oper), std::rotl(ui8Data[10], ui8Oper),
-				std::rotl(ui8Data[11], ui8Oper), std::rotl(ui8Data[12], ui8Oper), std::rotl(ui8Data[13], ui8Oper),
-				std::rotl(ui8Data[14], ui8Oper), std::rotl(ui8Data[15], ui8Oper), std::rotl(ui8Data[16], ui8Oper),
-				std::rotl(ui8Data[17], ui8Oper), std::rotl(ui8Data[18], ui8Oper), std::rotl(ui8Data[19], ui8Oper),
-				std::rotl(ui8Data[20], ui8Oper), std::rotl(ui8Data[21], ui8Oper), std::rotl(ui8Data[22], ui8Oper),
-				std::rotl(ui8Data[23], ui8Oper), std::rotl(ui8Data[24], ui8Oper), std::rotl(ui8Data[25], ui8Oper),
-				std::rotl(ui8Data[26], ui8Oper), std::rotl(ui8Data[27], ui8Oper), std::rotl(ui8Data[28], ui8Oper),
-				std::rotl(ui8Data[29], ui8Oper), std::rotl(ui8Data[30], ui8Oper), std::rotl(ui8Data[31], ui8Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi8(std::rotr(ui8Data[0], ui8Oper), std::rotr(ui8Data[1], ui8Oper),
-				std::rotr(ui8Data[2], ui8Oper), std::rotr(ui8Data[3], ui8Oper), std::rotr(ui8Data[4], ui8Oper),
-				std::rotr(ui8Data[5], ui8Oper), std::rotr(ui8Data[6], ui8Oper), std::rotr(ui8Data[7], ui8Oper),
-				std::rotr(ui8Data[8], ui8Oper), std::rotr(ui8Data[9], ui8Oper), std::rotr(ui8Data[10], ui8Oper),
-				std::rotr(ui8Data[11], ui8Oper), std::rotr(ui8Data[12], ui8Oper), std::rotr(ui8Data[13], ui8Oper),
-				std::rotr(ui8Data[14], ui8Oper), std::rotr(ui8Data[15], ui8Oper), std::rotr(ui8Data[16], ui8Oper),
-				std::rotr(ui8Data[17], ui8Oper), std::rotr(ui8Data[18], ui8Oper), std::rotr(ui8Data[19], ui8Oper),
-				std::rotr(ui8Data[20], ui8Oper), std::rotr(ui8Data[21], ui8Oper), std::rotr(ui8Data[22], ui8Oper),
-				std::rotr(ui8Data[23], ui8Oper), std::rotr(ui8Data[24], ui8Oper), std::rotr(ui8Data[25], ui8Oper),
-				std::rotr(ui8Data[26], ui8Oper), std::rotr(ui8Data[27], ui8Oper), std::rotr(ui8Data[28], ui8Oper),
-				std::rotr(ui8Data[29], ui8Oper), std::rotr(ui8Data[30], ui8Oper), std::rotr(ui8Data[31], ui8Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi8(ut::BitReverse(ui8Data[0]), ut::BitReverse(ui8Data[1]), ut::BitReverse(ui8Data[2]),
-				ut::BitReverse(ui8Data[3]), ut::BitReverse(ui8Data[4]), ut::BitReverse(ui8Data[5]), ut::BitReverse(ui8Data[6]),
-				ut::BitReverse(ui8Data[7]), ut::BitReverse(ui8Data[8]), ut::BitReverse(ui8Data[9]), ut::BitReverse(ui8Data[10]),
-				ut::BitReverse(ui8Data[11]), ut::BitReverse(ui8Data[12]), ut::BitReverse(ui8Data[13]), ut::BitReverse(ui8Data[14]),
-				ut::BitReverse(ui8Data[15]), ut::BitReverse(ui8Data[16]), ut::BitReverse(ui8Data[17]), ut::BitReverse(ui8Data[18]),
-				ut::BitReverse(ui8Data[19]), ut::BitReverse(ui8Data[20]), ut::BitReverse(ui8Data[21]), ut::BitReverse(ui8Data[22]),
-				ut::BitReverse(ui8Data[23]), ut::BitReverse(ui8Data[24]), ut::BitReverse(ui8Data[25]), ut::BitReverse(ui8Data[26]),
-				ut::BitReverse(ui8Data[27]), ut::BitReverse(ui8Data[28]), ut::BitReverse(ui8Data[29]), ut::BitReverse(ui8Data[30]),
-				ut::BitReverse(ui8Data[31]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint8_t operation.");
-			break;
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pui8Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256Int16 = [](std::int16_t* pi16Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int16_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi16Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi16Data));
-		alignas(32) std::int16_t i16Data[16];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(i16Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto i16Oper = *reinterpret_cast<const std::int16_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi16(i16Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi16(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi16(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_mullo_epi16(m256iData, m256iOper);
-			break;
-		case OPER_DIV:
-			assert(i16Oper > 0);
-			m256iResult = _mm256_setr_epi16(i16Data[0] / i16Oper, i16Data[1] / i16Oper, i16Data[2] / i16Oper,
-				i16Data[3] / i16Oper, i16Data[4] / i16Oper, i16Data[5] / i16Oper, i16Data[6] / i16Oper,
-				i16Data[7] / i16Oper, i16Data[8] / i16Oper, i16Data[9] / i16Oper, i16Data[10] / i16Oper,
-				i16Data[11] / i16Oper, i16Data[12] / i16Oper, i16Data[13] / i16Oper, i16Data[14] / i16Oper,
-				i16Data[15] / i16Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epi16(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epi16(m256iData, m256iOper);
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::int16_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi16(m256iData, i16Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_srai_epi16(m256iData, i16Oper); //Arithmetic shift.
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi16(std::rotl(static_cast<std::uint16_t>(i16Data[0]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[1]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[2]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[3]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[4]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[5]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[6]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[7]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[8]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[9]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[10]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[11]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[12]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[13]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[14]), i16Oper),
-				std::rotl(static_cast<std::uint16_t>(i16Data[15]), i16Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi16(std::rotr(static_cast<std::uint16_t>(i16Data[0]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[1]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[2]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[3]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[4]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[5]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[6]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[7]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[8]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[9]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[10]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[11]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[12]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[13]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[14]), i16Oper),
-				std::rotr(static_cast<std::uint16_t>(i16Data[15]), i16Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi16(ut::BitReverse(i16Data[0]), ut::BitReverse(i16Data[1]), ut::BitReverse(i16Data[2]),
-				ut::BitReverse(i16Data[3]), ut::BitReverse(i16Data[4]), ut::BitReverse(i16Data[5]), ut::BitReverse(i16Data[6]),
-				ut::BitReverse(i16Data[7]), ut::BitReverse(i16Data[8]), ut::BitReverse(i16Data[9]), ut::BitReverse(i16Data[10]),
-				ut::BitReverse(i16Data[11]), ut::BitReverse(i16Data[12]), ut::BitReverse(i16Data[13]), ut::BitReverse(i16Data[14]),
-				ut::BitReverse(i16Data[15]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int16_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::int16_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pi16Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256UInt16 = [](std::uint16_t* pui16Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint16_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui16Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui16Data));
-		alignas(32) std::uint16_t ui16Data[16];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(ui16Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto ui16Oper = *reinterpret_cast<const std::uint16_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi16(ui16Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi16(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi16(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_setr_epi16(ui16Data[0] * ui16Oper, ui16Data[1] * ui16Oper, ui16Data[2] * ui16Oper,
-				ui16Data[3] * ui16Oper, ui16Data[4] * ui16Oper, ui16Data[5] * ui16Oper, ui16Data[6] * ui16Oper,
-				ui16Data[7] * ui16Oper, ui16Data[8] * ui16Oper, ui16Data[9] * ui16Oper, ui16Data[10] * ui16Oper,
-				ui16Data[11] * ui16Oper, ui16Data[12] * ui16Oper, ui16Data[13] * ui16Oper, ui16Data[14] * ui16Oper,
-				ui16Data[15] * ui16Oper);
-			break;
-		case OPER_DIV:
-			assert(ui16Oper > 0);
-			m256iResult = _mm256_setr_epi16(ui16Data[0] / ui16Oper, ui16Data[1] / ui16Oper, ui16Data[2] / ui16Oper,
-				ui16Data[3] / ui16Oper, ui16Data[4] / ui16Oper, ui16Data[5] / ui16Oper, ui16Data[6] / ui16Oper,
-				ui16Data[7] / ui16Oper, ui16Data[8] / ui16Oper, ui16Data[9] / ui16Oper, ui16Data[10] / ui16Oper,
-				ui16Data[11] / ui16Oper, ui16Data[12] / ui16Oper, ui16Data[13] / ui16Oper, ui16Data[14] / ui16Oper,
-				ui16Data[15] / ui16Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epu16(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epu16(m256iData, m256iOper);
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::uint16_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi16(m256iData, ui16Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_srli_epi16(m256iData, ui16Oper); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi16(std::rotl(ui16Data[0], ui16Oper), std::rotl(ui16Data[1], ui16Oper),
-				std::rotl(ui16Data[2], ui16Oper), std::rotl(ui16Data[3], ui16Oper), std::rotl(ui16Data[4], ui16Oper),
-				std::rotl(ui16Data[5], ui16Oper), std::rotl(ui16Data[6], ui16Oper), std::rotl(ui16Data[7], ui16Oper),
-				std::rotl(ui16Data[8], ui16Oper), std::rotl(ui16Data[9], ui16Oper), std::rotl(ui16Data[10], ui16Oper),
-				std::rotl(ui16Data[11], ui16Oper), std::rotl(ui16Data[12], ui16Oper), std::rotl(ui16Data[13], ui16Oper),
-				std::rotl(ui16Data[14], ui16Oper), std::rotl(ui16Data[15], ui16Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi16(std::rotr(ui16Data[0], ui16Oper), std::rotr(ui16Data[1], ui16Oper),
-				std::rotr(ui16Data[2], ui16Oper), std::rotr(ui16Data[3], ui16Oper), std::rotr(ui16Data[4], ui16Oper),
-				std::rotr(ui16Data[5], ui16Oper), std::rotr(ui16Data[6], ui16Oper), std::rotr(ui16Data[7], ui16Oper),
-				std::rotr(ui16Data[8], ui16Oper), std::rotr(ui16Data[9], ui16Oper), std::rotr(ui16Data[10], ui16Oper),
-				std::rotr(ui16Data[11], ui16Oper), std::rotr(ui16Data[12], ui16Oper), std::rotr(ui16Data[13], ui16Oper),
-				std::rotr(ui16Data[14], ui16Oper), std::rotr(ui16Data[15], ui16Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi16(ut::BitReverse(ui16Data[0]), ut::BitReverse(ui16Data[1]), ut::BitReverse(ui16Data[2]),
-				ut::BitReverse(ui16Data[3]), ut::BitReverse(ui16Data[4]), ut::BitReverse(ui16Data[5]), ut::BitReverse(ui16Data[6]),
-				ut::BitReverse(ui16Data[7]), ut::BitReverse(ui16Data[8]), ut::BitReverse(ui16Data[9]), ut::BitReverse(ui16Data[10]),
-				ut::BitReverse(ui16Data[11]), ut::BitReverse(ui16Data[12]), ut::BitReverse(ui16Data[13]), ut::BitReverse(ui16Data[14]),
-				ut::BitReverse(ui16Data[15]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint16_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::uint16_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pui16Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256Int32 = [](std::int32_t* pi32Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int32_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi32Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi32Data));
-		alignas(32) std::int32_t i32Data[8];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(i32Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto i32Oper = *reinterpret_cast<const std::int32_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi32(i32Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi32(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi32(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_mullo_epi32(m256iData, m256iOper);
-			break;
-		case OPER_DIV:
-			assert(i32Oper > 0);
-			m256iResult = _mm256_setr_epi32(i32Data[0] / i32Oper, i32Data[1] / i32Oper, i32Data[2] / i32Oper,
-				i32Data[3] / i32Oper, i32Data[4] / i32Oper, i32Data[5] / i32Oper, i32Data[6] / i32Oper,
-				i32Data[7] / i32Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epi32(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epi32(m256iData, m256iOper);
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::int32_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi32(m256iData, i32Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_srai_epi32(m256iData, i32Oper); //Arithmetic shift.
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi32(std::rotl(static_cast<std::uint32_t>(i32Data[0]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[1]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[2]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[3]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[4]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[5]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[6]), i32Oper),
-				std::rotl(static_cast<std::uint32_t>(i32Data[7]), i32Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi32(std::rotr(static_cast<std::uint32_t>(i32Data[0]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[1]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[2]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[3]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[4]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[5]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[6]), i32Oper),
-				std::rotr(static_cast<std::uint32_t>(i32Data[7]), i32Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi32(ut::BitReverse(i32Data[0]), ut::BitReverse(i32Data[1]), ut::BitReverse(i32Data[2]),
-				ut::BitReverse(i32Data[3]), ut::BitReverse(i32Data[4]), ut::BitReverse(i32Data[5]), ut::BitReverse(i32Data[6]),
-				ut::BitReverse(i32Data[7]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int32_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::int32_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pi32Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256UInt32 = [](std::uint32_t* pui32Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint32_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui32Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui32Data));
-		alignas(32) std::uint32_t ui32Data[8];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(ui32Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto ui32Oper = *reinterpret_cast<const std::uint32_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi32(ui32Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi32(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi32(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_setr_epi32(ui32Data[0] * ui32Oper, ui32Data[1] * ui32Oper, ui32Data[2] * ui32Oper,
-				ui32Data[3] * ui32Oper, ui32Data[4] * ui32Oper, ui32Data[5] * ui32Oper, ui32Data[6] * ui32Oper,
-				ui32Data[7] * ui32Oper);
-			break;
-		case OPER_DIV:
-			assert(ui32Oper > 0);
-			m256iResult = _mm256_setr_epi32(ui32Data[0] / ui32Oper, ui32Data[1] / ui32Oper, ui32Data[2] / ui32Oper,
-				ui32Data[3] / ui32Oper, ui32Data[4] / ui32Oper, ui32Data[5] / ui32Oper, ui32Data[6] / ui32Oper,
-				ui32Data[7] / ui32Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_max_epu32(m256iData, m256iOper);
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_min_epu32(m256iData, m256iOper);
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::uint32_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi32(m256iData, ui32Oper);
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_srli_epi32(m256iData, ui32Oper); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi32(std::rotl(ui32Data[0], ui32Oper), std::rotl(ui32Data[1], ui32Oper),
-				std::rotl(ui32Data[2], ui32Oper), std::rotl(ui32Data[3], ui32Oper), std::rotl(ui32Data[4], ui32Oper),
-				std::rotl(ui32Data[5], ui32Oper), std::rotl(ui32Data[6], ui32Oper), std::rotl(ui32Data[7], ui32Oper));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi32(std::rotr(ui32Data[0], ui32Oper), std::rotr(ui32Data[1], ui32Oper),
-				std::rotr(ui32Data[2], ui32Oper), std::rotr(ui32Data[3], ui32Oper), std::rotr(ui32Data[4], ui32Oper),
-				std::rotr(ui32Data[5], ui32Oper), std::rotr(ui32Data[6], ui32Oper), std::rotr(ui32Data[7], ui32Oper));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi32(ut::BitReverse(ui32Data[0]), ut::BitReverse(ui32Data[1]), ut::BitReverse(ui32Data[2]),
-				ut::BitReverse(ui32Data[3]), ut::BitReverse(ui32Data[4]), ut::BitReverse(ui32Data[5]), ut::BitReverse(ui32Data[6]),
-				ut::BitReverse(ui32Data[7]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint32_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::uint32_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pui32Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256Int64 = [](std::int64_t* pi64Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::int64_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi64Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pi64Data));
-		alignas(32) std::int64_t i64Data[4];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(i64Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto i64Oper = *reinterpret_cast<const std::int64_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi64x(i64Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi64(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi64(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_setr_epi64x(i64Data[0] * i64Oper, i64Data[1] * i64Oper, i64Data[2] * i64Oper,
-				i64Data[3] * i64Oper);
-			break;
-		case OPER_DIV:
-			assert(i64Oper > 0);
-			m256iResult = _mm256_setr_epi64x(i64Data[0] / i64Oper, i64Data[1] / i64Oper, i64Data[2] / i64Oper,
-				i64Data[3] / i64Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_setr_epi64x((std::max)(i64Data[0], i64Oper), (std::max)(i64Data[1], i64Oper),
-				(std::max)(i64Data[2], i64Oper), (std::max)(i64Data[3], i64Oper));
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_setr_epi64x((std::min)(i64Data[0], i64Oper), (std::min)(i64Data[1], i64Oper),
-				(std::min)(i64Data[2], i64Oper), (std::min)(i64Data[3], i64Oper));
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::int64_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi64(m256iData, static_cast<int>(i64Oper));
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_setr_epi64x(i64Data[0] >> i64Oper, i64Data[1] >> i64Oper, i64Data[2] >> i64Oper,
-				i64Data[3] >> i64Oper);
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi64x(std::rotl(static_cast<std::uint64_t>(i64Data[0]), static_cast<const int>(i64Oper)),
-					std::rotl(static_cast<std::uint64_t>(i64Data[1]), static_cast<const int>(i64Oper)),
-					std::rotl(static_cast<std::uint64_t>(i64Data[2]), static_cast<const int>(i64Oper)),
-					std::rotl(static_cast<std::uint64_t>(i64Data[3]), static_cast<const int>(i64Oper)));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi64x(std::rotr(static_cast<std::uint64_t>(i64Data[0]), static_cast<const int>(i64Oper)),
-				std::rotr(static_cast<std::uint64_t>(i64Data[1]), static_cast<const int>(i64Oper)),
-				std::rotr(static_cast<std::uint64_t>(i64Data[2]), static_cast<const int>(i64Oper)),
-				std::rotr(static_cast<std::uint64_t>(i64Data[3]), static_cast<const int>(i64Oper)));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi64x(ut::BitReverse(i64Data[0]), ut::BitReverse(i64Data[1]), ut::BitReverse(i64Data[2]),
-				ut::BitReverse(i64Data[3]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported int64_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::int64_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pi64Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256UInt64 = [](std::uint64_t* pui64Data, const HEXMODIFY& hms) {
-		const auto m256iData = hms.fBigEndian ?
-			ut::ByteSwapVec<std::uint64_t>(_mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui64Data)))
-			: _mm256_loadu_si256(reinterpret_cast<const __m256i*>(pui64Data));
-		alignas(32) std::uint64_t ui64Data[4];
-		_mm256_store_si256(reinterpret_cast<__m256i*>(ui64Data), m256iData);
-		assert(!hms.spnData.empty());
-		const auto ui64Oper = *reinterpret_cast<const std::uint64_t*>(hms.spnData.data());
-		const auto m256iOper = _mm256_set1_epi64x(ui64Oper);
-		__m256i m256iResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256iResult = _mm256_add_epi64(m256iData, m256iOper);
-			break;
-		case OPER_SUB:
-			m256iResult = _mm256_sub_epi64(m256iData, m256iOper);
-			break;
-		case OPER_MUL:
-			m256iResult = _mm256_setr_epi64x(ui64Data[0] * ui64Oper, ui64Data[1] * ui64Oper, ui64Data[2] * ui64Oper,
-				ui64Data[3] * ui64Oper);
-			break;
-		case OPER_DIV:
-			assert(ui64Oper > 0);
-			m256iResult = _mm256_setr_epi64x(ui64Data[0] / ui64Oper, ui64Data[1] / ui64Oper, ui64Data[2] / ui64Oper,
-				ui64Data[3] / ui64Oper);
-			break;
-		case OPER_MIN:
-			m256iResult = _mm256_setr_epi64x((std::max)(ui64Data[0], ui64Oper), (std::max)(ui64Data[1], ui64Oper),
-				(std::max)(ui64Data[2], ui64Oper), (std::max)(ui64Data[3], ui64Oper));
-			break;
-		case OPER_MAX:
-			m256iResult = _mm256_setr_epi64x((std::min)(ui64Data[0], ui64Oper), (std::min)(ui64Data[1], ui64Oper),
-				 (std::min)(ui64Data[2], ui64Oper), (std::min)(ui64Data[3], ui64Oper));
-			break;
-		case OPER_SWAP:
-			m256iResult = ut::ByteSwapVec<std::uint64_t>(m256iData);
-			break;
-		case OPER_OR:
-			m256iResult = _mm256_or_si256(m256iData, m256iOper);
-			break;
-		case OPER_XOR:
-			m256iResult = _mm256_xor_si256(m256iData, m256iOper);
-			break;
-		case OPER_AND:
-			m256iResult = _mm256_and_si256(m256iData, m256iOper);
-			break;
-		case OPER_NOT:
-			//_mm256_cmpeq_epi64(a,a) will result in all 1s, then XOR to reverse bits.
-			m256iResult = _mm256_xor_si256(m256iData, _mm256_cmpeq_epi64(m256iData, m256iData));
-			break;
-		case OPER_SHL:
-			m256iResult = _mm256_slli_epi64(m256iData, static_cast<int>(ui64Oper));
-			break;
-		case OPER_SHR:
-			m256iResult = _mm256_srli_epi64(m256iData, static_cast<int>(ui64Oper)); //Logical shift.
-			break;
-		case OPER_ROTL:
-			m256iResult = _mm256_setr_epi64x(std::rotl(ui64Data[0], static_cast<const int>(ui64Oper)),
-				std::rotl(ui64Data[1], static_cast<const int>(ui64Oper)),
-				std::rotl(ui64Data[2], static_cast<const int>(ui64Oper)),
-				std::rotl(ui64Data[3], static_cast<const int>(ui64Oper)));
-			break;
-		case OPER_ROTR:
-			m256iResult = _mm256_setr_epi64x(std::rotr(ui64Data[0], static_cast<const int>(ui64Oper)),
-				std::rotr(ui64Data[1], static_cast<const int>(ui64Oper)),
-				std::rotr(ui64Data[2], static_cast<const int>(ui64Oper)),
-				std::rotr(ui64Data[3], static_cast<const int>(ui64Oper)));
-			break;
-		case OPER_BITREV:
-			m256iResult = _mm256_setr_epi64x(ut::BitReverse(ui64Data[0]), ut::BitReverse(ui64Data[1]), ut::BitReverse(ui64Data[2]),
-				ut::BitReverse(ui64Data[3]));
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported uint64_t operation.");
-			break;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256iResult = ut::ByteSwapVec<std::uint64_t>(m256iResult);
-		}
-
-		_mm256_storeu_si256(reinterpret_cast<__m256i*>(pui64Data), m256iResult);
-		};
-
-	constexpr auto lmbOperVec256Float = [](float* pflData, const HEXMODIFY& hms) {
-		const auto m256Data = hms.fBigEndian ? ut::ByteSwapVec<float>(_mm256_loadu_ps(pflData)) : _mm256_loadu_ps(pflData);
-		const auto m256Oper = _mm256_set1_ps(*reinterpret_cast<const float*>(hms.spnData.data()));
-		__m256 m256Result { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256Result = _mm256_add_ps(m256Data, m256Oper);
-			break;
-		case OPER_SUB:
-			m256Result = _mm256_sub_ps(m256Data, m256Oper);
-			break;
-		case OPER_MUL:
-			m256Result = _mm256_mul_ps(m256Data, m256Oper);
-			break;
-		case OPER_DIV:
-			assert(*reinterpret_cast<const float*>(hms.spnData.data()) > 0.F);
-			m256Result = _mm256_div_ps(m256Data, m256Oper);
-			break;
-		case OPER_MIN:
-			m256Result = _mm256_max_ps(m256Data, m256Oper);
-			break;
-		case OPER_MAX:
-			m256Result = _mm256_min_ps(m256Data, m256Oper);
-			break;
-		case OPER_SWAP:
-			m256Result = ut::ByteSwapVec<float>(m256Data);
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported float operation.");
-			return;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256Result = ut::ByteSwapVec<float>(m256Result);
-		}
-
-		_mm256_storeu_ps(pflData, m256Result);
-		};
-
-	constexpr auto lmbOperVec256Double = [](double* pdblData, const HEXMODIFY& hms) {
-		const auto m256dData = hms.fBigEndian ? ut::ByteSwapVec<double>(_mm256_loadu_pd(pdblData)) : _mm256_loadu_pd(pdblData);
-		const auto m256dOper = _mm256_set1_pd(*reinterpret_cast<const double*>(hms.spnData.data()));
-		__m256d m256dResult { };
-
-		switch (hms.eOperMode) {
-		case OPER_ASSIGN: //Implemented as MODIFY_REPEAT.
-			break;
-		case OPER_ADD:
-			m256dResult = _mm256_add_pd(m256dData, m256dOper);
-			break;
-		case OPER_SUB:
-			m256dResult = _mm256_sub_pd(m256dData, m256dOper);
-			break;
-		case OPER_MUL:
-			m256dResult = _mm256_mul_pd(m256dData, m256dOper);
-			break;
-		case OPER_DIV:
-			assert(*reinterpret_cast<const double*>(hms.spnData.data()) > 0.);
-			m256dResult = _mm256_div_pd(m256dData, m256dOper);
-			break;
-		case OPER_MIN:
-			m256dResult = _mm256_max_pd(m256dData, m256dOper);
-			break;
-		case OPER_MAX:
-			m256dResult = _mm256_min_pd(m256dData, m256dOper);
-			break;
-		case OPER_SWAP:
-			m256dResult = ut::ByteSwapVec<double>(m256dData);
-			break;
-		default:
-			ut::DBG_REPORT(L"Unsupported double operation.");
-			return;
-		}
-
-		if (hms.fBigEndian) { //Swap bytes back.
-			m256dResult = ut::ByteSwapVec<double>(m256dResult);
-		}
-
-		_mm256_storeu_pd(pdblData, m256dResult);
-		};
-
-	switch (hms.eDataType) {
-	case DATA_INT8:
-		lmbOperVec256Int8(reinterpret_cast<std::int8_t*>(pData), hms);
-		break;
-	case DATA_UINT8:
-		lmbOperVec256UInt8(reinterpret_cast<std::uint8_t*>(pData), hms);
-		break;
-	case DATA_INT16:
-		lmbOperVec256Int16(reinterpret_cast<std::int16_t*>(pData), hms);
-		break;
-	case DATA_UINT16:
-		lmbOperVec256UInt16(reinterpret_cast<std::uint16_t*>(pData), hms);
-		break;
-	case DATA_INT32:
-		lmbOperVec256Int32(reinterpret_cast<std::int32_t*>(pData), hms);
-		break;
-	case DATA_UINT32:
-		lmbOperVec256UInt32(reinterpret_cast<std::uint32_t*>(pData), hms);
-		break;
-	case DATA_INT64:
-		lmbOperVec256Int64(reinterpret_cast<std::int64_t*>(pData), hms);
-		break;
-	case DATA_UINT64:
-		lmbOperVec256UInt64(reinterpret_cast<std::uint64_t*>(pData), hms);
-		break;
-	case DATA_FLOAT:
-		lmbOperVec256Float(reinterpret_cast<float*>(pData), hms);
-		break;
-	case DATA_DOUBLE:
-		lmbOperVec256Double(reinterpret_cast<double*>(pData), hms);
-		break;
-	default:
-		break;
-	}
-}
-#endif //^^^ _M_IX86 || _M_X64
 
 auto CHexCtrl::SubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 	UINT_PTR uIDSubclass, [[maybe_unused]] DWORD_PTR dwRefData) -> LRESULT {

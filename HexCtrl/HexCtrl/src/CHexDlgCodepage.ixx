@@ -23,7 +23,7 @@ namespace HEXCTRL::INTERNAL {
 		void CreateDlg()const;
 		void DestroyDlg();
 		[[nodiscard]] auto GetHWND()const -> HWND;
-		void Initialize(IHexCtrl* pHexCtrl, HINSTANCE hInstRes);
+		void Initialize(IHexCtrl &HexCtrl, HINSTANCE hInstRes);
 		[[nodiscard]] bool PreTranslateMsg(MSG* pMsg);
 		[[nodiscard]] auto ProcessMsg(const MSG& msg) -> INT_PTR;
 		void SetDlgProperties(std::uint64_t u64Flags);
@@ -101,14 +101,9 @@ auto CHexDlgCodepage::GetHWND()const->HWND
 	return m_Wnd;
 }
 
-void CHexDlgCodepage::Initialize(IHexCtrl* pHexCtrl, HINSTANCE hInstRes)
+void CHexDlgCodepage::Initialize(IHexCtrl &HexCtrl, HINSTANCE hInstRes)
 {
-	if (pHexCtrl == nullptr || hInstRes == nullptr) {
-		ut::DBG_REPORT(L"Initialize == nullptr");
-		return;
-	}
-
-	m_pHexCtrl = pHexCtrl;
+	m_pHexCtrl = &HexCtrl;
 	m_hInstRes = hInstRes;
 }
 
@@ -272,12 +267,7 @@ auto CHexDlgCodepage::OnMeasureItem(const MSG& msg)->INT_PTR
 	return TRUE;
 }
 
-auto CHexDlgCodepage::OnMouseActivate([[maybe_unused]] const MSG& msg)->INT_PTR
-{
-	if (const auto pHex = GetHexCtrl(); pHex != nullptr && pHex->IsCreated() && pHex->IsDataSet()) {
-		UpdateListSelection();
-	}
-
+auto CHexDlgCodepage::OnMouseActivate([[maybe_unused]] const MSG& msg)->INT_PTR {
 	return MA_ACTIVATE;
 }
 

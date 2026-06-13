@@ -10,7 +10,7 @@ module;
 #include "res/HexCtrlRes.h"
 #include <Windows.h>
 #include <commctrl.h>
-#include <string_view>
+#include <string>
 #include <unordered_map>
 export module HEXCTRL:CHexDlgModify;
 
@@ -165,8 +165,8 @@ bool CHexDlgOpers::FillVecOper(bool fCheckBE)
 	}
 
 	//Some operations don't need to swap the whole data in big-endian mode.
-	//Instead, the operand itself can be swapped. Binary OR/XOR/AND are good examples.
-	//Binary NOT and OPER_BITREV don't need to swap at all.
+	//Instead, the operand itself can be swapped preemptively for such operations.
+	//Bitwise OR/XOR/AND are good examples. Bitwise NOT and OPER_BITREV don't need to swap at all.
 	if (fCheckBE && (eOperMode == OPER_OR || eOperMode == OPER_XOR
 		|| eOperMode == OPER_AND || eOperMode == OPER_ASSIGN)) {
 		tOper = ut::ByteSwap(tOper);
@@ -249,9 +249,9 @@ void CHexDlgOpers::OnComboOperSelChange()
 	if (fShouldHaveFloats != fHasFloats) {
 		m_WndCmbType.SetRedraw(false);
 		if (fShouldHaveFloats) {
-			auto iIndex = m_WndCmbType.AddString(L"Float");
+			auto iIndex = m_WndCmbType.AddString(L"float");
 			m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_FLOAT));
-			iIndex = m_WndCmbType.AddString(L"Double");
+			iIndex = m_WndCmbType.AddString(L"double");
 			m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_DOUBLE));
 		}
 		else {
@@ -347,24 +347,25 @@ auto CHexDlgOpers::OnInitDialog(const MSG& msg)->INT_PTR
 	m_WndCmbOper.SetItemData(iIndex, static_cast<DWORD_PTR>(OPER_BITREV));
 
 	using enum EHexDataType;
-	iIndex = m_WndCmbType.AddString(L"Int8");
+	iIndex = m_WndCmbType.AddString(L"int8");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_INT8));
 	m_WndCmbType.SetCurSel(iIndex);
-	iIndex = m_WndCmbType.AddString(L"Unsigned Int8");
+	iIndex = m_WndCmbType.AddString(L"uint8");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_UINT8));
-	iIndex = m_WndCmbType.AddString(L"Int16");
+	iIndex = m_WndCmbType.AddString(L"int16");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_INT16));
-	iIndex = m_WndCmbType.AddString(L"Unsigned Int16");
+	iIndex = m_WndCmbType.AddString(L"uint16");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_UINT16));
-	iIndex = m_WndCmbType.AddString(L"Int32");
+	iIndex = m_WndCmbType.AddString(L"int32");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_INT32));
-	iIndex = m_WndCmbType.AddString(L"Unsigned Int32");
+	iIndex = m_WndCmbType.AddString(L"uint32");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_UINT32));
-	iIndex = m_WndCmbType.AddString(L"Int64");
+	iIndex = m_WndCmbType.AddString(L"int64");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_INT64));
-	iIndex = m_WndCmbType.AddString(L"Unsigned Int64");
+	iIndex = m_WndCmbType.AddString(L"uint64");
 	m_WndCmbType.SetItemData(iIndex, static_cast<DWORD_PTR>(DATA_UINT64));
 
+	m_WndEditOperand.SetLimitText(19); //19 is the maximum amount of decimals in uint64_t.
 	m_Wnd.CheckRadioButton(IDC_HEXCTRL_OPERS_RAD_ALL, IDC_HEXCTRL_OPERS_RAD_SEL, IDC_HEXCTRL_OPERS_RAD_ALL);
 	OnComboOperSelChange();
 	UpdateRadioButtons();
@@ -426,7 +427,7 @@ void CHexDlgOpers::OnOK()
 	if (!fFillOk)
 		return;
 
-	VecSpan vecSpan;
+	VecHexSpan vecSpan;
 	const auto iRadioAllOrSel = m_Wnd.GetCheckedRadioButton(IDC_HEXCTRL_OPERS_RAD_ALL, IDC_HEXCTRL_OPERS_RAD_SEL);
 	if (iRadioAllOrSel == IDC_HEXCTRL_OPERS_RAD_ALL) {
 		if (::MessageBoxW(m_Wnd, L"You are about to modify the entire data region.\r\nAre you sure?",
@@ -482,43 +483,44 @@ void CHexDlgOpers::UpdateDescription()
 {
 	using enum EHexOperMode;
 	using enum EHexDataType;
-	std::wstring_view wsvDescr;
+	const auto wstrOper = m_WndEditOperand.IsWndTextEmpty() ? L"operand" : m_WndEditOperand.GetWndText();
+	std::wstring wstrDescr;
 	switch (GetOperMode()) {
 	case OPER_ASSIGN:
-		wsvDescr = L"Data = Operand";
+		wstrDescr = L"Assignation:\r\nx = " + wstrOper;
 		break;
 	case OPER_ADD:
-		wsvDescr = L"Data += Operand";
+		wstrDescr = L"Addition:\r\nx += " + wstrOper;
 		break;
 	case OPER_SUB:
-		wsvDescr = L"Data -= Operand";
+		wstrDescr = L"Subtraction:\r\nx -= " + wstrOper;
 		break;
 	case OPER_MUL:
-		wsvDescr = L"Data *= Operand";
+		wstrDescr = L"Multiplication:\r\nx *= " + wstrOper;
 		break;
 	case OPER_DIV:
-		wsvDescr = L"Data /= Operand";
+		wstrDescr = L"Division:\r\nx /=  " + wstrOper;
 		break;
 	case OPER_MIN:
-		wsvDescr = L"Data = max(Data, Operand)";
+		wstrDescr = L"Minimum acceptable:\r\nx = max(x, " + wstrOper + L")";
 		break;
 	case OPER_MAX:
-		wsvDescr = L"Data = min(Data, Operand)";
+		wstrDescr = L"Maximum acceptable:\r\nx = min(x, " + wstrOper + L")";
 		break;
 	case OPER_OR:
-		wsvDescr = L"Data |= Operand";
+		wstrDescr = L"Bitwise OR:\r\nx |= " + wstrOper;
 		break;
 	case OPER_XOR:
-		wsvDescr = L"Data ^= Operand";
+		wstrDescr = L"Bitwise XOR:\r\nx ^= " + wstrOper;
 		break;
 	case OPER_AND:
-		wsvDescr = L"Data &&= Operand";
+		wstrDescr = L"Bitwise AND:\r\nx &= " + wstrOper;
 		break;
 	case OPER_NOT:
-		wsvDescr = L"Data = ~Data";
+		wstrDescr = L"Bitwise NOT:\r\nx = ~x";
 		break;
 	case OPER_SHL:
-		wsvDescr = L"Data <<= Operand\r\n(Logical Left Shift)";
+		wstrDescr = L"Bitwise logical left shift:\r\nx <<= " + wstrOper;
 		break;
 	case OPER_SHR:
 		switch (GetDataType()) {
@@ -526,42 +528,43 @@ void CHexDlgOpers::UpdateDescription()
 		case DATA_INT16:
 		case DATA_INT32:
 		case DATA_INT64:
-			wsvDescr = L"Data >>= Operand\r\n(Arithmetical Right Shift)";
+			wstrDescr = L"Bitwise arithmetical right shift:\r\nx >>= " + wstrOper;
 			break;
 		case DATA_UINT8:
 		case DATA_UINT16:
 		case DATA_UINT32:
 		case DATA_UINT64:
-			wsvDescr = L"Data >>= Operand\r\n(Logical Right Shift)";
+			wstrDescr = L"Bitwise logical right shift:\r\nx >>= " + wstrOper;
 			break;
 		default:
 			break;
 		};
 		break;
 	case OPER_ROTL:
-		wsvDescr = L"Data = std::rotl(Data, Operand)";
+		wstrDescr = L"Bitwise rotate left:\r\nx = rotl(x, " + wstrOper + L")";
 		break;
 	case OPER_ROTR:
-		wsvDescr = L"Data = std::rotr(Data, Operand)";
+		wstrDescr = L"Bitwise rotate right:\r\nx = rotr(x, " + wstrOper + L")";
 		break;
 	case OPER_SWAP:
 		switch (GetDataType()) {
 		case DATA_INT8:
 		case DATA_UINT8:
+			wstrDescr = L"Not used for 1-byte data types.";
 			break;
 		default:
-			wsvDescr = L"Data = SwapBytes(Data)\r\n(Change Endianness)";
+			wstrDescr = L"Change endianness:\r\nx = byteswap(x)";
 			break;
 		};
 		break;
 	case OPER_BITREV:
-		wsvDescr = L"11000001 -> 10000011";
+		wstrDescr = L"Reverse bits order:\r\n11000001 -> 10000011";
 		break;
 	default:
 		break;
 	};
 
-	m_WndStatDescr.SetWndText(wsvDescr.data());
+	m_WndStatDescr.SetWndText(wstrDescr);
 }
 
 void CHexDlgOpers::UpdateRadioButtons()
@@ -796,7 +799,7 @@ void CHexDlgFillData::OnOK()
 		}
 	}
 
-	VecSpan vecSpan;
+	VecHexSpan vecSpan;
 	const auto iRadioAllOrSel = m_Wnd.GetCheckedRadioButton(IDC_HEXCTRL_FILLDATA_RAD_ALL, IDC_HEXCTRL_FILLDATA_RAD_SEL);
 	if (iRadioAllOrSel == IDC_HEXCTRL_FILLDATA_RAD_ALL) {
 		if (::MessageBoxW(m_Wnd, L"You are about to modify the entire data region.\r\nAre you sure?", L"Modify all data?",
@@ -891,7 +894,7 @@ namespace HEXCTRL::INTERNAL {
 		void DestroyDlg();
 		[[nodiscard]] auto GetDlgItemHandle(EHexDlgItem eItem)const -> HWND;
 		[[nodiscard]] auto GetHWND()const -> HWND;
-		void Initialize(IHexCtrl* pHexCtrl, HINSTANCE hInstRes);
+		void Initialize(IHexCtrl &HexCtrl, HINSTANCE hInstRes);
 		[[nodiscard]] bool PreTranslateMsg(MSG* pMsg);
 		[[nodiscard]] auto ProcessMsg(const MSG& msg) -> INT_PTR;
 		void SetDlgProperties(std::uint64_t u64Flags);
@@ -956,14 +959,9 @@ auto CHexDlgModify::GetHWND()const->HWND
 	return m_Wnd;
 }
 
-void CHexDlgModify::Initialize(IHexCtrl* pHexCtrl, HINSTANCE hInstRes)
+void CHexDlgModify::Initialize(IHexCtrl &HexCtrl, HINSTANCE hInstRes)
 {
-	if (pHexCtrl == nullptr || hInstRes == nullptr) {
-		ut::DBG_REPORT(L"Initialize == nullptr");
-		return;
-	}
-
-	m_pHexCtrl = pHexCtrl;
+	m_pHexCtrl = &HexCtrl;
 	m_hInstRes = hInstRes;
 }
 

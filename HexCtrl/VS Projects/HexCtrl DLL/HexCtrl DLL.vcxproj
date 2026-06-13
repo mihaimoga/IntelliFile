@@ -151,15 +151,7 @@
     <ResourceCompile Include="..\..\HexCtrl\src\res\HexCtrl.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_BKMS.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_COPYHEX.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_CLPBRD_PASTEHEX.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_FONTCHOOSE.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_GROUP.bmp" />
     <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_LOGO.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_MODIFY.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_MODIFY_FILLZEROS.bmp" />
-    <Image Include="..\..\HexCtrl\src\res\IDB_HEXCTRL_SEARCH.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\HexCtrl\src\res\IDJ_HEXCTRL_KEYBIND.json" />
@@ -175,14 +167,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -190,21 +182,21 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -212,7 +204,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -291,7 +283,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers />
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
@@ -322,7 +314,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
@@ -350,7 +342,7 @@
       <OmitFramePointers>
       </OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
@@ -379,7 +371,7 @@
       <OmitFramePointers>
       </OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
@@ -412,7 +404,7 @@
       <OmitFramePointers>
       </OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>
@@ -448,7 +440,7 @@
       <OmitFramePointers>
       </OmitFramePointers>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/utf-8 /D_USRDLL /DHEXCTRL_DYNAMIC_LIB /DHEXCTRL_DYNAMIC_LIB_EXPORT %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 /DHEXCTRLAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
       <ScanSourceForModuleDependencies>true</ScanSourceForModuleDependencies>
     </ClCompile>
     <Link>

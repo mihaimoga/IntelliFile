@@ -16,42 +16,16 @@
 #include <vector>
 
 #if !defined(__cpp_lib_format) || !defined(__cpp_lib_span) || !defined(__cpp_lib_bit_cast)
-#error "C++20 compliant compiler is required to build HexCtrl."
+#error "C++20 compliant compiler is required for HexCtrl."
 #endif
 
-#ifdef HEXCTRL_DYNAMIC_LIB
-#ifdef HEXCTRL_DYNAMIC_LIB_EXPORT
-#define HEXCTRLAPI __declspec(dllexport)
-#else //^^^ HEXCTRL_DYNAMIC_LIB_EXPORT / vvv !HEXCTRL_DYNAMIC_LIB_EXPORT
-#define HEXCTRLAPI __declspec(dllimport)
-#ifdef _M_IX86
-#ifdef _DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlx86D.lib"
-#else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlx86.lib"
-#endif //^^^ !_DEBUG
-#elif defined(_M_X64) //^^^ _M_IX86 / vvv _M_X64
-#ifdef _DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlx64D.lib"
-#else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlx64.lib"
-#endif //^^^ !_DEBUG
-#elif defined(_M_ARM64) //^^^ _M_X64 / vvv _M_ARM64
-#ifdef _DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlARM64D.lib"
-#else //^^^ _DEBUG / vvv !_DEBUG
-#define HEXCTRL_LIBNAME "HexCtrlARM64.lib"
-#endif //^^^ _DEBUG
-#endif //^^^ _M_ARM64
-#pragma comment(lib, HEXCTRL_LIBNAME)
-#endif //^^^ !HEXCTRL_DYNAMIC_LIB_EXPORT
-#else //^^^ HEXCTRL_DYNAMIC_LIB / vvv !HEXCTRL_DYNAMIC_LIB
+#ifndef HEXCTRLAPI
 #define	HEXCTRLAPI
-#endif //^^^ !HEXCTRL_DYNAMIC_LIB
+#endif
 
 namespace HEXCTRL {
 	constexpr auto HEXCTRL_VERSION_MAJOR = 3;
-	constexpr auto HEXCTRL_VERSION_MINOR = 8;
+	constexpr auto HEXCTRL_VERSION_MINOR = 9;
 	constexpr auto HEXCTRL_VERSION_PATCH = 0;
 
 	using SpanByte = std::span<std::byte>;
@@ -61,21 +35,21 @@ namespace HEXCTRL {
 	* EHexCmd: Enum of the commands that can be executed within HexCtrl via the ExecuteCmd.     *
 	********************************************************************************************/
 	enum class EHexCmd : std::uint8_t {
-		CMD_SEARCH_DLG = 0x01, CMD_SEARCH_NEXT, CMD_SEARCH_PREV,
-		CMD_NAV_GOTO_DLG, CMD_NAV_REPFWD, CMD_NAV_REPBKW, CMD_NAV_DATABEG, CMD_NAV_DATAEND,
-		CMD_NAV_PAGEBEG, CMD_NAV_PAGEEND, CMD_NAV_LINEBEG, CMD_NAV_LINEEND, CMD_GROUPDATA_BYTE,
-		CMD_GROUPDATA_WORD, CMD_GROUPDATA_DWORD, CMD_GROUPDATA_QWORD, CMD_GROUPDATA_INC, CMD_GROUPDATA_DEC,
+		CMD_SEARCH_DLG = 0x01, CMD_SEARCH_NEXT, CMD_SEARCH_PREV, CMD_GROUPDATA_BYTE,
+		CMD_GROUPDATA_WORD, CMD_GROUPDATA_DWORD, CMD_GROUPDATA_QWORD, CMD_GROUPDATA_INC,
+		CMD_GROUPDATA_DEC, CMD_NAV_GOTO_DLG, CMD_NAV_REPFWD, CMD_NAV_REPBKW, CMD_NAV_DATABEG,
+		CMD_NAV_DATAEND, CMD_NAV_PAGEBEG, CMD_NAV_PAGEEND, CMD_NAV_LINEBEG, CMD_NAV_LINEEND,
 		CMD_BKM_ADD, CMD_BKM_REMOVE, CMD_BKM_NEXT, CMD_BKM_PREV, CMD_BKM_REMOVEALL, CMD_BKM_DLG_MGR,
 		CMD_CLPBRD_COPY_HEX, CMD_CLPBRD_COPY_HEXLE, CMD_CLPBRD_COPY_HEXFMT, CMD_CLPBRD_COPY_TEXTCP,
 		CMD_CLPBRD_COPY_BASE64, CMD_CLPBRD_COPY_CARR, CMD_CLPBRD_COPY_GREPHEX, CMD_CLPBRD_COPY_PRNTSCRN,
 		CMD_CLPBRD_COPY_OFFSET, CMD_CLPBRD_PASTE_HEX, CMD_CLPBRD_PASTE_TEXTUTF16, CMD_CLPBRD_PASTE_TEXTCP,
-		CMD_MODIFY_OPERS_DLG, CMD_MODIFY_FILLZEROS, CMD_MODIFY_FILLDATA_DLG, CMD_MODIFY_UNDO, CMD_MODIFY_REDO,
-		CMD_SEL_MARKSTARTEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT, CMD_SEL_ADDUP,
-		CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG, CMD_APPEAR_FONTINC,
-		CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC, CMD_PRINT_DLG, CMD_ABOUT_DLG,
-		CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,
-		CMD_SCROLL_CURSOR, CMD_SCROLL_PAGEUP, CMD_SCROLL_PAGEDOWN,
-		CMD_TEMPL_APPLYCURR, CMD_TEMPL_DISAPPLY, CMD_TEMPL_DISAPPALL, CMD_TEMPL_DLG_MGR
+		CMD_MODIFY_OPERS_DLG, CMD_MODIFY_FILLZEROS, CMD_MODIFY_FILLDATA_DLG, CMD_MODIFY_UNDO,
+		CMD_MODIFY_REDO, CMD_SEL_MARKSTARTEND, CMD_SEL_ALL, CMD_SEL_ADDLEFT, CMD_SEL_ADDRIGHT,
+		CMD_SEL_ADDUP, CMD_SEL_ADDDOWN, CMD_DATAINTERP_DLG, CMD_CODEPAGE_DLG, CMD_APPEAR_FONT_DLG,
+		CMD_APPEAR_FONTINC, CMD_APPEAR_FONTDEC, CMD_APPEAR_CAPACINC, CMD_APPEAR_CAPACDEC,
+		CMD_PRINT_DLG, CMD_ABOUT_DLG, CMD_CARET_LEFT, CMD_CARET_RIGHT, CMD_CARET_UP, CMD_CARET_DOWN,
+		CMD_SCROLL_CURSOR, CMD_SCROLL_PAGEUP, CMD_SCROLL_PAGEDOWN, CMD_TEMPL_APPLYCURR,
+		CMD_TEMPL_DISAPPLY, CMD_TEMPL_DISAPPALL, CMD_TEMPL_DLG_MGR
 	};
 
 	/********************************************************************************************
@@ -90,10 +64,32 @@ namespace HEXCTRL {
 	* EHexDlgItem: HexCtrl's internal dialogs' items.                                           *
 	********************************************************************************************/
 	enum class EHexDlgItem : std::uint8_t {
-		BKMMGR_CHK_HEX, DATAINTERP_CHK_HEX, DATAINTERP_CHK_BE, TEMPLMGR_CHK_MIN,
-		TEMPLMGR_CHK_TT, TEMPLMGR_CHK_HGL, TEMPLMGR_CHK_HEX, TEMPLMGR_CHK_SWAP,
-		SEARCH_COMBO_FIND, SEARCH_COMBO_REPLACE, SEARCH_EDIT_START, SEARCH_EDIT_STEP,
-		SEARCH_EDIT_RNGBEG, SEARCH_EDIT_RNGEND, SEARCH_EDIT_LIMIT, FILLDATA_COMBO_DATA
+		BKMMGR_CHK_HEX, BKMMGR_CHK_TT, DATAINTERP_CHK_HEX, DATAINTERP_CHK_BE, TEMPLMGR_CHK_MIN,
+		TEMPLMGR_CHK_TT, TEMPLMGR_CHK_HGL, TEMPLMGR_CHK_HEX, TEMPLMGR_CHK_SWAP, SEARCH_COMBO_FIND,
+		SEARCH_COMBO_REPLACE, SEARCH_EDIT_START, SEARCH_EDIT_STEP, SEARCH_EDIT_RNGBEG,
+		SEARCH_EDIT_RNGEND, SEARCH_EDIT_LIMIT, SEARCH_EDIT_WILDCARD, FILLDATA_COMBO_DATA
+	};
+
+	/********************************************************************************************
+	* EHexMenuItem: HexCtrl's menu items.                                                       *
+	********************************************************************************************/
+	enum class EHexMenuItem :std::uint8_t {
+		IDM_SEARCH_POPUP = 0x01, IDM_SEARCH_SEARCH, IDM_SEARCH_NEXT, IDM_SEARCH_PREV,
+		IDM_GROUPDATA_POPUP, IDM_GROUPDATA_1BYTE, IDM_GROUPDATA_2BYTE, IDM_GROUPDATA_4BYTE,
+		IDM_GROUPDATA_8BYTE, IDM_GROUPDATA_INC, IDM_GROUPDATA_DEC, IDM_NAV_POPUP,
+		IDM_NAV_GOTO, IDM_NAV_REPFWD, IDM_NAV_REPBKW, IDM_NAV_DATABEG, IDM_NAV_DATAEND,
+		IDM_NAV_PAGEBEG, IDM_NAV_PAGEEND, IDM_NAV_LINEBEG, IDM_NAV_LINEEND, IDM_BKM_POPUP,
+		IDM_BKM_ADD, IDM_BKM_REMOVE, IDM_BKM_GONEXT, IDM_BKM_GOPREV, IDM_BKM_REMOVEALL,
+		IDM_BKM_BKMMGR, IDM_CLPBRD_POPUP, IDM_CLPBRD_COPYHEX, IDM_CLPBRD_COPYHEXLE,
+		IDM_CLPBRD_COPYHEXFMT, IDM_CLPBRD_COPYTEXTCP, IDM_CLPBRD_COPYBASE64, IDM_CLPBRD_COPYCARR,
+		IDM_CLPBRD_COPYGREPHEX, IDM_CLPBRD_COPYPRNTSCRN, IDM_CLPBRD_COPYCAROFF, IDM_CLPBRD_PASTEHEX,
+		IDM_CLPBRD_PASTEUTF16, IDM_CLPBRD_PASTETEXTCP, IDM_MODIFY_POPUP, IDM_MODIFY_OPERS,
+		IDM_MODIFY_FILLZEROS, IDM_MODIFY_FILLDATA, IDM_MODIFY_UNDO, IDM_MODIFY_REDO, IDM_SEL_POPUP,
+		IDM_SEL_MARKSTARTEND, IDM_SEL_SELALL, IDM_TEMPL_POPUP, IDM_TEMPL_APPLYCURR,
+		IDM_TEMPL_DISAPPLY, IDM_TEMPL_DISAPPLYALL, IDM_TEMPL_TEMPLMGR, IDM_DATAVIEW_POPUP,
+		IDM_DATAVIEW_DATAINTERP, IDM_DATAVIEW_TEXTCP, IDM_APPEAR_POPUP, IDM_APPEAR_CHOOSEFONT,
+		IDM_APPEAR_INCFONT, IDM_APPEAR_DECFONT, IDM_APPEAR_INCCAPAS, IDM_APPEAR_DECCAPAS,
+		IDM_OTHER_POPUP, IDM_OTHER_PRINT, IDM_OTHER_ABOUT
 	};
 
 	/********************************************************************************************
@@ -103,7 +99,8 @@ namespace HEXCTRL {
 		ULONGLONG ullOffset { };
 		ULONGLONG ullSize { };
 	};
-	using VecSpan = std::vector<HEXSPAN>;
+	using VecHexSpan = std::vector<HEXSPAN>;
+	using SpanHexSpan = std::span<const HEXSPAN>;
 
 	/********************************************************************************************
 	* HEXCOLOR: Background and Text color struct.                                               *
@@ -139,26 +136,29 @@ namespace HEXCTRL {
 	* HEXBKM: Bookmarks main struct.                                                            *
 	********************************************************************************************/
 	struct HEXBKM {
-		VecSpan      vecSpan;     //Vector of offsets and sizes.
+		VecHexSpan   vecSpan;     //Vector of offsets and sizes.
 		std::wstring wstrDesc;    //Bookmark description.
 		ULONGLONG    ullID { };   //Bookmark ID, assigned internally by framework.
 		ULONGLONG    ullData { }; //User defined custom data.
 		HEXCOLOR     stClr;       //Bookmark bk/text color.
 	};
 	using PHEXBKM = HEXBKM*;
+	using SpanHexBkm = std::span<const HEXBKM>;
 
 	/********************************************************************************************
 	* IHexBookmarks: Pure abstract bookmarks' interface, for the HexCtrl bookmarks machinery.   *
 	********************************************************************************************/
 	class IHexBookmarks {
 	public:
-		virtual auto AddBkm(const HEXBKM& hbs, bool fRedraw = true) -> ULONGLONG = 0; //Add new bookmark, returns the new bookmark's ID.
-		[[nodiscard]] virtual auto GetByID(ULONGLONG ullID) -> PHEXBKM = 0;           //Get bookmark by ID.
-		[[nodiscard]] virtual auto GetByIndex(ULONGLONG ullIndex) -> PHEXBKM = 0;     //Get bookmark by index.
-		[[nodiscard]] virtual auto GetCount() -> ULONGLONG = 0;                       //Get bookmarks count.
-		[[nodiscard]] virtual auto HitTest(ULONGLONG ullOffset) -> PHEXBKM = 0;       //HitTest for given offset.
-		virtual void RemoveAll() = 0;                                                 //Remove all bookmarks.
-		virtual void RemoveByID(ULONGLONG ullID) = 0;                                 //Remove by a given ID.
+		virtual auto AddBkm(const HEXBKM& bkm) -> ULONGLONG = 0;                  //Adds new bookmark, returns the new bookmark's ID.
+		[[nodiscard]] virtual auto GetAllBkms() -> SpanHexBkm = 0;                //Returns array of all bookmarks.
+		[[nodiscard]] virtual auto GetByID(ULONGLONG ullID) -> PHEXBKM = 0;       //Get bookmark by ID.
+		[[nodiscard]] virtual auto GetByIndex(ULONGLONG ullIndex) -> PHEXBKM = 0; //Get bookmark by index.
+		[[nodiscard]] virtual auto GetCount() -> ULONGLONG = 0;                   //Get bookmarks count.
+		[[nodiscard]] virtual auto HitTest(ULONGLONG ullOffset) -> PHEXBKM = 0;   //HitTest for the given offset.
+		virtual void RemoveAll() = 0;                                             //Remove all bookmarks.
+		virtual void RemoveByID(ULONGLONG ullID) = 0;                             //Remove by the given ID.
+		virtual void SetVirtualBkm(IHexBookmarks* pVirtBkm) = 0;                  //Sets the Virtual Bookmarks pointer.
 	};
 
 	/********************************************************************************************
@@ -202,8 +202,8 @@ namespace HEXCTRL {
 	* Templates related data structures, enums, and aliases                                     *
 	********************************************************************************************/
 	struct HEXTEMPLFIELD;
-	using HexPtrField = std::unique_ptr<HEXTEMPLFIELD>;
-	using HexVecFields = std::vector<HexPtrField>; //Vector for the Fields.
+	using PtrHexField = std::unique_ptr<HEXTEMPLFIELD>;
+	using VecHexFields = std::vector<PtrHexField>; //Vector for the Fields.
 	using PCHEXTEMPLFIELD = const HEXTEMPLFIELD*;
 
 	//Predefined types of a field.
@@ -217,33 +217,41 @@ namespace HEXCTRL {
 	//Custom type of a field.
 	struct HEXCUSTOMTYPE {
 		std::wstring wstrTypeName; //Custom type name.
-		std::uint8_t uTypeID { };  //Custom type ID.
+		int          iTypeID { };  //Custom type ID.
 	};
-	using VecCT = std::vector<HEXCUSTOMTYPE>;
+	using VecHexCT = std::vector<HEXCUSTOMTYPE>;
 
 	//Template's field main struct.
 	struct HEXTEMPLFIELD {
 		std::wstring    wstrName;             //Field name.
 		std::wstring    wstrDescr;            //Field description.
+		VecHexFields    vecNested;            //Vector for nested fields.
+		HEXCOLOR        stClr;                //Field Bk and Text color.
+		PCHEXTEMPLFIELD pFieldParent { };     //Parent field, in case of nested.
 		int             iOffset { };          //Field offset relative to the Template's beginning.
 		int             iSize { };            //Field size.
-		HEXCOLOR        stClr;                //Field Bk and Text color.
-		HexVecFields    vecNested;            //Vector for nested fields.
-		PCHEXTEMPLFIELD pFieldParent { };     //Parent field, in case of nested.
+		int             iCustomTypeID { };    //Field custom-type ID, if eType==type_custom.
 		EHexFieldType   eType { };            //Field type.
-		std::uint8_t    uTypeID { };          //Field type ID if, it's a custom type.
 		bool            fBigEndian { false }; //Field endianness.
 	};
 
 	//Template main struct.
 	struct HEXTEMPLATE {
 		std::wstring wstrName;      //Template name.
-		HexVecFields vecFields;     //Template fields.
-		VecCT        vecCustomType; //Custom types of this template.
+		VecHexFields vecFields;     //Template fields.
+		VecHexCT     vecCustomType; //Custom types of this template.
 		int          iSizeTotal;    //Total size of all Template's fields, assigned internally by framework.
 		int          iTemplateID;   //Template ID, assigned by framework.
 	};
 	using PCHEXTEMPLATE = const HEXTEMPLATE*;
+
+	//Applied templates.
+	struct HEXTEMPLAPPLIED {
+		ULONGLONG     ullOffset { };  //Offset, where to apply a template.
+		PCHEXTEMPLATE pTemplate { };  //Template pointer.
+		int           iAppliedID { }; //AppliedID assigned by framework. Any template can be applied many times.
+	};
+	using SpanHexTemplApplied = std::span<const HEXTEMPLAPPLIED>;
 
 	/********************************************************************************************
 	* IHexTemplates: Pure abstract base interface for HexCtrl templates.                        *
@@ -251,10 +259,12 @@ namespace HEXCTRL {
 	class IHexTemplates {
 	public:
 		virtual auto AddTemplate(const HEXTEMPLATE& hts) -> int = 0; //Adds existing template.
-		virtual auto ApplyTemplate(ULONGLONG ullOffset, int iTemplateID) -> int = 0; //Applies template to offset, returns AppliedID.
+		virtual auto ApplyTemplate(ULONGLONG ullOffset, int iTemplateID) -> int = 0; //Applies template by ID, returns AppliedID.
+		virtual auto ApplyTemplate(ULONGLONG ullOffset, std::wstring_view wsvTemplateName) -> int = 0; //Applies template by name.
 		virtual void DisapplyAll() = 0;
 		virtual void DisapplyByID(int iAppliedID) = 0;
 		virtual void DisapplyByOffset(ULONGLONG ullOffset) = 0;
+		[[nodiscard]] virtual auto GetAllApplied() -> SpanHexTemplApplied = 0; //All currently applied templates.
 		virtual auto LoadTemplate(const wchar_t* pFilePath) -> int = 0; //Returns TemplateID on success, null otherwise.
 		virtual void ShowTooltips(bool fShow) = 0;
 		virtual void UnloadAll() = 0;                     //Unload all templates.
@@ -391,7 +401,7 @@ namespace HEXCTRL {
 		EHexOperMode   eOperMode { };        //Operation mode, used if eModifyMode == MODIFY_OPERATION.
 		EHexDataType   eDataType { };        //Data type of the underlying data, used if eModifyMode == MODIFY_OPERATION.
 		SpanCByte      spnData;              //Span of the data to modify with.
-		VecSpan        vecSpan;              //Vector of data offsets and sizes to modify.
+		VecHexSpan     vecSpan;              //Vector of data offsets and sizes to modify.
 		bool           fBigEndian { false }; //Treat data as the big endian, used if eModifyMode == MODIFY_OPERATION.
 	};
 
@@ -433,7 +443,7 @@ namespace HEXCTRL {
 		[[nodiscard]] virtual auto GetPagePos()const -> ULONGLONG = 0;         //Get a page number that the cursor stays at.
 		[[nodiscard]] virtual auto GetPageSize()const -> DWORD = 0;            //Current page size.
 		[[nodiscard]] virtual auto GetScrollRatio()const -> std::tuple<float, bool> = 0; //Get current scroll ratio.
-		[[nodiscard]] virtual auto GetSelection()const -> VecSpan = 0;         //Get current selection.
+		[[nodiscard]] virtual auto GetSelection()const -> VecHexSpan = 0;      //Get current selection.
 		[[nodiscard]] virtual auto GetTemplates() -> IHexTemplates* = 0;       //Get Templates interface.
 		[[nodiscard]] virtual auto GetUnprintableChar()const -> wchar_t = 0;   //Get unprintable replacement character.
 		[[nodiscard]] virtual auto GetWndHandle(EHexWnd eWnd, bool fCreate = true)const -> HWND = 0; //Get HWND of internal window/dialogs.
@@ -458,20 +468,20 @@ namespace HEXCTRL {
 		virtual void SetCodepage(int iCodepage) = 0;           //Codepage for text area.
 		virtual void SetColors(const HEXCOLORS& hcs) = 0;      //Set HexCtrl's colors.
 		virtual bool SetConfig(std::wstring_view wsvPath) = 0; //Set configuration file, or "" for defaults.
-		virtual void SetData(const HEXDATA& hds, bool fAdjust = false) = 0; //Main method to set data for HexCtrl.
+		virtual void SetData(const HEXDATA& hd, bool fAdjust = false) = 0; //Main method to set data for HexCtrl.
 		virtual void SetDateInfo(DWORD dwFormat, wchar_t wchSepar) = 0; //Set date format and date separator.
 		virtual void SetDlgProperties(EHexWnd eWnd, std::uint64_t u64Flags) = 0; //Properties for the internal dialogs.
 		virtual void SetFont(const LOGFONTW& lf, bool fMain = true) = 0; //Set main/infobar font.
 		virtual void SetGroupSize(DWORD dwSize) = 0;           //Set data grouping size.
 		virtual void SetHexCharsCase(bool fUpper) = 0;         //Set printed hex-chars to an UPPER or lower case.
+		virtual void SetMenuItem(EHexMenuItem eItem, const MENUITEMINFOW& mii) = 0; //Set MENUITEMINFOW to internal menu item.
 		virtual void SetMutable(bool fMutable) = 0;            //Enable or disable mutable/editable mode.
 		virtual void SetOffsetMode(bool fHex) = 0;             //Set offset being shown as Hex or as Decimal.
 		virtual void SetPageSize(DWORD dwSize, std::wstring_view wsvName = L"Page") = 0; //Set page size and name to draw the lines in-between.
 		virtual void SetRedraw(bool fRedraw) = 0;              //Handle WM_PAINT message or not.
 		virtual void SetScrollRatio(float flRatio, bool fLines) = 0; //Set mouse-wheel scroll ratio in screens or in lines.
-		virtual void SetSelection(const VecSpan& vecSel, bool fRedraw = true, bool fHighlight = false) = 0; //Set current selection.
+		virtual void SetSelection(SpanHexSpan spnSel, bool fRedraw = true, bool fHighlight = false) = 0; //Set current selection.
 		virtual void SetUnprintableChar(wchar_t wch) = 0;      //Set unprintable replacement character.
-		virtual void SetVirtualBkm(IHexBookmarks* pVirtBkm) = 0; //Set pointer for Bookmarks Virtual Mode.
 		virtual void SetWindowPos(HWND hWndAfter, int iX, int iY, int iWidth, int iHeight, UINT uFlags = SWP_NOACTIVATE | SWP_NOZORDER) = 0;
 		virtual void ShowInfoBar(bool fShow) = 0;              //Show/hide bottom Info bar.
 	};

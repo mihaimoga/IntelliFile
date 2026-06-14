@@ -260,7 +260,17 @@
 							<ul>
 								<li>Updated the embedded web browser (Microsoft Edge).</li>
 								<li>Updated <code>LEXILLA</code> library to version 5.5.0 and <code>SCINTILLA</code> library to version 5.6.3.<br><blockquote>Version 5.5.0 improves Fortran and LaTeX.<br>Version 5.6.3 restores selection and scroll position for undo and redo on additional views.</blockquote></li>
-								<li>Updated Jovibor's <code>HexCtrl</code> library to the latest version available.</li>
+								<li>Updated Jovibor's <code>HexCtrl</code> library to the latest version available.
+									<ul>
+										<li>Range search (-1:15) and custom wildcard added.</li>
+										<li>New menu API: <code>SetMenuItem</code>, <code>EHexMenuItem</code> (icons now app-controlled).</li>
+										<li>New methods: <code>GetAllBkms</code>, <code>ApplyTemplate</code>, <code>GetAllApplied</code>.</li>
+										<li>Faster search (1/2/4-byte), improved UI &amp; shortcuts.</li>
+										<li><code>SetSelection</code> &rarr; <code>std::span</code> (breaking change).</li>
+										<li>API cleanup: moved <code>SetVirtualBkm</code>, removed legacy macros.</li>
+										<li>Bug fixes and improvements.</li>
+									</ul>
+								</li>
 							</ul>
 						</li>
 					</ul>

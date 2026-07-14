@@ -337,6 +337,11 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 28-02-2026 1. Updated copyright details.
                           2. Updated class to work with Scintilla v5.6.0. New messages wrapped include: SCI_GETDRAGDROPENABLED 
                           & SCI_SETDRAGDROPENABLED.
+         PJN / 03-04-2026 1. Verified the code against Scintilla v5.6.1.
+         PJN / 29-04-2026 1. Verified the code against Scintilla v5.6.2.
+         PJN / 10-06-2026 1. Verified the code against Scintilla v5.6.3.
+         PJN / 14-07-2026 1. Verified the code against Scintilla v5.6.4.
+                          2. Updated the code to use the new Scintilla pixels paramter type.
 
 Copyright (c) 2004 - 2026 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 
@@ -385,8 +390,7 @@ m_DirectPointer{ 0 },
 m_LastStatus{ Status::Ok },
 m_dwOwnerThreadID{ 0 },
 m_bDoneInitialSetup{ false }
-{
-}
+{}
 
 #ifdef _AFX
 BOOL CScintillaCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, DWORD dwExStyle, LPVOID lpParam)
@@ -762,7 +766,7 @@ void CScintillaCtrl::CallTipShow(_In_ Position pos, _In_z_ const wchar_t* defini
 	CallTipShow(pos, sUTF8);
 }
 
-int CScintillaCtrl::TextWidth(_In_ int style, _In_z_ const wchar_t* text)
+CScintillaCtrl::pixels CScintillaCtrl::TextWidth(_In_ int style, _In_z_ const wchar_t* text)
 {
 	//Convert the unicode text to UTF8
 	StringA sUTF8{ W2UTF8(text, -1) };
@@ -1886,12 +1890,12 @@ void CScintillaCtrl::SetTabDrawMode(_In_ TabDrawMode tabDrawMode)
 	Call(static_cast<UINT>(Message::SetTabDrawMode), static_cast<WPARAM>(tabDrawMode), 0);
 }
 
-Position CScintillaCtrl::PositionFromPoint(_In_ int x, _In_ int y)
+Position CScintillaCtrl::PositionFromPoint(_In_ pixels x, _In_ pixels y)
 {
 	return static_cast<Position>(Call(static_cast<UINT>(Message::PositionFromPoint), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }
 
-Position CScintillaCtrl::PositionFromPointClose(_In_ int x, _In_ int y)
+Position CScintillaCtrl::PositionFromPointClose(_In_ pixels x, _In_ pixels y)
 {
 	return static_cast<Position>(Call(static_cast<UINT>(Message::PositionFromPointClose), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }
@@ -1966,14 +1970,14 @@ int CScintillaCtrl::GetTabWidth()
 	return static_cast<int>(Call(static_cast<UINT>(Message::GetTabWidth), 0, 0));
 }
 
-void CScintillaCtrl::SetTabMinimumWidth(_In_ int pixels)
+void CScintillaCtrl::SetTabMinimumWidth(_In_ pixels pixels)
 {
 	Call(static_cast<UINT>(Message::SetTabMinimumWidth), static_cast<WPARAM>(pixels), 0);
 }
 
-int CScintillaCtrl::GetTabMinimumWidth()
+CScintillaCtrl::pixels CScintillaCtrl::GetTabMinimumWidth()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetTabMinimumWidth), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetTabMinimumWidth), 0, 0));
 }
 
 void CScintillaCtrl::ClearTabStops(_In_ Line line)
@@ -2051,7 +2055,7 @@ void CScintillaCtrl::MarkerSetBackSelectedTranslucent(_In_ int markerNumber, _In
 	Call(static_cast<UINT>(Message::MarkerSetBackSelectedTranslucent), static_cast<WPARAM>(markerNumber), static_cast<LPARAM>(back));
 }
 
-void CScintillaCtrl::MarkerSetStrokeWidth(_In_ int markerNumber, _In_ int hundredths)
+void CScintillaCtrl::MarkerSetStrokeWidth(_In_ int markerNumber, _In_ pixels hundredths)
 {
 	Call(static_cast<UINT>(Message::MarkerSetStrokeWidth), static_cast<WPARAM>(markerNumber), static_cast<LPARAM>(hundredths));
 }
@@ -2126,14 +2130,14 @@ MarginType CScintillaCtrl::GetMarginTypeN(_In_ int margin)
 	return static_cast<MarginType>(Call(static_cast<UINT>(Message::GetMarginTypeN), static_cast<WPARAM>(margin), 0));
 }
 
-void CScintillaCtrl::SetMarginWidthN(_In_ int margin, _In_ int pixelWidth)
+void CScintillaCtrl::SetMarginWidthN(_In_ int margin, _In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::SetMarginWidthN), static_cast<WPARAM>(margin), static_cast<LPARAM>(pixelWidth));
 }
 
-int CScintillaCtrl::GetMarginWidthN(_In_ int margin)
+CScintillaCtrl::pixels CScintillaCtrl::GetMarginWidthN(_In_ int margin)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetMarginWidthN), static_cast<WPARAM>(margin), 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetMarginWidthN), static_cast<WPARAM>(margin), 0));
 }
 
 void CScintillaCtrl::SetMarginMaskN(_In_ int margin, _In_ int mask)
@@ -2666,14 +2670,14 @@ IndicFlag CScintillaCtrl::IndicGetFlags(_In_ int indicator)
 	return static_cast<IndicFlag>(Call(static_cast<UINT>(Message::IndicGetFlags), static_cast<WPARAM>(indicator), 0));
 }
 
-void CScintillaCtrl::IndicSetStrokeWidth(_In_ int indicator, _In_ int hundredths)
+void CScintillaCtrl::IndicSetStrokeWidth(_In_ int indicator, _In_ pixels hundredths)
 {
 	Call(static_cast<UINT>(Message::IndicSetStrokeWidth), static_cast<WPARAM>(indicator), static_cast<LPARAM>(hundredths));
 }
 
-int CScintillaCtrl::IndicGetStrokeWidth(_In_ int indicator)
+CScintillaCtrl::pixels CScintillaCtrl::IndicGetStrokeWidth(_In_ int indicator)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::IndicGetStrokeWidth), static_cast<WPARAM>(indicator), 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::IndicGetStrokeWidth), static_cast<WPARAM>(indicator), 0));
 }
 
 void CScintillaCtrl::SetWhitespaceFore(_In_ BOOL useSetting, _In_ COLORREF fore)
@@ -2686,14 +2690,14 @@ void CScintillaCtrl::SetWhitespaceBack(_In_ BOOL useSetting, _In_ COLORREF back)
 	Call(static_cast<UINT>(Message::SetWhitespaceBack), static_cast<WPARAM>(useSetting), static_cast<LPARAM>(back));
 }
 
-void CScintillaCtrl::SetWhitespaceSize(_In_ int size)
+void CScintillaCtrl::SetWhitespaceSize(_In_ pixels size)
 {
 	Call(static_cast<UINT>(Message::SetWhitespaceSize), static_cast<WPARAM>(size), 0);
 }
 
-int CScintillaCtrl::GetWhitespaceSize()
+CScintillaCtrl::pixels CScintillaCtrl::GetWhitespaceSize()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetWhitespaceSize), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetWhitespaceSize), 0, 0));
 }
 
 void CScintillaCtrl::SetLineState(_In_ Line line, _In_ int state)
@@ -2731,12 +2735,12 @@ void CScintillaCtrl::SetCaretLineBack(_In_ COLORREF back)
 	Call(static_cast<UINT>(Message::SetCaretLineBack), static_cast<WPARAM>(back), 0);
 }
 
-int CScintillaCtrl::GetCaretLineFrame()
+CScintillaCtrl::pixels CScintillaCtrl::GetCaretLineFrame()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetCaretLineFrame), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetCaretLineFrame), 0, 0));
 }
 
-void CScintillaCtrl::SetCaretLineFrame(_In_ int width)
+void CScintillaCtrl::SetCaretLineFrame(_In_ pixels width)
 {
 	Call(static_cast<UINT>(Message::SetCaretLineFrame), static_cast<WPARAM>(width), 0);
 }
@@ -3141,24 +3145,24 @@ void CScintillaCtrl::AllocateLines(_In_ Line lines)
 	Call(static_cast<UINT>(Message::AllocateLines), static_cast<WPARAM>(lines), 0);
 }
 
-void CScintillaCtrl::SetMarginLeft(_In_ int pixelWidth)
+void CScintillaCtrl::SetMarginLeft(_In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::SetMarginLeft), 0, static_cast<LPARAM>(pixelWidth));
 }
 
-int CScintillaCtrl::GetMarginLeft()
+CScintillaCtrl::pixels CScintillaCtrl::GetMarginLeft()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetMarginLeft), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetMarginLeft), 0, 0));
 }
 
-void CScintillaCtrl::SetMarginRight(_In_ int pixelWidth)
+void CScintillaCtrl::SetMarginRight(_In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::SetMarginRight), 0, static_cast<LPARAM>(pixelWidth));
 }
 
-int CScintillaCtrl::GetMarginRight()
+CScintillaCtrl::pixels CScintillaCtrl::GetMarginRight()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetMarginRight), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetMarginRight), 0, 0));
 }
 
 BOOL CScintillaCtrl::GetModify()
@@ -3196,14 +3200,14 @@ BOOL CScintillaCtrl::GetSelectionHidden()
 	return static_cast<BOOL>(Call(static_cast<UINT>(Message::GetSelectionHidden), 0, 0));
 }
 
-int CScintillaCtrl::PointXFromPosition(_In_ Position pos)
+CScintillaCtrl::pixels CScintillaCtrl::PointXFromPosition(_In_ Position pos)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::PointXFromPosition), 0, static_cast<LPARAM>(pos)));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::PointXFromPosition), 0, static_cast<LPARAM>(pos)));
 }
 
-int CScintillaCtrl::PointYFromPosition(_In_ Position pos)
+CScintillaCtrl::pixels CScintillaCtrl::PointYFromPosition(_In_ Position pos)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::PointYFromPosition), 0, static_cast<LPARAM>(pos)));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::PointYFromPosition), 0, static_cast<LPARAM>(pos)));
 }
 
 Line CScintillaCtrl::LineFromPosition(_In_ Position pos)
@@ -3316,14 +3320,14 @@ BOOL CScintillaCtrl::GetOvertype()
 	return static_cast<BOOL>(Call(static_cast<UINT>(Message::GetOvertype), 0, 0));
 }
 
-void CScintillaCtrl::SetCaretWidth(_In_ int pixelWidth)
+void CScintillaCtrl::SetCaretWidth(_In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::SetCaretWidth), static_cast<WPARAM>(pixelWidth), 0);
 }
 
-int CScintillaCtrl::GetCaretWidth()
+CScintillaCtrl::pixels CScintillaCtrl::GetCaretWidth()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetCaretWidth), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetCaretWidth), 0, 0));
 }
 
 void CScintillaCtrl::SetTargetStart(_In_ Position start)
@@ -3461,7 +3465,7 @@ void CScintillaCtrl::CallTipSetForeHlt(_In_ COLORREF fore)
 	Call(static_cast<UINT>(Message::CallTipSetForeHlt), static_cast<WPARAM>(fore), 0);
 }
 
-void CScintillaCtrl::CallTipUseStyle(_In_ int tabSize)
+void CScintillaCtrl::CallTipUseStyle(_In_ pixels tabSize)
 {
 	Call(static_cast<UINT>(Message::CallTipUseStyle), static_cast<WPARAM>(tabSize), 0);
 }
@@ -3696,14 +3700,14 @@ WrapVisualLocation CScintillaCtrl::GetWrapVisualFlagsLocation()
 	return static_cast<WrapVisualLocation>(Call(static_cast<UINT>(Message::GetWrapVisualFlagsLocation), 0, 0));
 }
 
-void CScintillaCtrl::SetWrapStartIndent(_In_ int indent)
+void CScintillaCtrl::SetWrapStartIndent(_In_ pixels indent)
 {
 	Call(static_cast<UINT>(Message::SetWrapStartIndent), static_cast<WPARAM>(indent), 0);
 }
 
-int CScintillaCtrl::GetWrapStartIndent()
+CScintillaCtrl::pixels CScintillaCtrl::GetWrapStartIndent()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetWrapStartIndent), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetWrapStartIndent), 0, 0));
 }
 
 void CScintillaCtrl::SetWrapIndentMode(_In_ WrapIndentMode wrapIndentMode)
@@ -3726,14 +3730,14 @@ LineCache CScintillaCtrl::GetLayoutCache()
 	return static_cast<LineCache>(Call(static_cast<UINT>(Message::GetLayoutCache), 0, 0));
 }
 
-void CScintillaCtrl::SetScrollWidth(_In_ int pixelWidth)
+void CScintillaCtrl::SetScrollWidth(_In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::SetScrollWidth), static_cast<WPARAM>(pixelWidth), 0);
 }
 
-int CScintillaCtrl::GetScrollWidth()
+CScintillaCtrl::pixels CScintillaCtrl::GetScrollWidth()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetScrollWidth), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetScrollWidth), 0, 0));
 }
 
 void CScintillaCtrl::SetScrollWidthTracking(_In_ BOOL tracking)
@@ -3746,9 +3750,9 @@ BOOL CScintillaCtrl::GetScrollWidthTracking()
 	return static_cast<BOOL>(Call(static_cast<UINT>(Message::GetScrollWidthTracking), 0, 0));
 }
 
-int CScintillaCtrl::TextWidth(_In_ int style, _In_z_ const char* text)
+CScintillaCtrl::pixels CScintillaCtrl::TextWidth(_In_ int style, _In_z_ const char* text)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::TextWidth), static_cast<WPARAM>(style), reinterpret_cast<LPARAM>(text)));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::TextWidth), static_cast<WPARAM>(style), reinterpret_cast<LPARAM>(text)));
 }
 
 void CScintillaCtrl::SetEndAtLastLine(_In_ BOOL endAtLastLine)
@@ -3761,9 +3765,9 @@ BOOL CScintillaCtrl::GetEndAtLastLine()
 	return static_cast<BOOL>(Call(static_cast<UINT>(Message::GetEndAtLastLine), 0, 0));
 }
 
-int CScintillaCtrl::TextHeight(_In_ Line line)
+CScintillaCtrl::pixels CScintillaCtrl::TextHeight(_In_ Line line)
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::TextHeight), static_cast<WPARAM>(line), 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::TextHeight), static_cast<WPARAM>(line), 0));
 }
 
 void CScintillaCtrl::SetVScrollBar(_In_ BOOL visible)
@@ -3826,7 +3830,7 @@ void CScintillaCtrl::LinesJoin()
 	Call(static_cast<UINT>(Message::LinesJoin), 0, 0);
 }
 
-void CScintillaCtrl::LinesSplit(_In_ int pixelWidth)
+void CScintillaCtrl::LinesSplit(_In_ pixels pixelWidth)
 {
 	Call(static_cast<UINT>(Message::LinesSplit), static_cast<WPARAM>(pixelWidth), 0);
 }
@@ -4438,14 +4442,14 @@ void CScintillaCtrl::DelLineRight()
 	Call(static_cast<UINT>(Message::DelLineRight), 0, 0);
 }
 
-void CScintillaCtrl::SetXOffset(_In_ int xOffset)
+void CScintillaCtrl::SetXOffset(_In_ pixels xOffset)
 {
 	Call(static_cast<UINT>(Message::SetXOffset), static_cast<WPARAM>(xOffset), 0);
 }
 
-int CScintillaCtrl::GetXOffset()
+CScintillaCtrl::pixels CScintillaCtrl::GetXOffset()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetXOffset), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetXOffset), 0, 0));
 }
 
 void CScintillaCtrl::ChooseCaretX()
@@ -4458,7 +4462,7 @@ void CScintillaCtrl::GrabFocus()
 	Call(static_cast<UINT>(Message::GrabFocus), 0, 0);
 }
 
-void CScintillaCtrl::SetXCaretPolicy(_In_ CaretPolicy caretPolicy, _In_ int caretSlop)
+void CScintillaCtrl::SetXCaretPolicy(_In_ CaretPolicy caretPolicy, _In_ pixels caretSlop)
 {
 	Call(static_cast<UINT>(Message::SetXCaretPolicy), static_cast<WPARAM>(caretPolicy), static_cast<LPARAM>(caretSlop));
 }
@@ -4960,24 +4964,24 @@ Alpha CScintillaCtrl::IndicGetOutlineAlpha(_In_ int indicator)
 	return static_cast<Alpha>(Call(static_cast<UINT>(Message::IndicGetOutlineAlpha), static_cast<WPARAM>(indicator), 0));
 }
 
-void CScintillaCtrl::SetExtraAscent(_In_ int extraAscent)
+void CScintillaCtrl::SetExtraAscent(_In_ pixels extraAscent)
 {
 	Call(static_cast<UINT>(Message::SetExtraAscent), static_cast<WPARAM>(extraAscent), 0);
 }
 
-int CScintillaCtrl::GetExtraAscent()
+CScintillaCtrl::pixels CScintillaCtrl::GetExtraAscent()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetExtraAscent), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetExtraAscent), 0, 0));
 }
 
-void CScintillaCtrl::SetExtraDescent(_In_ int extraDescent)
+void CScintillaCtrl::SetExtraDescent(_In_ pixels extraDescent)
 {
 	Call(static_cast<UINT>(Message::SetExtraDescent), static_cast<WPARAM>(extraDescent), 0);
 }
 
-int CScintillaCtrl::GetExtraDescent()
+CScintillaCtrl::pixels CScintillaCtrl::GetExtraDescent()
 {
-	return static_cast<int>(Call(static_cast<UINT>(Message::GetExtraDescent), 0, 0));
+	return static_cast<pixels>(Call(static_cast<UINT>(Message::GetExtraDescent), 0, 0));
 }
 
 MarkerSymbol CScintillaCtrl::MarkerSymbolDefined(_In_ int markerNumber)
@@ -5115,12 +5119,12 @@ void CScintillaCtrl::AddUndoAction(_In_ int token, _In_ UndoFlags flags)
 	Call(static_cast<UINT>(Message::AddUndoAction), static_cast<WPARAM>(token), static_cast<LPARAM>(flags));
 }
 
-Position CScintillaCtrl::CharPositionFromPoint(_In_ int x, _In_ int y)
+Position CScintillaCtrl::CharPositionFromPoint(_In_ pixels x, _In_ pixels y)
 {
 	return static_cast<Position>(Call(static_cast<UINT>(Message::CharPositionFromPoint), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }
 
-Position CScintillaCtrl::CharPositionFromPointClose(_In_ int x, _In_ int y)
+Position CScintillaCtrl::CharPositionFromPointClose(_In_ pixels x, _In_ pixels y)
 {
 	return static_cast<Position>(Call(static_cast<UINT>(Message::CharPositionFromPointClose), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }
@@ -5200,7 +5204,7 @@ void CScintillaCtrl::AddSelection(_In_ Position caret, _In_ Position anchor)
 	Call(static_cast<UINT>(Message::AddSelection), static_cast<WPARAM>(caret), static_cast<LPARAM>(anchor));
 }
 
-int CScintillaCtrl::SelectionFromPoint(_In_ int x, _In_ int y)
+int CScintillaCtrl::SelectionFromPoint(_In_ pixels x, _In_ pixels y)
 {
 	return static_cast<int>(Call(static_cast<UINT>(Message::SelectionFromPoint), static_cast<WPARAM>(x), static_cast<LPARAM>(y)));
 }

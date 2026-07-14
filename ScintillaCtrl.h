@@ -83,6 +83,7 @@ namespace Scintilla
 		using StringA = CStringA;
 		using StringW = CStringW;
 #endif //#ifndef _AFX
+		using pixels = intptr_t;
 
 		//Constructors / Destructors
 		CScintillaCtrl() noexcept;
@@ -175,7 +176,7 @@ namespace Scintilla
 		Position ReplaceTargetMinimal(_In_ Position length, _In_ const wchar_t* text);
 		Position SearchInTarget(_In_ Position length, _In_ const wchar_t* text);
 		void CallTipShow(_In_ Position pos, _In_z_ const wchar_t* definition);
-		int TextWidth(_In_ int style, _In_z_ const wchar_t* text);
+		pixels TextWidth(_In_ int style, _In_z_ const wchar_t* text);
 		void AppendText(_In_ int length, _In_ const wchar_t* text);
 		Position SearchNext(_In_ FindOption flags, _In_z_ const wchar_t* text);
 		Position SearchPrev(_In_ FindOption flags, _In_z_ const wchar_t* text);
@@ -286,8 +287,8 @@ namespace Scintilla
 		void SetViewWS(_In_ WhiteSpace viewWS);
 		[[nodiscard]] TabDrawMode GetTabDrawMode();
 		void SetTabDrawMode(_In_ TabDrawMode tabDrawMode);
-		[[nodiscard]] Position PositionFromPoint(_In_ int x, _In_ int y);
-		[[nodiscard]] Position PositionFromPointClose(_In_ int x, _In_ int y);
+		[[nodiscard]] Position PositionFromPoint(_In_ pixels x, _In_ pixels y);
+		[[nodiscard]] Position PositionFromPointClose(_In_ pixels x, _In_ pixels y);
 		void GotoLine(_In_ Line line);
 		void GotoPos(_In_ Position caret);
 		void SetAnchor(_In_ Position anchor);
@@ -302,8 +303,8 @@ namespace Scintilla
 		void SetBufferedDraw(_In_ BOOL buffered);
 		void SetTabWidth(_In_ int tabWidth);
 		[[nodiscard]] int GetTabWidth();
-		void SetTabMinimumWidth(_In_ int pixels);
-		[[nodiscard]] int GetTabMinimumWidth();
+		void SetTabMinimumWidth(_In_ pixels pixels);
+		[[nodiscard]] pixels GetTabMinimumWidth();
 		void ClearTabStops(_In_ Line line);
 		void AddTabStop(_In_ Line line, _In_ int x);
 		[[nodiscard]] int GetNextTabStop(_In_ Line line, _In_ int x);
@@ -319,7 +320,7 @@ namespace Scintilla
 		void MarkerSetForeTranslucent(_In_ int markerNumber, _In_ int fore);
 		void MarkerSetBackTranslucent(_In_ int markerNumber, _In_ int back);
 		void MarkerSetBackSelectedTranslucent(_In_ int markerNumber, _In_ int back);
-		void MarkerSetStrokeWidth(_In_ int markerNumber, _In_ int hundredths);
+		void MarkerSetStrokeWidth(_In_ int markerNumber, _In_ pixels hundredths);
 		void MarkerEnableHighlight(_In_ BOOL enabled);
 		int MarkerAdd(_In_ Line line, _In_ int markerNumber);
 		void MarkerDelete(_In_ Line line, _In_ int markerNumber);
@@ -334,8 +335,8 @@ namespace Scintilla
 		void MarkerSetLayer(_In_ int markerNumber, _In_ Layer layer);
 		void SetMarginTypeN(_In_ int margin, _In_ MarginType marginType);
 		[[nodiscard]] MarginType GetMarginTypeN(_In_ int margin);
-		void SetMarginWidthN(_In_ int margin, _In_ int pixelWidth);
-		[[nodiscard]] int GetMarginWidthN(_In_ int margin);
+		void SetMarginWidthN(_In_ int margin, _In_ pixels pixelWidth);
+		[[nodiscard]] pixels GetMarginWidthN(_In_ int margin);
 		void SetMarginMaskN(_In_ int margin, _In_ int mask);
 		[[nodiscard]] int GetMarginMaskN(_In_ int margin);
 		void SetMarginSensitiveN(_In_ int margin, _In_ BOOL sensitive);
@@ -442,12 +443,12 @@ namespace Scintilla
 		[[nodiscard]] COLORREF IndicGetHoverFore(_In_ int indicator);
 		void IndicSetFlags(_In_ int indicator, _In_ IndicFlag flags);
 		[[nodiscard]] IndicFlag IndicGetFlags(_In_ int indicator);
-		void IndicSetStrokeWidth(_In_ int indicator, _In_ int hundredths);
-		[[nodiscard]] int IndicGetStrokeWidth(_In_ int indicator);
+		void IndicSetStrokeWidth(_In_ int indicator, _In_ pixels hundredths);
+		[[nodiscard]] pixels IndicGetStrokeWidth(_In_ int indicator);
 		void SetWhitespaceFore(_In_ BOOL useSetting, _In_ COLORREF fore);
 		void SetWhitespaceBack(_In_ BOOL useSetting, _In_ COLORREF back);
-		void SetWhitespaceSize(_In_ int size);
-		[[nodiscard]] int GetWhitespaceSize();
+		void SetWhitespaceSize(_In_ pixels size);
+		[[nodiscard]] pixels GetWhitespaceSize();
 		void SetLineState(_In_ Line line, _In_ int state);
 		[[nodiscard]] int GetLineState(_In_ Line line);
 		[[nodiscard]] int GetMaxLineState();
@@ -455,8 +456,8 @@ namespace Scintilla
 		void SetCaretLineVisible(_In_ BOOL show);
 		[[nodiscard]] COLORREF GetCaretLineBack();
 		void SetCaretLineBack(_In_ COLORREF back);
-		[[nodiscard]] int GetCaretLineFrame();
-		void SetCaretLineFrame(_In_ int width);
+		[[nodiscard]] pixels GetCaretLineFrame();
+		void SetCaretLineFrame(_In_ pixels width);
 		void StyleSetChangeable(_In_ int style, _In_ BOOL changeable);
 		void AutoCShow(_In_ Position lengthEntered, _In_z_ const char* itemList);
 		void AutoCCancel();
@@ -537,10 +538,10 @@ namespace Scintilla
 		Position GetLine(_In_ Line line, _Inout_opt_z_ char* text);
 		[[nodiscard]] Line GetLineCount();
 		void AllocateLines(_In_ Line lines);
-		void SetMarginLeft(_In_ int pixelWidth);
-		[[nodiscard]] int GetMarginLeft();
-		void SetMarginRight(_In_ int pixelWidth);
-		[[nodiscard]] int GetMarginRight();
+		void SetMarginLeft(_In_ pixels pixelWidth);
+		[[nodiscard]] pixels GetMarginLeft();
+		void SetMarginRight(_In_ pixels pixelWidth);
+		[[nodiscard]] pixels GetMarginRight();
 		[[nodiscard]] BOOL GetModify();
 		void SetSel(_In_ Position anchor, _In_ Position caret);
 		Position GetSelText(_Inout_opt_z_ char* text);
@@ -548,8 +549,8 @@ namespace Scintilla
 		Position GetTextRangeFull(_Inout_ TextRangeFull* tr);
 		void HideSelection(_In_ BOOL hide);
 		[[nodiscard]] BOOL GetSelectionHidden();
-		[[nodiscard]] int PointXFromPosition(_In_ Position pos);
-		[[nodiscard]] int PointYFromPosition(_In_ Position pos);
+		[[nodiscard]] pixels PointXFromPosition(_In_ Position pos);
+		[[nodiscard]] pixels PointYFromPosition(_In_ Position pos);
 		[[nodiscard]] Line LineFromPosition(_In_ Position pos);
 		[[nodiscard]] Position PositionFromLine(_In_ Line line);
 		void LineScroll(_In_ Position columns, _In_ Line lines);
@@ -572,8 +573,8 @@ namespace Scintilla
 		[[nodiscard]] Position GetTextLength();
 		void SetOvertype(_In_ BOOL overType);
 		[[nodiscard]] BOOL GetOvertype();
-		void SetCaretWidth(_In_ int pixelWidth);
-		[[nodiscard]] int GetCaretWidth();
+		void SetCaretWidth(_In_ pixels pixelWidth);
+		[[nodiscard]] pixels GetCaretWidth();
 		void SetTargetStart(_In_ Position start);
 		[[nodiscard]] Position GetTargetStart();
 		void SetTargetStartVirtualSpace(_In_ Position space);
@@ -601,7 +602,7 @@ namespace Scintilla
 		void CallTipSetBack(_In_ COLORREF back);
 		void CallTipSetFore(_In_ COLORREF fore);
 		void CallTipSetForeHlt(_In_ COLORREF fore);
-		void CallTipUseStyle(_In_ int tabSize);
+		void CallTipUseStyle(_In_ pixels tabSize);
 		void CallTipSetPosition(_In_ BOOL above);
 		[[nodiscard]] Line VisibleFromDocLine(_In_ Line docLine);
 		[[nodiscard]] Line DocLineFromVisible(_In_ Line displayLine);
@@ -648,20 +649,20 @@ namespace Scintilla
 		[[nodiscard]] WrapVisualFlag GetWrapVisualFlags();
 		void SetWrapVisualFlagsLocation(_In_ WrapVisualLocation wrapVisualFlagsLocation);
 		[[nodiscard]] WrapVisualLocation GetWrapVisualFlagsLocation();
-		void SetWrapStartIndent(_In_ int indent);
-		[[nodiscard]] int GetWrapStartIndent();
+		void SetWrapStartIndent(_In_ pixels indent);
+		[[nodiscard]] pixels GetWrapStartIndent();
 		void SetWrapIndentMode(_In_ WrapIndentMode wrapIndentMode);
 		[[nodiscard]] WrapIndentMode GetWrapIndentMode();
 		void SetLayoutCache(_In_ LineCache cacheMode);
 		[[nodiscard]] LineCache GetLayoutCache();
-		void SetScrollWidth(_In_ int pixelWidth);
-		[[nodiscard]] int GetScrollWidth();
+		void SetScrollWidth(_In_ pixels pixelWidth);
+		[[nodiscard]] pixels GetScrollWidth();
 		void SetScrollWidthTracking(_In_ BOOL tracking);
 		[[nodiscard]] BOOL GetScrollWidthTracking();
-		[[nodiscard]] int TextWidth(_In_ int style, _In_z_ const char* text);
+		[[nodiscard]] pixels TextWidth(_In_ int style, _In_z_ const char* text);
 		void SetEndAtLastLine(_In_ BOOL endAtLastLine);
 		[[nodiscard]] BOOL GetEndAtLastLine();
-		[[nodiscard]] int TextHeight(_In_ Line line);
+		[[nodiscard]] pixels TextHeight(_In_ Line line);
 		void SetVScrollBar(_In_ BOOL visible);
 		[[nodiscard]] BOOL GetVScrollBar();
 		void AppendText(_In_ Position length, _In_reads_bytes_(length) const char* text);
@@ -674,7 +675,7 @@ namespace Scintilla
 		[[nodiscard]] MultiPaste GetMultiPaste();
 		int GetTag(_In_ int tagNumber, _Inout_opt_z_ char* tagValue);
 		void LinesJoin();
-		void LinesSplit(_In_ int pixelWidth);
+		void LinesSplit(_In_ pixels pixelWidth);
 		void SetFoldMarginColour(_In_ BOOL useSetting, _In_ COLORREF back);
 		void SetFoldMarginHiColour(_In_ BOOL useSetting, _In_ COLORREF fore);
 		void SetAccessibility(_In_ Accessibility accessibility);
@@ -796,11 +797,11 @@ namespace Scintilla
 		void SetVisiblePolicy(_In_ VisiblePolicy visiblePolicy, _In_ int visibleSlop);
 		void DelLineLeft();
 		void DelLineRight();
-		void SetXOffset(_In_ int xOffset);
-		[[nodiscard]] int GetXOffset();
+		void SetXOffset(_In_ pixels xOffset);
+		[[nodiscard]] pixels GetXOffset();
 		void ChooseCaretX();
 		void GrabFocus();
-		void SetXCaretPolicy(_In_ CaretPolicy caretPolicy, _In_ int caretSlop);
+		void SetXCaretPolicy(_In_ CaretPolicy caretPolicy, _In_ pixels caretSlop);
 		void SetYCaretPolicy(_In_ CaretPolicy caretPolicy, _In_ int caretSlop);
 		void SetPrintWrapMode(_In_ Wrap wrapMode);
 		[[nodiscard]] Wrap GetPrintWrapMode();
@@ -900,10 +901,10 @@ namespace Scintilla
 		[[nodiscard]] Alpha IndicGetAlpha(_In_ int indicator);
 		void IndicSetOutlineAlpha(_In_ int indicator, _In_ Alpha alpha);
 		[[nodiscard]] Alpha IndicGetOutlineAlpha(_In_ int indicator);
-		void SetExtraAscent(_In_ int extraAscent);
-		[[nodiscard]] int GetExtraAscent();
-		void SetExtraDescent(_In_ int extraDescent);
-		[[nodiscard]] int GetExtraDescent();
+		void SetExtraAscent(_In_ pixels extraAscent);
+		[[nodiscard]] pixels GetExtraAscent();
+		void SetExtraDescent(_In_ pixels extraDescent);
+		[[nodiscard]] pixels GetExtraDescent();
 		[[nodiscard]] MarkerSymbol MarkerSymbolDefined(_In_ int markerNumber);
 		void MarginSetText(_In_ Line line, _In_z_ const char* text);
 		int MarginGetText(_In_ Line line, _Inout_opt_z_ char* text);
@@ -931,8 +932,8 @@ namespace Scintilla
 		void ReleaseAllExtendedStyles();
 		int AllocateExtendedStyles(_In_ int numberStyles);
 		void AddUndoAction(_In_ int token, _In_ UndoFlags flags);
-		[[nodiscard]] Position CharPositionFromPoint(_In_ int x, _In_ int y);
-		[[nodiscard]] Position CharPositionFromPointClose(_In_ int x, _In_ int y);
+		[[nodiscard]] Position CharPositionFromPoint(_In_ pixels x, _In_ pixels y);
+		[[nodiscard]] Position CharPositionFromPointClose(_In_ pixels x, _In_ pixels y);
 		void SetMouseSelectionRectangularSwitch(_In_ BOOL mouseSelectionRectangularSwitch);
 		[[nodiscard]] BOOL GetMouseSelectionRectangularSwitch();
 		void SetMultipleSelection(_In_ BOOL multipleSelection);
@@ -948,7 +949,7 @@ namespace Scintilla
 		void ClearSelections();
 		void SetSelection(_In_ Position caret, _In_ Position anchor);
 		void AddSelection(_In_ Position caret, _In_ Position anchor);
-		[[nodiscard]] int SelectionFromPoint(_In_ int x, _In_ int y);
+		[[nodiscard]] int SelectionFromPoint(_In_ pixels x, _In_ pixels y);
 		void DropSelectionN(_In_ int selection);
 		void SetMainSelection(_In_ int selection);
 		[[nodiscard]] int GetMainSelection();

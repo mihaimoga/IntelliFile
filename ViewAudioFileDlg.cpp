@@ -30,6 +30,8 @@ IMPLEMENT_DYNAMIC(CViewAudioFileDlg, CDialogEx)
 CViewAudioFileDlg::CViewAudioFileDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_ViewAudioFileDlg, pParent)
 {
+	m_nPlaySoundThreadID = 0;
+	m_hPlaySoundThread = nullptr;
 	m_nTimerID = 0;
 }
 

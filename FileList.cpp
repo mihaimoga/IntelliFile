@@ -19,6 +19,7 @@ IntelliFile. If not, see <http://www.opensource.org/licenses/gpl-3.0.html>*/
 #include "stdafx.h"
 #include "IntelliFile.h"
 #include "FileList.h"
+#include <tchar.h>
 
 IMPLEMENT_DYNAMIC(CFileData, CObject)
 
@@ -45,21 +46,24 @@ void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, DWORD 
 
 	lpszDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
 		(lstrlen((LPCTSTR)lpszMsgBuf)+lstrlen((LPCTSTR)lpszFunction)+40)*sizeof(TCHAR)); 
-	_stprintf_s((LPTSTR)lpszDisplayBuf, 
-		LocalSize(lpszDisplayBuf) / sizeof(TCHAR),
-		TEXT("%s failed with error %d: %s\n"), 
-		lpszFunction, dwError, (LPCTSTR) lpszMsgBuf);
-	OutputDebugString((LPCTSTR) lpszDisplayBuf);
-	if (wndCaptionBar != nullptr)
+	if (lpszDisplayBuf != nullptr)
 	{
-		wndCaptionBar->SetText((LPCTSTR) lpszMsgBuf, CMFCCaptionBar::ALIGN_LEFT);
-		wndCaptionBar->ShowWindow(SW_SHOW);
-		wndCaptionBar->Invalidate();
-		wndCaptionBar->UpdateWindow();
-	}
+		_stprintf_s((LPTSTR)lpszDisplayBuf, 
+			LocalSize(lpszDisplayBuf) / sizeof(TCHAR),
+			TEXT("%s failed with error %d: %s\n"), 
+			lpszFunction, dwError, (LPCTSTR) lpszMsgBuf);
+		OutputDebugString((LPCTSTR) lpszDisplayBuf);
+		if (wndCaptionBar != nullptr)
+		{
+			wndCaptionBar->SetText((LPCTSTR) lpszMsgBuf, CMFCCaptionBar::ALIGN_LEFT);
+			wndCaptionBar->ShowWindow(SW_SHOW);
+			wndCaptionBar->Invalidate();
+			wndCaptionBar->UpdateWindow();
+		}
 
+		LocalFree(lpszDisplayBuf);
+	}
 	LocalFree(lpszMsgBuf);
-	LocalFree(lpszDisplayBuf);
 }
 
 void DisplayErrorBox(CMFCCaptionBar* wndCaptionBar, LPCTSTR lpszFunction, HRESULT hResult)
@@ -491,7 +495,7 @@ bool CFileSystem::EditFile(CString strFilePath)
 
 		CString strApplication;
 		TCHAR lpszBuffer[0x1000] = { 0 };
-		DWORD cbLength = sizeof(lpszBuffer);
+		DWORD cbLength = 0x1000;
 		if (SUCCEEDED(AssocQueryString(0, ASSOCSTR_COMMAND, strExtension, _T("open"), lpszBuffer, &cbLength)))
 		{
 			lpszBuffer[cbLength] = 0;
@@ -1280,8 +1284,9 @@ bool CFileSystem::CommandPrompt(bool bAdministrator)
 	pShellExecuteInfo.lpVerb = (bAdministrator ? _T("runas") : nullptr);
 	pShellExecuteInfo.lpFile = _T("cmd.exe");
 	pShellExecuteInfo.lpParameters = nullptr;
-	pShellExecuteInfo.lpDirectory = GetCurrentFolder();
+	pShellExecuteInfo.lpDirectory = m_strCurrentFolder.GetBuffer();
 	pShellExecuteInfo.nShow = SW_SHOWNORMAL;
+	m_strCurrentFolder.ReleaseBuffer();
 
 	if (!ShellExecuteEx(&pShellExecuteInfo))
 	{

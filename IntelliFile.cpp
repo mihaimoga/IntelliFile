@@ -92,7 +92,12 @@ BOOL CIntelliFileApp::InitInstance()
 		return FALSE;
 	}
 
-	CoInitialize(nullptr);
+	HRESULT hr = CoInitialize(nullptr);
+	if (FAILED(hr))
+	{
+		AfxMessageBox(_T("Failed to initialize COM library"));
+		return FALSE;
+	}
 
 	AfxEnableControlContainer();
 

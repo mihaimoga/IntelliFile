@@ -164,7 +164,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 	if (!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CFileView), CSize(nDefaultViewWidth, nDefaultViewHeight), pContext))
 		return FALSE;
 
-	if ((m_wndLeftFileView = (CFileView*) m_wndSplitter.GetPane(0, 0)) != nullptr)
+	if ((m_wndLeftFileView = (CFileView*)m_wndSplitter.GetPane(0, 0)) != nullptr)
 	{
 		m_wndLeftFileView->m_pMainFrame = this;
 		m_wndLeftFileView->m_bIsLeftPane = true;
@@ -172,7 +172,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 		VERIFY(m_wndLeftFileView->Refresh());
 	}
 
-	if ((m_wndRightFileView = (CFileView*) m_wndSplitter.GetPane(0, 1)) != nullptr)
+	if ((m_wndRightFileView = (CFileView*)m_wndSplitter.GetPane(0, 1)) != nullptr)
 	{
 		m_wndRightFileView->m_pMainFrame = this;
 		m_wndRightFileView->m_bIsLeftPane = false;
@@ -180,6 +180,8 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT lpcs, CCreateContext* pContext)
 		VERIFY(m_wndRightFileView->Refresh());
 	}
 
+	// Add NULL checks before dereferencing
+	ASSERT(m_wndLeftFileView != NULL && m_wndRightFileView != NULL);
 	ASSERT(m_wndLeftFileView->m_bIsLeftPane != m_wndRightFileView->m_bIsLeftPane);
 	SetActiveView(m_wndRightFileView);
 

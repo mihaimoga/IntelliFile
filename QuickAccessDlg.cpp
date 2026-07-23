@@ -53,6 +53,7 @@ END_MESSAGE_MAP()
 
 // CQuickAccessDlg message handlers
 
+#pragma warning(suppress: 6262)
 CString GetQuickAcessFilePath()
 {
 	TCHAR lpszDrive[_MAX_DRIVE];

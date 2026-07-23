@@ -742,7 +742,10 @@ BOOL CViewTextFileDlg::OnInitDialog()
 																				else
 																				{
 																					m_ctrlTextFile.SetupDirectAccess();
-																					m_ctrlTextFile.SetILexer(nullptr);
+																					if (m_pLexer != nullptr)
+																					{
+																						m_ctrlTextFile.SetILexer(m_pLexer);
+																					}
 																				}
 																			}
 																		}

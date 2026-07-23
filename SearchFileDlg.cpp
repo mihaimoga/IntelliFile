@@ -46,6 +46,9 @@ CSearchFileDlg::CSearchFileDlg(CWnd* pParent /*=nullptr*/)
 	m_pFileSystem = nullptr;
 	m_nSearchThreadID = 0;
 	m_hSearchThread = nullptr;
+
+	m_bFindTextCheck = false;
+	m_bReplaceTextCheck = false;
 }
 
 CSearchFileDlg::~CSearchFileDlg()
@@ -354,7 +357,7 @@ bool WaitWithMessageLoop(HANDLE hEvent, DWORD dwTimeout)
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-			if (WaitForSingleObject(hEvent, 0) == WAIT_OBJECT_0)
+			if (hEvent && WaitForSingleObject(hEvent, 0) == WAIT_OBJECT_0)
 				return true;
 		}
 	}

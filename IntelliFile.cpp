@@ -331,6 +331,8 @@ BOOL CAboutDlg::OnInitDialog()
 		const int nFirst = strVersion.Find(_T('.'));
 		const int nSecond = strVersion.Find(_T('.'), nFirst + 1);
 		strVersion.Truncate(nSecond);
+		if (nSecond == (nFirst + 2))
+			strVersion.Insert(nFirst + 1, _T("0"));
 #if _WIN32 || _WIN64
 #if _WIN64
 		m_ctrlVersion.SetWindowText(strName + _T(" version ") + strVersion + _T(" (64-bit)"));

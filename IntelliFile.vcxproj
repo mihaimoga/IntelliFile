@@ -202,6 +202,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <None Include="AGENTS.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="HexCtrl\HexCtrl\src\res\IDJ_HEXCTRL_KEYBIND.json" />

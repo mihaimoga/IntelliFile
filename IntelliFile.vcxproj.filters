@@ -296,6 +296,7 @@
     <None Include="HexCtrl\HexCtrl\src\res\IDJ_HEXCTRL_KEYBIND.json">
       <Filter>HexCtrl\src\res</Filter>
     </None>
+    <None Include="AGENTS.md" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IntelliFile.h">

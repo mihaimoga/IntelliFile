@@ -319,12 +319,12 @@ void CCheckForUpdatesDlg::OnTimer(UINT_PTR nIDEvent)
 			// Thread finished - clean up timer
 			VERIFY(KillTimer(m_nTimerID));
 
-			// Close the dialog automatically
-			CDialogEx::OnCancel();
-
 			// If a new update was found and installer was launched
 			if (g_bNewUpdateFound)
 			{
+				// Close the dialog automatically
+				CDialogEx::OnCancel();
+
 				// Exit the application to allow installer to update files
 				// The installer cannot update files while they are in use
 				PostQuitMessage(0);

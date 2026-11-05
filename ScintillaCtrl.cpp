@@ -345,6 +345,7 @@ History: PJN / 19-03-2004 1. Initial implementation synchronized to the v1.59 re
          PJN / 06-08-2026 1. Verified the code against Scintilla v5.6.5.
          PJN / 29-08-2026 1. Verified the code against Scintilla v5.6.6.
          PJN / 14-10-2026 1. Verified the code against Scintilla v5.6.7.
+         PJN / 05-11-2026 1. Verified the code against Scintilla v5.6.9.
 
 Copyright (c) 2004 - 2026 by PJ Naughter (Web: www.naughter.com, Email: pjna@naughter.com)
 

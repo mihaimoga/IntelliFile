@@ -4,3 +4,6 @@
 [submodule "HexCtrl"]
 	path = HexCtrl
 	url = https://github.com/jovibor/HexCtrl
+[submodule "fatcow"]
+	path = fatcow
+	url = https://github.com/mihaimoga/fatcow

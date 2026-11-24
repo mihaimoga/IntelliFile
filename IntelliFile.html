@@ -65,7 +65,7 @@
 						<li><s>Built-in ZIP-compatible packer, supports long filenames! This packer is based on ZLIB by Info-Zip.</s></li>
 						<li><s>Pack archives in the background (separate thread).</s></li>
 					</ul>
-					<p><strong>Some of the above features are still under development!</strong></p>
+					<p><strong>Some of the above features are still under development!</strong> See the <a href="#roadmap">Roadmap</a> below for what is planned.</p>
 
 					<h2>Getting started</h2>
 					<h3>Install IntelliFile using the installer</h3>
@@ -129,6 +129,42 @@
 						<li>TCL/TK</li>
 						<li>XML</li>
 					</ul>
+
+					<h2 id="roadmap">Roadmap</h2>
+					<p>This roadmap outlines where <em>IntelliFile</em> is heading. It brings together the features marked above as still under development, ideas suggested by users in <a href="https://github.com/mihaimoga/IntelliFile/discussions" target="_blank">Discussions</a>, and the maintenance work that goes into every release. Items are grouped by horizon rather than by date, and their order may change as feedback arrives or as the libraries <em>IntelliFile</em> builds on evolve, so please treat it as a statement of intent, not a promise. For everything that has already shipped, see the <a href="ReleaseNotes.html">Release Notes</a>.</p>
+					<p class="text-body-secondary"><small>Last reviewed: November 2026 (version 1.51 in development).</small></p>
+
+					<h3>Now <small class="text-body-secondary fw-normal">in progress and ongoing</small></h3>
+					<ul>
+						<li><strong>Up-to-date components</strong>: each release picks up the latest Scintilla and Lexilla (syntax highlighting), HexCtrl (binary viewer), Microsoft Edge WebView2 (embedded web preview) and genUp4win (automatic updates).</li>
+						<li><strong>Stability, security and performance</strong>: bug fixes, security updates and performance tuning continue alongside new features.</li>
+						<li><strong>Refreshed UI icons</strong>: groundwork has started, with the FatCow &ldquo;Farm-Fresh Web Icons&rdquo; set added to the repository as the source of UI icon assets.</li>
+					</ul>
+
+					<h3>Next <small class="text-body-secondary fw-normal">planned, next in line</small></h3>
+					<ul>
+						<li><strong>Drag &amp; Drop</strong>: move and copy files between <em>IntelliFile</em> and Windows Explorer or the Desktop.</li>
+						<li><strong>Compare files by content</strong>: compare two files using the built-in text editor.</li>
+					</ul>
+
+					<h3>Later <small class="text-body-secondary fw-normal">planned, larger efforts</small></h3>
+					<ul>
+						<li><strong>Archive handling</strong>: browse archives like subdirectories and copy files to and from them, with a built-in ZIP-compatible packer that supports long filenames and packs in the background. Full text search will then be able to look inside archives too.</li>
+						<li><strong>FTP client</strong>: a built-in client for public FTP servers, including secure FTP over SSL/TLS (<code>ftps://</code> URLs), with downloads running in the background.</li>
+					</ul>
+					<p>Archive handling and the FTP client both involve long-running operations that must not block the user interface, so they are expected to share common background-task infrastructure (worker threads, progress reporting and cancellation).</p>
+
+					<h3>Under consideration <small class="text-body-secondary fw-normal">ideas, not yet committed</small></h3>
+					<ul>
+						<li><strong>Confirmation before copy and move</strong>: an optional prompt showing the source and destination before <kbd>F5</kbd> or <kbd>F6</kbd> starts (suggested in <a href="https://github.com/mihaimoga/IntelliFile/discussions/2" target="_blank">Discussion #2</a>).</li>
+						<li><strong>Current folder at the top of each pane</strong>: today the current folder is only shown in the window title (suggested in <a href="https://github.com/mihaimoga/IntelliFile/discussions/2" target="_blank">Discussion #2</a>).</li>
+						<li><strong>Localized user interface</strong>: translated menus, commands and messages (suggested in <a href="https://github.com/mihaimoga/IntelliFile/discussions/2" target="_blank">Discussion #2</a>).</li>
+						<li><strong>More syntax highlighting languages</strong>: Lexilla already provides lexers for many languages that are not enabled yet, for example YAML, TOML, PowerShell, Ruby, Perl and Lua.</li>
+						<li><strong>Native ARM64 and high-DPI support</strong>: a native ARM64 build for Windows on Arm devices (<em>IntelliFile</em> is currently built for x86 and x64) and Per-Monitor V2 DPI awareness for a sharper interface on high-DPI and mixed-DPI displays.</li>
+					</ul>
+
+					<h3>Help shape the roadmap</h3>
+					<p>Want to see something sooner, or have an idea that is not listed here? <a href="https://github.com/mihaimoga/IntelliFile/issues" target="_blank">Open an issue</a> or start a conversation in <a href="https://github.com/mihaimoga/IntelliFile/discussions" target="_blank">Discussions</a>. Contributions are welcome as well: any item above can be picked up through a pull request, as described in the next section.</p>
 
 					<h2>Create and Submit your Pull Request</h2>
 					<p>As noted in the <a href="https://github.com/mihaimoga/IntelliFile/blob/main/CONTRIBUTING.md" target="_blank">Contributing Rules</a> for <em>IntelliFile</em>, all Pull Requests need to be attached to a issue on GitHub. So the first step is to create an issue which requests that the functionality be improved (if it was already there) or added (if it was not yet there); in your issue, be sure to explain that you have the functionality definition ready, and will be submitting a Pull Request. The second step is to use the GitHub interface to create the Pull Request from your fork into the main repository. The final step is to wait for and respond to feedback from the developers as needed, until such time as your PR is accepted or rejected.</p>

@@ -29,7 +29,7 @@ _IntelliFile_ is a free (as in “free speech” and also as in “free beer”)
 - ~~Built-in ZIP-compatible packer, supports long filenames! This packer is based on ZLIB by Info-Zip.~~
 - ~~Pack archives in the background (separate thread).~~
 
-**Some of the above features are still under development!**
+**Some of the above features are still under development!** See the [Roadmap](#roadmap) below for what is planned.
 
 ## Getting started
 
@@ -96,6 +96,42 @@ The following programming languages are supported by _IntelliFile_:
 - SQL
 - TCL/TK
 - XML
+
+## Roadmap
+
+This roadmap outlines where _IntelliFile_ is heading. It brings together the features marked above as still under development, ideas suggested by users in [Discussions](https://github.com/mihaimoga/IntelliFile/discussions), and the maintenance work that goes into every release. Items are grouped by horizon rather than by date, and their order may change as feedback arrives or as the libraries _IntelliFile_ builds on evolve, so please treat it as a statement of intent, not a promise. For everything that has already shipped, see the [Release Notes](https://github.com/mihaimoga/IntelliFile/releases).
+
+_Last reviewed: November 2026 (version 1.51 in development)._
+
+### Now (in progress and ongoing)
+
+- **Up-to-date components**: each release picks up the latest Scintilla and Lexilla (syntax highlighting), HexCtrl (binary viewer), Microsoft Edge WebView2 (embedded web preview) and genUp4win (automatic updates).
+- **Stability, security and performance**: bug fixes, security updates and performance tuning continue alongside new features.
+- **Refreshed UI icons**: groundwork has started, with the FatCow “Farm-Fresh Web Icons” set added to the repository as the source of UI icon assets.
+
+### Next (planned, next in line)
+
+- **Drag & Drop**: move and copy files between _IntelliFile_ and Windows Explorer or the Desktop.
+- **Compare files by content**: compare two files using the built-in text editor.
+
+### Later (planned, larger efforts)
+
+- **Archive handling**: browse archives like subdirectories and copy files to and from them, with a built-in ZIP-compatible packer that supports long filenames and packs in the background. Full text search will then be able to look inside archives too.
+- **FTP client**: a built-in client for public FTP servers, including secure FTP over SSL/TLS (`ftps://` URLs), with downloads running in the background.
+
+Archive handling and the FTP client both involve long-running operations that must not block the user interface, so they are expected to share common background-task infrastructure (worker threads, progress reporting and cancellation).
+
+### Under consideration (ideas, not yet committed)
+
+- **Confirmation before copy and move**: an optional prompt showing the source and destination before `F5` or `F6` starts (suggested in [Discussion #2](https://github.com/mihaimoga/IntelliFile/discussions/2)).
+- **Current folder at the top of each pane**: today the current folder is only shown in the window title (suggested in [Discussion #2](https://github.com/mihaimoga/IntelliFile/discussions/2)).
+- **Localized user interface**: translated menus, commands and messages (suggested in [Discussion #2](https://github.com/mihaimoga/IntelliFile/discussions/2)).
+- **More syntax highlighting languages**: Lexilla already provides lexers for many languages that are not enabled yet, for example YAML, TOML, PowerShell, Ruby, Perl and Lua.
+- **Native ARM64 and high-DPI support**: a native ARM64 build for Windows on Arm devices (_IntelliFile_ is currently built for x86 and x64) and Per-Monitor V2 DPI awareness for a sharper interface on high-DPI and mixed-DPI displays.
+
+### Help shape the roadmap
+
+Want to see something sooner, or have an idea that is not listed here? [Open an issue](https://github.com/mihaimoga/IntelliFile/issues) or start a conversation in [Discussions](https://github.com/mihaimoga/IntelliFile/discussions). Contributions are welcome as well: any item above can be picked up through a pull request, as described in the next section.
 
 ## Create and Submit your Pull Request
 
